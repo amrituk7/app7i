@@ -1,0 +1,64 @@
+.add-student-container {
+  max-width: 450px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.add-student-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.add-student-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-student-form label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.add-student-form input,
+.add-student-form select {
+  padding: 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.add-student-form input:focus,
+.add-student-form select:focus {
+  border-color: #007bff;
+}
+
+.save-btn {
+  margin-top: 10px;
+  padding: 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.save-btn:hover {
+  background: #005fcc;
+}
+
+.default-avatar {
+  width: 60px;
+  height: 60px;
+  background: black;
+  border-radius: 50%;
+}

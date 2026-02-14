@@ -1,66 +1,137 @@
-import React, { useState } from "react";
-import { addStudent, sendNotification, getStudents } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { getStudent, sendMessage, getMessagesForStudent } from "../firebase";
+import { useParams, useNavigate } from "react-router-dom";
 
-export default function AddStudent() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [transmission, setTransmission] = useState("");
+export default function StudentProfile() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  const [student, setStudent] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
 
-    const all = await getStudents();
-    const exists = all.find(s => s.phone === phone);
-
-    if (exists) {
-      alert("A student with this phone number already exists.");
-      return;
+  // Load student + messages
+  useEffect(() => {
+    async function loadStudent() {
+      const data = await getStudent(id);
+      setStudent(data);
     }
+    loadStudent();
 
-    await addStudent({
-      name,
-      phone,
-      transmission,
-      perfectDriver: false,
-      parkingPractice: false
-    });
+    // Load messages
+    getMessagesForStudent(id, setMessages);
+  }, [id]);
 
-    await sendNotification({
-      title: "New Student Added",
-      message: `${name} has been added`
-    });
+  // Send message
+  async function handleSend() {
+    if (!newMessage.trim()) return;
 
-    navigate("/students");
+    await sendMessage(id, newMessage);
+    setNewMessage("");
   }
 
+  if (!student) return <p>Loading...</p>;
+
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>Add Student</h1>
-
-      <input
-        placeholder="Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
-
-      <input
-        placeholder="Phone"
-        value={phone}
-        onChange={e => setPhone(e.target.value)}
-      />
-
-      <select
-        value={transmission}
-        onChange={e => setTransmission(e.target.value)}
+    <div style={{ maxWidth: "600px" }}>
+      
+      {/* Profile Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "20px",
+          marginBottom: "20px"
+        }}
       >
-        <option value="">Select transmission</option>
-        <option value="manual">Manual</option>
-        <option value="auto">Auto</option>
-      </select>
+        {/* Profile Picture */}
+        {student.photoURL ? (
+          <img
+            src={student.photoURL}
+            alt="profile"
+            style={{
+              width: "90px",
+              height: "90px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "2px solid #ccc"
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "90px",
+              height: "90px",
+              borderRadius: "50%",
+              background: "black"
+            }}
+          />
+        )}
 
-      <button type="submit">Save</button>
-    </form>
+        {/* Student Info */}
+        <div>
+          <h2>{student.name}</h2>
+          <p>Phone: {student.phone}</p>
+          <p>Transmission: {student.transmission}</p>
+          <p>Perfect Driver: {student.perfectDriver ? "Yes" : "No"}</p>
+          <p>Parking Practice: {student.parkingPractice ? "Yes" : "No"}</p>
+
+          <button
+            onClick={() => navigate(`/students/edit/${id}`)}
+            style={{
+              marginTop: "10px",
+              padding: "8px 14px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            Edit Student
+          </button>
+        </div>
+      </div>
+
+      {/* Messages Section */}
+      <h3>Messages</h3>
+      <div style={{ marginBottom: "20px" }}>
+        {messages.map((msg, index) => (
+          <div key={index} style={{ marginBottom: "10px" }}>
+            <p>{msg.text}</p>
+            <small>{msg.timestamp}</small>
+          </div>
+        ))}
+      </div>
+
+      {/* Send Message */}
+      <div style={{ display: "flex", gap: "10px" }}>
+        <input
+          type="text"
+          placeholder="Send a message..."
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          style={{
+            flex: 1,
+            padding: "10px",
+            borderRadius: "6px",
+            border: "1px solid #ccc"
+          }}
+        />
+        <button
+          onClick={handleSend}
+          style={{
+            padding: "10px 16px",
+            background: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer"
+          }}
+        >
+          Send
+        </button>
+      </div>
+    </div>
   );
 }

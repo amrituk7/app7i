@@ -1,73 +1,99 @@
 import React, { useEffect, useState } from "react";
-import { getStudents, sendMessage, getMessagesForStudent } from "../firebase";
-import { useParams, Link } from "react-router-dom";
+import { getStudents, deleteStudent } from "../firebase";
+import { Link } from "react-router-dom";
+import "./Students.css";
 
-export default function StudentProfile() {
-  const { id } = useParams();
-  const [student, setStudent] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState("");
+function getInitialAvatarSmall(name) {
+  const initial = name?.charAt(0).toUpperCase() || "?";
+  const colors = ["#4A90E2", "#F5A623", "#7ED321", "#BD10E0", "#50E3C2"];
+  const color = colors[initial.charCodeAt(0) % colors.length];
+
+  return (
+    <div
+      style={{
+        width: "50px",
+        height: "50px",
+        borderRadius: "50%",
+        background: color,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "24px",
+        color: "white",
+        fontWeight: "bold"
+      }}
+    >
+      {initial}
+    </div>
+  );
+}
+
+export default function Students() {
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
     async function load() {
-      const all = await getStudents();
-      const s = all.find(x => x.id === id);
-      setStudent(s);
-
-      const msgs = await getMessagesForStudent(id);
-      setMessages(msgs.sort((a, b) => b.timestamp - a.timestamp));
+      const data = await getStudents();
+      setStudents(data);
     }
     load();
-  }, [id]);
+  }, []);
 
-  async function handleSend() {
-    if (!text.trim()) return;
+  async function handleDelete(id, name) {
+    if (!window.confirm(`Delete ${name}?`)) return;
 
-    await sendMessage({
-      sender: "instructor",
-      receiver: id,
-      text
-    });
-
-    setText("");
-
-    const msgs = await getMessagesForStudent(id);
-    setMessages(msgs.sort((a, b) => b.timestamp - a.timestamp));
+    await deleteStudent(id);
+    setStudents(students.filter((s) => s.id !== id));
   }
 
-  if (!student) return <p>Loading...</p>;
-
   return (
-    <div className="profile-container">
-      <h1>{student.name}</h1>
+    <div className="students-page">
+      <h1>Students</h1>
 
-      <p><strong>Phone:</strong> {student.phone}</p>
-      <p><strong>Transmission:</strong> {student.transmission || "N/A"}</p>
-      <p><strong>Perfect Driver:</strong> {student.perfectDriver ? "Yes" : "No"}</p>
-      <p><strong>Parking Practice:</strong> {student.parkingPractice ? "Yes" : "No"}</p>
+      <div className="students-list">
+        {students.map((s) => (
+          <div key={s.id} className="student-card">
 
-      <Link to={`/students/edit/${student.id}`}>
-        <button>Edit Student</button>
-      </Link>
+            <Link to={`/students/${s.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+              {s.photoURL ? (
+                <img
+                  src={s.photoURL}
+                  alt="profile"
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    marginBottom: "8px"
+                  }}
+                />
+              ) : (
+                getInitialAvatarSmall(s.name)
+              )}
 
-      <h2>Messages</h2>
+              <h3>{s.name}</h3>
+              <p>{s.phone}</p>
+              <p>{s.transmission || "N/A"} transmission</p>
+            </Link>
 
-      <div className="messages-box">
-        {messages.map(m => (
-          <div key={m.id} className="message">
-            <p>{m.text}</p>
-            <small>{new Date(m.timestamp).toLocaleString()}</small>
+            <button
+              onClick={() => handleDelete(s.id, s.name)}
+              style={{
+                marginTop: "10px",
+                background: "red",
+                color: "white",
+                border: "none",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              Delete
+            </button>
+
           </div>
         ))}
       </div>
-
-      <textarea
-        value={text}
-        onChange={e => setText(e.target.value)}
-        placeholder="Send a message..."
-      ></textarea>
-
-      <button onClick={handleSend}>Send</button>
     </div>
   );
 }
