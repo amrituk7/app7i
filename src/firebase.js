@@ -11,6 +11,20 @@ import {
   query,
   where
 } from "firebase/firestore";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "firebase/auth";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from "firebase/storage";
 
 // Firebase config
 const firebaseConfig = {
@@ -26,6 +40,71 @@ const firebaseConfig = {
 // Init Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const storage = getStorage(app);
+
+//
+// AUTH
+//
+export const registerUser = async (email, password, role = "student") => {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+  
+  // Create user profile in Firestore
+  await addDoc(collection(db, "users"), {
+    uid: user.uid,
+    email: user.email,
+    role: role,
+    createdAt: Date.now()
+  });
+  
+  return user;
+};
+
+export const loginUser = async (email, password) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
+};
+
+export const logoutUser = async () => {
+  await signOut(auth);
+};
+
+export const getUserProfile = async (uid) => {
+  const q = query(collection(db, "users"), where("uid", "==", uid));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  return { id: doc.id, ...doc.data() };
+};
+
+export const onAuthChange = (callback) => {
+  return onAuthStateChanged(auth, callback);
+};
+
+//
+// STORAGE - Profile Pictures
+//
+export const uploadProfilePicture = async (studentId, file) => {
+  const storageRef = ref(storage, `profile-pictures/${studentId}`);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+  
+  // Update student with profile picture URL
+  await updateStudent(studentId, { profilePicture: url });
+  return url;
+};
+
+export const deleteProfilePicture = async (studentId) => {
+  try {
+    const storageRef = ref(storage, `profile-pictures/${studentId}`);
+    await deleteObject(storageRef);
+  } catch (error) {
+    // File might not exist, that's okay
+    console.log("No profile picture to delete");
+  }
+  await updateStudent(studentId, { profilePicture: null });
+};
 
 //
 // STUDENTS
@@ -52,6 +131,12 @@ export const updateStudent = async (id, data) => {
 };
 
 export const deleteStudent = async (id) => {
+  // Delete profile picture first
+  try {
+    await deleteProfilePicture(id);
+  } catch (e) {
+    // Ignore if no picture
+  }
   const docRef = doc(db, "students", id);
   await deleteDoc(docRef);
 };
@@ -126,4 +211,30 @@ export const getNotifications = async () => {
 export const markNotificationRead = async (id) => {
   const docRef = doc(db, "notifications", id);
   await updateDoc(docRef, { read: true });
+};
+
+export const deleteNotification = async (id) => {
+  const docRef = doc(db, "notifications", id);
+  await deleteDoc(docRef);
+};
+
+//
+// TIPS
+//
+export const addTip = async (tipData) => {
+  const docRef = await addDoc(collection(db, "tips"), {
+    ...tipData,
+    timestamp: Date.now()
+  });
+  return docRef.id;
+};
+
+export const getTips = async () => {
+  const snapshot = await getDocs(collection(db, "tips"));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export const deleteTip = async (id) => {
+  const docRef = doc(db, "tips", id);
+  await deleteDoc(docRef);
 };

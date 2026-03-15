@@ -1,137 +1,107 @@
-import React, { useEffect, useState } from "react";
-import { getStudent, sendMessage, getMessagesForStudent } from "../firebase";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { addStudent, sendNotification, getStudents } from "../firebase";
+import { useNavigate, Link } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
+import { DEFAULT_PROGRESS } from "../utils/instructorInsights";
 
-export default function StudentProfile() {
-  const { id } = useParams();
+export default function AddStudent() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [transmission, setTransmission] = useState("");
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
-  const [student, setStudent] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!name.trim()) { showToast("Please enter a name", "error"); return; }
+    if (!phone.trim()) { showToast("Please enter a phone number", "error"); return; }
+    if (!email.trim()) { showToast("Please enter an email address", "error"); return; }
+    if (!transmission) { showToast("Please select a transmission type", "error"); return; }
 
-  // Load student + messages
-  useEffect(() => {
-    async function loadStudent() {
-      const data = await getStudent(id);
-      setStudent(data);
+    setSaving(true);
+    try {
+      const all = await getStudents();
+      if (all.find(s => s.phone === phone.trim())) {
+        showToast("A student with this phone number already exists", "error");
+        setSaving(false);
+        return;
+      }
+      if (all.find(s => s.email === email.trim())) {
+        showToast("A student with this email already exists", "error");
+        setSaving(false);
+        return;
+      }
+      await addStudent({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        transmission,
+        perfectDriver: false,
+        parkingPractice: false,
+        theoryPassed: false,
+        theoryTestDate: "",
+        practicalTestDate: "",
+        mockTestScore: "",
+        lessonBalance: "",
+        confidenceLevel: 3,
+        riskLevel: "steady",
+        nextFocus: "",
+        progress: { ...DEFAULT_PROGRESS }
+      });
+      await sendNotification({ title: "New Student Added", message: `${name.trim()} has been added as a student` });
+      showToast("Student added successfully!", "success");
+      navigate("/students");
+    } catch {
+      showToast("Failed to add student. Please try again.", "error");
+      setSaving(false);
     }
-    loadStudent();
-
-    // Load messages
-    getMessagesForStudent(id, setMessages);
-  }, [id]);
-
-  // Send message
-  async function handleSend() {
-    if (!newMessage.trim()) return;
-
-    await sendMessage(id, newMessage);
-    setNewMessage("");
   }
 
-  if (!student) return <p>Loading...</p>;
+  const inputStyle = { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "15px", marginBottom: "14px", boxSizing: "border-box" };
 
   return (
-    <div style={{ maxWidth: "600px" }}>
-      
-      {/* Profile Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "20px",
-          marginBottom: "20px"
-        }}
-      >
-        {/* Profile Picture */}
-        {student.photoURL ? (
-          <img
-            src={student.photoURL}
-            alt="profile"
-            style={{
-              width: "90px",
-              height: "90px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "2px solid #ccc"
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: "90px",
-              height: "90px",
-              borderRadius: "50%",
-              background: "black"
-            }}
-          />
-        )}
-
-        {/* Student Info */}
-        <div>
-          <h2>{student.name}</h2>
-          <p>Phone: {student.phone}</p>
-          <p>Transmission: {student.transmission}</p>
-          <p>Perfect Driver: {student.perfectDriver ? "Yes" : "No"}</p>
-          <p>Parking Practice: {student.parkingPractice ? "Yes" : "No"}</p>
-
-          <button
-            onClick={() => navigate(`/students/edit/${id}`)}
-            style={{
-              marginTop: "10px",
-              padding: "8px 14px",
-              background: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer"
-            }}
-          >
-            Edit Student
-          </button>
-        </div>
-      </div>
-
-      {/* Messages Section */}
-      <h3>Messages</h3>
-      <div style={{ marginBottom: "20px" }}>
-        {messages.map((msg, index) => (
-          <div key={index} style={{ marginBottom: "10px" }}>
-            <p>{msg.text}</p>
-            <small>{msg.timestamp}</small>
-          </div>
-        ))}
-      </div>
-
-      {/* Send Message */}
-      <div style={{ display: "flex", gap: "10px" }}>
-        <input
-          type="text"
-          placeholder="Send a message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
-        />
-        <button
-          onClick={handleSend}
-          style={{
-            padding: "10px 16px",
-            background: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer"
-          }}
-        >
-          Send
+    <div style={{ maxWidth: "480px" }}>
+      <Link to="/students">
+        <button type="button" style={{ marginBottom: "20px", background: "none", border: "1px solid #ddd", padding: "8px 14px", borderRadius: "8px", cursor: "pointer" }}>
+          ← Back to Students
         </button>
-      </div>
+      </Link>
+
+      <h1 style={{ marginBottom: "24px" }}>Add Student</h1>
+
+      <form onSubmit={handleSubmit}>
+        <label style={{ fontWeight: "600", display: "block", marginBottom: "4px" }}>Full Name</label>
+        <input style={inputStyle} placeholder="e.g. John Smith" value={name} onChange={e => setName(e.target.value)} />
+
+        <label style={{ fontWeight: "600", display: "block", marginBottom: "4px" }}>Phone Number</label>
+        <input style={inputStyle} placeholder="e.g. 07700 900123" value={phone} onChange={e => setPhone(e.target.value)} />
+
+        <label style={{ fontWeight: "600", display: "block", marginBottom: "4px" }}>Email Address</label>
+        <input
+          style={inputStyle}
+          type="email"
+          placeholder="e.g. student@example.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+
+        <label style={{ fontWeight: "600", display: "block", marginBottom: "4px" }}>Transmission</label>
+        <select style={inputStyle} value={transmission} onChange={e => setTransmission(e.target.value)}>
+          <option value="">Select transmission type</option>
+          <option value="manual">Manual</option>
+          <option value="auto">Automatic</option>
+        </select>
+
+        <button
+          type="submit"
+          disabled={saving}
+          style={{ width: "100%", padding: "12px", background: saving ? "#93c5fd" : "#2563eb", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: saving ? "not-allowed" : "pointer" }}
+        >
+          {saving ? "Adding..." : "Add Student"}
+        </button>
+      </form>
     </div>
   );
 }

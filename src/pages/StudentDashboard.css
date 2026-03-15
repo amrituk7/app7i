@@ -1,0 +1,261 @@
+.student-dashboard {
+  max-width: 1000px;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+}
+
+.welcome-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-large {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.welcome-section h1 {
+  font-size: 28px;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.welcome-section p {
+  color: #6b7280;
+  margin: 0;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.dashboard-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid #e5e7eb;
+}
+
+.dashboard-section h2 {
+  font-size: 18px;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.view-all {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+/* Quick Actions */
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.action-buttons a {
+  text-decoration: none;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.action-card:hover {
+  border-color: #667eea;
+  background: #fafbff;
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  color: white;
+}
+
+.action-icon.book {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.action-icon.code {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.action-icon.tips {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.action-card span {
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin: 0 0 4px 0;
+}
+
+.empty-state small {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* Lessons List */
+.lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lesson-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.lesson-card.upcoming {
+  background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%);
+  border-color: #c7d2fe;
+}
+
+.lesson-card.past {
+  background: #f9fafb;
+}
+
+.lesson-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  padding: 8px;
+  background: white;
+  border-radius: 8px;
+}
+
+.lesson-date .day {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.lesson-date .month {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.lesson-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.lesson-details strong {
+  color: #1f2937;
+  font-size: 15px;
+}
+
+.lesson-details span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.lesson-details small {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Tips Preview */
+.tips-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tip-preview-card {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.tip-preview-card h4 {
+  font-size: 14px;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.tip-preview-card p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .welcome-section {
+    flex-direction: column;
+    text-align: center;
+  }
+}
