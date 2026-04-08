@@ -2,15 +2,33 @@
   --font-body: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
   --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
 
+  /* App7i Brand Tokens */
+  --app7i-cream: #faf8f5;
+  --app7i-paper: #fffdf9;
+  --app7i-soft: #f6f1ea;
+  --app7i-line: #e3dbd0;
+  --app7i-line-strong: #d8cebf;
+  --app7i-forest: #2d3b2d;
+  --app7i-pine: #1f3026;
+  --app7i-moss: #5c7a5c;
+  --app7i-espresso: #3d3229;
+  --app7i-body: #5c5347;
+  --app7i-gold: #9a8a3d;
+  --app7i-slate: #5c6b80;
+  --app7i-gradient: linear-gradient(135deg, #3d3229 0%, #2d3b2d 50%, #1f3026 100%);
+
+  /* Primary Colors */
   --primary: #c46a2d;
   --primary-dark: #8f491d;
-  --primary-hover: #ae5d28;
+  --primary-hover: #efb37a;
   --primary-pale: #f8e6d4;
   --primary-ring: rgba(196, 106, 45, 0.2);
 
+  /* Accent Colors */
   --accent: #2f6b5f;
   --accent-pale: #dfede8;
 
+  /* Background & Surface */
   --bg: #f6efe5;
   --bg-strong: #ecdfcd;
   --surface: rgba(255, 250, 244, 0.92);
@@ -19,11 +37,13 @@
   --border: #dbc8b1;
   --border-2: #bda182;
 
+  /* Text Colors */
   --text: #1f2a31;
   --text-2: #47565f;
   --text-muted: #6e7b83;
   --text-dim: #98a0a5;
 
+  /* Status Colors */
   --success: #236f56;
   --success-pale: #e2efe9;
   --warning: #b96d1e;
@@ -31,6 +51,7 @@
   --danger: #c24b43;
   --danger-pale: #fde8e3;
 
+  /* Layout & Effects */
   --radius: 14px;
   --radius-lg: 24px;
   --shadow-sm: 0 8px 18px rgba(71, 52, 31, 0.06);
@@ -43,15 +64,26 @@
 }
 
 body.dark {
+  /* App7i Brand Tokens - Dark Mode */
+  --app7i-cream: #1a1d20;
+  --app7i-paper: #f6efe6;
+  --app7i-soft: #d8cec1;
+  --app7i-line: #3a4249;
+  --app7i-line-strong: #56616b;
+  --app7i-gradient: linear-gradient(135deg, #1a1d20 0%, #23282d 50%, #2b3137 100%);
+
+  /* Primary Colors */
   --primary: #e59b5a;
   --primary-dark: #c17734;
   --primary-hover: #f0ad6d;
   --primary-pale: rgba(229, 155, 90, 0.14);
   --primary-ring: rgba(229, 155, 90, 0.18);
 
+  /* Accent Colors */
   --accent: #7bb7a3;
   --accent-pale: rgba(123, 183, 163, 0.12);
 
+  /* Background & Surface */
   --bg: #15181b;
   --bg-strong: #0f1113;
   --surface: rgba(31, 35, 39, 0.92);
@@ -60,11 +92,13 @@ body.dark {
   --border: #3a4249;
   --border-2: #56616b;
 
+  /* Text Colors */
   --text: #f6efe6;
   --text-2: #d8cec1;
   --text-muted: #b09f8e;
   --text-dim: #81786f;
 
+  /* Status Colors */
   --success: #7fc7ac;
   --success-pale: rgba(127, 199, 172, 0.12);
   --warning: #f0b36d;
@@ -72,6 +106,7 @@ body.dark {
   --danger: #f08a7d;
   --danger-pale: rgba(240, 138, 125, 0.14);
 
+  /* Effects */
   --shadow-sm: 0 12px 24px rgba(0, 0, 0, 0.18);
   --shadow: 0 22px 46px rgba(0, 0, 0, 0.22);
   --shadow-lg: 0 28px 64px rgba(0, 0, 0, 0.3);
@@ -163,13 +198,13 @@ button {
   border: none;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: #fffdf9;
+  color: var(--app7i-paper);
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
-  box-shadow: 0 14px 24px rgba(196, 106, 45, 0.2);
+  box-shadow: 0 14px 24px var(--primary-ring);
   transition:
     transform var(--transition),
     box-shadow var(--transition),

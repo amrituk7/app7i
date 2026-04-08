@@ -17,9 +17,9 @@
   background:
     radial-gradient(circle at top left, rgba(239, 179, 122, 0.18), transparent 28%),
     radial-gradient(circle at 86% 18%, rgba(123, 183, 163, 0.14), transparent 22%),
-    linear-gradient(135deg, #22272c 0%, #3a2c24 52%, #2f6b5f 100%);
-  color: #fff8f0;
-  box-shadow: 0 28px 60px rgba(28, 20, 13, 0.18);
+    var(--app7i-gradient);
+  color: var(--app7i-paper);
+  box-shadow: var(--shadow-lg);
 }
 
 .students-hero-copy {
@@ -42,7 +42,7 @@
 
 .students-hero h1 {
   margin-bottom: 10px;
-  color: #fff8f0;
+  color: var(--app7i-paper);
 }
 
 .students-hero p {
@@ -180,11 +180,11 @@ body.dark .students-lang-filter {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #c46a2d 0%, #efb37a 100%);
-  color: #fff8f0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: var(--app7i-paper);
   font-size: 18px;
   font-weight: 800;
-  box-shadow: 0 16px 28px rgba(196, 106, 45, 0.18);
+  box-shadow: 0 16px 28px var(--primary-ring);
 }
 
 .student-card-body {
@@ -230,29 +230,29 @@ body.dark .students-lang-filter {
 }
 
 .student-card-chip-gold {
-  background: rgba(185, 109, 30, 0.14);
-  color: #8a571c;
+  background: var(--warning-pale);
+  color: var(--warning);
 }
 
 .student-readiness-pill.ready {
-  background: rgba(47, 107, 95, 0.12);
-  color: #236f56;
+  background: var(--success-pale);
+  color: var(--success);
 }
 
 .student-readiness-pill.steady {
-  background: rgba(77, 119, 136, 0.12);
-  color: #355664;
+  background: var(--accent-pale);
+  color: var(--app7i-slate);
 }
 
 .student-readiness-pill.developing {
-  background: rgba(185, 109, 30, 0.12);
-  color: #996024;
+  background: var(--warning-pale);
+  color: var(--warning);
 }
 
 .student-readiness-pill.early,
 .student-readiness-pill.watch {
-  background: rgba(194, 75, 67, 0.12);
-  color: #a4463f;
+  background: var(--danger-pale);
+  color: var(--danger);
 }
 
 .student-card-progress {
@@ -284,7 +284,7 @@ body.dark .students-lang-filter {
 .student-card-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #c46a2d 0%, #2f6b5f 100%);
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
   transition: width 0.4s ease;
 }
 
@@ -310,8 +310,8 @@ body.dark .students-lang-filter {
   justify-content: center;
   padding: 11px 12px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #29b266 0%, #1d8f52 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
+  color: var(--app7i-paper);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;

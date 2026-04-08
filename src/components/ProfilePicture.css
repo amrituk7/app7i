@@ -9,7 +9,7 @@
   position: relative;
   border-radius: 50%;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
 }
 
 .profile-pic-small .profile-picture-wrapper {
@@ -102,19 +102,20 @@
 }
 
 .pic-btn.upload {
-  background: #667eea;
-  color: white;
+  background: var(--primary);
+  color: var(--app7i-paper);
 }
 
 .pic-btn.upload:hover {
-  background: #5a6fd6;
+  background: var(--primary-dark);
 }
 
 .pic-btn.remove {
-  background: #ef4444;
-  color: white;
+  background: var(--danger);
+  color: var(--app7i-paper);
 }
 
 .pic-btn.remove:hover {
-  background: #dc2626;
+  background: var(--danger);
+  opacity: 0.9;
 }

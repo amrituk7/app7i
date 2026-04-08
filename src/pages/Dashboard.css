@@ -59,7 +59,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  color: #fff9f2;
+  color: var(--app7i-paper);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -68,27 +68,27 @@
 }
 
 .stat-box.total .stat-icon {
-  background: linear-gradient(135deg, #2f6b5f 0%, #1f564b 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--app7i-pine) 100%);
 }
 
 .stat-box.lessons .stat-icon {
-  background: linear-gradient(135deg, #c46a2d 0%, #8f491d 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
 }
 
 .stat-box.manual .stat-icon {
-  background: linear-gradient(135deg, #8b5a2b 0%, #6c401a 100%);
+  background: linear-gradient(135deg, var(--app7i-espresso) 0%, var(--app7i-forest) 100%);
 }
 
 .stat-box.auto .stat-icon {
-  background: linear-gradient(135deg, #4d7788 0%, #355664 100%);
+  background: linear-gradient(135deg, var(--app7i-slate) 0%, var(--app7i-pine) 100%);
 }
 
 .stat-box.perfect .stat-icon {
-  background: linear-gradient(135deg, #c24b43 0%, #92342f 100%);
+  background: linear-gradient(135deg, var(--danger) 0%, var(--app7i-forest) 100%);
 }
 
 .stat-box.parking .stat-icon {
-  background: linear-gradient(135deg, #b98a2c 0%, #93691a 100%);
+  background: linear-gradient(135deg, var(--app7i-gold) 0%, var(--warning) 100%);
 }
 
 .stat-content h3 {
@@ -206,12 +206,12 @@
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  background: linear-gradient(135deg, #c46a2d 0%, #efb37a 100%);
-  color: #fff9f2;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: var(--app7i-paper);
   font-size: 15px;
   font-weight: 800;
   flex-shrink: 0;
-  box-shadow: 0 14px 22px rgba(196, 106, 45, 0.18);
+  box-shadow: 0 14px 22px var(--primary-ring);
 }
 
 .student-info h4,
@@ -316,18 +316,18 @@
 }
 
 .dash-banner-green {
-  background: linear-gradient(135deg, rgba(223, 237, 232, 0.96) 0%, rgba(255, 255, 255, 0.9) 100%);
-  color: #225443;
+  background: linear-gradient(135deg, var(--accent-pale) 0%, var(--app7i-paper) 100%);
+  color: var(--success);
 }
 
 .dash-banner-blue {
-  background: linear-gradient(135deg, rgba(248, 230, 212, 0.96) 0%, rgba(255, 255, 255, 0.9) 100%);
-  color: #7a4a1c;
+  background: linear-gradient(135deg, var(--primary-pale) 0%, var(--app7i-paper) 100%);
+  color: var(--primary-dark);
 }
 
 .dash-banner-amber {
-  background: linear-gradient(135deg, rgba(255, 241, 223, 0.96) 0%, rgba(255, 255, 255, 0.9) 100%);
-  color: #8a571c;
+  background: linear-gradient(135deg, var(--warning-pale) 0%, var(--app7i-paper) 100%);
+  color: var(--warning);
 }
 
 .dash-today-chip {
@@ -377,18 +377,18 @@
 }
 
 .qp.cash {
-  background: #dcefe4;
-  color: #236f56;
+  background: var(--success-pale);
+  color: var(--success);
 }
 
 .qp.card {
-  background: #f4e3d1;
-  color: #8f491d;
+  background: var(--primary-pale);
+  color: var(--primary-dark);
 }
 
 .qp.bank {
-  background: #e0eaef;
-  color: #355664;
+  background: var(--accent-pale);
+  color: var(--app7i-slate);
 }
 
 .qp:hover {
