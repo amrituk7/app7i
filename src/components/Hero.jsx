@@ -1,118 +1,70 @@
 import { Link } from "react-router-dom";
 
-const heroStats = [
-  {
-    title: "Lessons Today",
-    value: "4",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M8 2.5v3M16 2.5v3M4 8.5h16M5.5 4.5h13A1.5 1.5 0 0 1 20 6v12.5A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5V6A1.5 1.5 0 0 1 5.5 4.5Z" />
-      </svg>
-    ),
-    tint: "bg-[#8B6F47]/10 text-[#8B6F47]",
-  },
-  {
-    title: "Students",
-    value: "12",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="8" cy="8" r="3" />
-        <circle cx="16.5" cy="7" r="2.5" />
-        <path d="M3.5 18.5a4.5 4.5 0 0 1 9 0M13.5 18.5a3.5 3.5 0 0 1 7 0" />
-      </svg>
-    ),
-    tint: "bg-[#5C7A5C]/10 text-[#5C7A5C]",
-  },
-  {
-    title: "This Month",
-    value: "\u00A3840",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M13 3.5c-2.8 0-4.75 1.83-4.75 4.55 0 1.3.46 2.45 1.25 3.45H7v1.8h3.95c-.32 2.13-1.63 3.54-4.1 4.7h10.65" />
-      </svg>
-    ),
-    tint: "bg-[#9A8A3D]/10 text-[#9A8A3D]",
-  },
-];
-
 export default function Hero() {
   return (
-    <section
-      className="relative overflow-hidden pb-16 pt-24 md:pb-24 md:pt-32"
-      style={{ background: "linear-gradient(135deg, #3D3229 0%, #2D3B2D 50%, #1F3026 100%)" }}
-    >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-[#5C7A5C]/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#8B6F47]/20 blur-3xl" />
-      </div>
+    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-[#3D3229] via-[#2D3B2D] to-[#1F3026]">
+      <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-[#4A5D4A]/20 blur-[80px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-[#5C4D3C]/20 blur-[80px] pointer-events-none" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="text-center lg:text-left">
-            <div className="animate-fade-in-up mb-6 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
-              Built for UK driving instructors
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 text-sm font-medium text-amber-300 mb-6 animate-fade-in">
+              Early Access - First 50 Instructors
             </div>
-
-            <h1 className="animate-fade-in-up animation-delay-100 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-              Run your lessons.
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">
+              Run your classes
               <br />
-              <span className="text-white/70">Not your paperwork.</span>
+              <span className="text-white/70">without the chaos</span>
             </h1>
-
-            <p className="animate-fade-in-up animation-delay-200 mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/80 lg:mx-0">
-              A complete toolkit for driving instructors: bookings, progress tracking, earnings, invoices, and a
-              student portal.
+            <p className="mt-6 text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              App7i automates attendance, payments, scheduling, and communication so you can focus on teaching.
             </p>
-
-            <div className="animate-fade-in-up animation-delay-300 mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-              <Link
-                to="/register-instructor"
-                className="inline-flex items-center justify-center rounded-full bg-[#FAF8F5] px-6 py-3.5 text-base font-semibold text-[#2D3B2D] shadow-lg shadow-black/20 transition hover:bg-[#F2EDE6]"
-              >
-                Start Free
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Link to="/register-instructor" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#2D3B2D] font-medium rounded-lg shadow-lg hover:bg-white/90 hover:-translate-y-0.5 transition-all">
+                Claim Early Access
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/20"
-              >
-                Student Portal
+              <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/30 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-all">
+                Log In
               </Link>
             </div>
-
-            <p className="animate-fade-in-up animation-delay-400 mt-6 text-sm text-white/60">
-              No contract. Cancel any time. 3-day free trial.
+            <p className="mt-6 text-sm text-white/60">
+              Lock in GBP 11.99/month instead of GBP 19.99/month while your subscription remains active
             </p>
           </div>
 
-          <div className="animate-fade-in-up animation-delay-300 relative lg:pl-8">
+          <div className="relative lg:pl-8">
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="rounded-2xl border border-white/15 bg-[#FFFDF9]/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                <div className="mb-6 flex items-center justify-between">
+              <div className="rounded-2xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                <div className="flex justify-between items-start mb-6">
                   <div>
                     <p className="text-sm text-[#5C5347]">Good morning, Sarah</p>
                     <h3 className="text-lg font-semibold text-[#2D3B2D]">Your Dashboard</h3>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2D3B2D]/10">
-                    <span className="text-sm font-bold text-[#2D3B2D]">7i</span>
+                  <div className="w-10 h-10 rounded-full bg-[#2D3B2D]/10 flex items-center justify-center text-sm font-bold text-[#2D3B2D]">7i</div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-xl bg-blue-50 p-4 hover:scale-105 transition-transform">
+                    <svg className="w-5 h-5 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" strokeWidth={2} /><path strokeWidth={2} d="M16 2v4M8 2v4M3 10h18" /></svg>
+                    <p className="text-2xl font-bold text-[#2D3B2D]">4</p>
+                    <p className="text-xs text-[#5C5347]">Lessons Today</p>
+                  </div>
+                  <div className="rounded-xl bg-green-50 p-4 hover:scale-105 transition-transform">
+                    <svg className="w-5 h-5 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" strokeWidth={2} /><path strokeWidth={2} d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>
+                    <p className="text-2xl font-bold text-[#2D3B2D]">12</p>
+                    <p className="text-xs text-[#5C5347]">Students</p>
+                  </div>
+                  <div className="rounded-xl bg-amber-50 p-4 hover:scale-105 transition-transform">
+                    <svg className="w-5 h-5 text-amber-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>
+                    <p className="text-2xl font-bold text-[#2D3B2D]">GBP 840</p>
+                    <p className="text-xs text-[#5C5347]">This Month</p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {heroStats.map((stat) => (
-                    <div key={stat.title} className={`rounded-xl p-4 transition-transform hover:scale-105 ${stat.tint}`}>
-                      <div className="mb-2">{stat.icon}</div>
-                      <p className="text-2xl font-bold text-[#2D3B2D]">{stat.value}</p>
-                      <p className="text-xs text-[#5C5347]">{stat.title}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 space-y-3">
-                  <p className="text-sm font-medium text-[#2D3B2D]">Next Up</p>
-                  <div className="flex items-center gap-3 rounded-lg border border-[#E3DBD0] bg-[#F6F1EA] p-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2D3B2D] text-sm font-bold text-white">
-                      9:00
-                    </div>
+                <div className="mt-6">
+                  <p className="text-sm font-medium text-[#2D3B2D] mb-3">Next Up</p>
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-[#E8E4DD] bg-[#FAF8F5]/50">
+                    <div className="w-10 h-10 rounded-lg bg-[#2D3B2D] text-white flex items-center justify-center text-sm font-bold">9:00</div>
                     <div>
                       <p className="font-medium text-[#2D3B2D]">James Wilson</p>
                       <p className="text-sm text-[#5C5347]">Lesson 8 - Roundabouts</p>
@@ -120,8 +72,7 @@ export default function Hero() {
                   </div>
                 </div>
               </div>
-
-              <div className="animate-float absolute -right-4 -top-4 rounded-lg border border-[#E3DBD0] bg-[#FFFDF9] p-3 shadow-lg shadow-black/10">
+              <div className="absolute -top-4 -right-4 bg-white p-3 rounded-lg border border-[#E8E4DD] shadow-lg">
                 <p className="text-xs text-[#5C5347]">New booking!</p>
                 <p className="text-sm font-medium text-[#2D3B2D]">Emma - Tomorrow 2pm</p>
               </div>

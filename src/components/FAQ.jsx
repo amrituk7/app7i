@@ -1,82 +1,42 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 
-const items = [
-  {
-    question: "How does 3-day trial work?",
-    answer: "Start with full access for 3 days. Stripe collects payment details securely, and billing begins only after the trial ends unless you cancel first.",
-  },
-  {
-    question: "How do payments work?",
-    answer: "Payments run through Stripe. You manage billing from your account and receive a clear subscription flow before any charge is taken.",
-  },
-  {
-    question: "Can I cancel anytime?",
-    answer: "Yes. There are no long-term contracts. Cancel from your account settings and access remains until the end of the billing period.",
-  },
-  {
-    question: "How do students connect?",
-    answer: "Students scan your QR code or use your instructor link, then connect to your profile without a long setup process.",
-  },
-  {
-    question: "Is my data secure?",
-    answer: "Yes. App7i uses authenticated access, protected infrastructure, and standard security controls for instructor and student data.",
-  },
-  {
-    question: "Can students access progress?",
-    answer: "Yes. The student side can view progress, updates, and relevant lesson information tied to the instructor account.",
-  },
-  {
-    question: "Can I switch plans?",
-    answer: "Yes. You can move between monthly and yearly options as billing support becomes available for your account.",
-  },
-  {
-    question: "Refund policy?",
-    answer: "If you need billing support, contact App7i support and the request can be reviewed based on your subscription timing and plan.",
-  },
+const faqs = [
+  { q: "How does the 3-day free trial work?", a: "Start using App7i immediately with full access to all features. Your trial lasts 3 days, after which you'll be charged based on your selected plan. Cancel anytime during the trial and you won't be charged." },
+  { q: "How do payments work?", a: "All payments are securely processed through Stripe. We accept all major credit and debit cards. Your payment details are never stored on our servers." },
+  { q: "Can I cancel anytime?", a: "Yes. There are no long-term contracts. You can cancel your subscription at any time from your account settings. You'll continue to have access until the end of your billing period." },
+  { q: "Is my data secure?", a: "Absolutely. We use industry-standard encryption and security practices. Your data is stored securely on UK/EU servers and is never shared with third parties." },
+  { q: "Can my students access their progress?", a: "Yes. Each student gets their own portal login where they can view upcoming lessons, track their progress, see messages from you, and manage their bookings." },
+  { q: "Can I switch between monthly and yearly billing?", a: "Yes, you can change your billing plan at any time. If you switch to yearly, you'll receive the discounted rate immediately. Switching to monthly takes effect at your next billing date." },
+  { q: "What happens to my data if I cancel?", a: "Your data remains available for 30 days after cancellation. You can export all your student records, lesson history, and financial data before your account is fully closed." },
+  { q: "Do you offer refunds?", a: "If you're not satisfied within the first 14 days of your paid subscription, contact us for a full refund. After 14 days, we offer prorated refunds for yearly plans." },
 ];
 
 export default function FAQ() {
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section id="faq" className="bg-[#faf8f5] py-20 md:py-28">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="lp-eyebrow">FAQ</p>
-          <h2 className="lp-title mt-3 text-4xl sm:text-5xl">
-            Common questions, answered clearly
-          </h2>
-          <p className="lp-copy mt-4 text-lg">Everything an instructor needs before getting started.</p>
+    <section id="faq" className="bg-[#FAF8F5] py-20 md:py-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#5C7A5C]">FAQ</p>
+          <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D3B2D] tracking-tight">Frequently asked questions</h2>
+          <p className="mt-4 text-lg text-[#5C5347]">Everything you need to know about App7i.</p>
         </div>
 
-        <div className="lp-surface mt-12 overflow-hidden rounded-[2rem]">
-          {items.map((item, index) => {
-            const isOpen = openIndex === index;
-
-            return (
-              <article key={item.question} className="border-b border-[#e3dbd0] last:border-b-0">
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  onClick={() => setOpenIndex(isOpen ? -1 : index)}
-                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition hover:bg-[#f6f1ea]"
-                >
-                  <span className="text-base font-semibold text-[#2d3b2d]">{item.question}</span>
-                  <span className="text-[#5c5347]">
-                    <svg viewBox="0 0 24 24" className={`h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </span>
-                </button>
-                {isOpen && (
-                  <div className="px-6 pb-5 text-sm leading-7 text-[#5c5347]">{item.answer}</div>
-                )}
-              </article>
-            );
-          })}
+        <div className="max-w-3xl mx-auto space-y-4">
+          {faqs.map((faq, index) => (
+            <div key={index} className="bg-white border border-[#E8E4DD] rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+              <button onClick={() => setOpenIndex(openIndex === index ? null : index)} className="w-full flex items-center justify-between p-5 text-left">
+                <span className="font-medium text-[#2D3B2D]">{faq.q}</span>
+                <svg className={`w-5 h-5 text-[#5C5347] shrink-0 transition-transform ${openIndex === index ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openIndex === index && <div className="px-5 pb-5 text-[#5C5347] leading-relaxed">{faq.a}</div>}
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
-

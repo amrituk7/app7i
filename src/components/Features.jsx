@@ -1,103 +1,34 @@
 const features = [
-  {
-    title: "Lesson Scheduling",
-    description:
-      "Calendar-based booking with recurring lessons, clash detection, and block bookings. Students see their schedule in real time.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M8 2.5v3M16 2.5v3M4 8.5h16M5.5 4.5h13A1.5 1.5 0 0 1 20 6v12.5A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5V6A1.5 1.5 0 0 1 5.5 4.5Z" />
-      </svg>
-    ),
-    colorClass: "bg-[#8B6F47]/12 text-[#8B6F47]",
-  },
-  {
-    title: "Student Management",
-    description:
-      "Full profiles with skill ratings, theory and test dates, progress tracking, and a waiting list for new enquiries.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="8" cy="8" r="3" />
-        <circle cx="16.5" cy="7" r="2.5" />
-        <path d="M3.5 18.5a4.5 4.5 0 0 1 9 0M13.5 18.5a3.5 3.5 0 0 1 7 0" />
-      </svg>
-    ),
-    colorClass: "bg-[#5C7A5C]/12 text-[#5C7A5C]",
-  },
-  {
-    title: "Earnings Tracker",
-    description:
-      "See exactly what you've earned by week and month at a glance. Export CSV for your accountant with one tap.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M13 3.5c-2.8 0-4.75 1.83-4.75 4.55 0 1.3.46 2.45 1.25 3.45H7v1.8h3.95c-.32 2.13-1.63 3.54-4.1 4.7h10.65" />
-      </svg>
-    ),
-    colorClass: "bg-[#9A8A3D]/12 text-[#9A8A3D]",
-  },
-  {
-    title: "In-App Messaging",
-    description:
-      "Message students directly through the app. They reply from their own portal, with no phone number sharing needed.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M5.5 6.5h13A1.5 1.5 0 0 1 20 8v7.5A1.5 1.5 0 0 1 18.5 17H9l-4.5 3v-3H5.5A1.5 1.5 0 0 1 4 15.5V8A1.5 1.5 0 0 1 5.5 6.5Z" />
-      </svg>
-    ),
-    colorClass: "bg-[#5C6B80]/12 text-[#5C6B80]",
-  },
-  {
-    title: "Invoices",
-    description:
-      "Generate branded invoices per lesson with your ADI number, payment status, and logo. Send them out with one tap.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M6 3.5h9l3 3v14l-3-1.75-3 1.75-3-1.75-3 1.75v-17Z" />
-        <path d="M8.5 9.5h7M8.5 13h7M8.5 16.5H12" />
-      </svg>
-    ),
-    colorClass: "bg-[#5C5347]/12 text-[#5C5347]",
-  },
-  {
-    title: "Student Portal",
-    description:
-      "Your students get their own login to view upcoming lessons, messages, tips, and a full progress report.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M12 3.5 4.5 7.5 12 11.5l7.5-4-7.5-4Z" />
-        <path d="M7 10.2v4.3c0 1.9 2.3 3.5 5 3.5s5-1.6 5-3.5v-4.3" />
-      </svg>
-    ),
-    colorClass: "bg-[#5C7A5C]/12 text-[#5C7A5C]",
-  },
+  { title: "Lesson scheduling", description: "Book, manage and track every lesson. Recurring lessons, block bookings, and clash detection built in.", color: "terracotta", icon: (<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" strokeWidth={2} /><path strokeWidth={2} d="M16 2v4M8 2v4M3 10h18" /></svg>) },
+  { title: "Student management", description: "Full profiles with progress tracking, skill ratings, theory and test dates - all in one place.", color: "moss", icon: (<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" strokeWidth={2} /><path strokeWidth={2} d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>) },
+  { title: "Earnings tracker", description: "See exactly what you have earned by week and month. Export CSV for your accountant with one tap.", color: "mustard", icon: (<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>) },
+  { title: "Student messaging", description: "Message students directly through the app. They reply from their student portal.", color: "slate", icon: (<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>) },
+  { title: "Professional invoices", description: "Generate branded invoices per lesson with payment status, ADI number and your logo.", color: "terracotta", icon: (<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" strokeWidth={2} /><line x1="16" y1="13" x2="8" y2="13" strokeWidth={2} /><line x1="16" y1="17" x2="8" y2="17" strokeWidth={2} /></svg>) },
+  { title: "Student portal", description: "Your students get their own login to see upcoming lessons, messages, and progress.", color: "moss", icon: (<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" strokeWidth={2} /></svg>) },
 ];
+
+const colorClasses = {
+  terracotta: "bg-[#C4A77D]/20 text-[#8B6F47]",
+  moss: "bg-[#7A9B7A]/20 text-[#5C7A5C]",
+  mustard: "bg-[#C9B96D]/20 text-[#9A8A3D]",
+  slate: "bg-[#7A8AA0]/20 text-[#5C6B80]",
+};
 
 export default function Features() {
   return (
     <section id="features" className="bg-[#FAF8F5] py-20 md:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#5C7A5C]">Features</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#2D3B2D] sm:text-4xl md:text-5xl">
-            Everything you need. One app.
-          </h2>
-          <p className="mt-4 text-lg text-[#5C5347]">
-            Stop juggling spreadsheets, WhatsApp groups, and paper diaries. App7i replaces all of it.
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#5C7A5C]">Everything you need</p>
+          <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D3B2D] tracking-tight">One app. No spreadsheets.</h2>
+          <p className="mt-4 text-lg text-[#5C5347] leading-relaxed">Everything you used to track on paper, WhatsApp, and spreadsheets - now in a single professional tool.</p>
         </div>
-
-        <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="group rounded-2xl border border-[#E3DBD0] bg-[#FFFDF9] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#2D3B2D]/20 hover:shadow-lg hover:shadow-[#2D3B2D]/5"
-            >
-              <div
-                className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${feature.colorClass} transition-transform duration-300 group-hover:scale-110`}
-              >
-                {feature.icon}
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-[#2D3B2D]">{feature.title}</h3>
-              <p className="text-sm leading-relaxed text-[#5C5347]">{feature.description}</p>
+            <div key={feature.title} className="group p-6 bg-white border border-[#E8E4DD] rounded-2xl shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${colorClasses[feature.color]}`}>{feature.icon}</div>
+              <h3 className="mt-5 text-lg font-semibold text-[#2D3B2D]">{feature.title}</h3>
+              <p className="mt-2 text-[#5C5347] leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>

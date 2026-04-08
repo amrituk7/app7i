@@ -1,48 +1,28 @@
-﻿import { Link } from "react-router-dom";
-
-const links = [
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "#features", label: "Features" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
-];
+import { Link } from "react-router-dom";
 
 export default function Footer() {
-  const year = new Date().getFullYear();
-
   return (
-    <footer className="border-t border-[#e3dbd0] bg-white py-10">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2d3b2d] text-sm font-semibold text-white">
-            7i
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-[#2d3b2d]">App7i</span>
+    <footer className="bg-[#FAF8F5] border-t border-[#E8E4DD] py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#2D3B2D] flex items-center justify-center text-sm font-bold text-white">7i</div>
+            <span className="text-lg font-semibold text-[#2D3B2D]">App7i</span>
+          </div>
+
+          <nav className="flex flex-wrap items-center justify-center gap-6">
+            <a href="#how-it-works" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">How It Works</a>
+            <a href="#features" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">Features</a>
+            <a href="#pricing" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">Pricing</a>
+            <a href="#faq" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">FAQ</a>
+            <Link to="/privacy" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">Privacy</Link>
+            <Link to="/terms" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">Terms</Link>
+            <Link to="/support" className="text-sm text-[#5C5347] hover:text-[#2D3B2D] transition-colors">Support</Link>
+          </nav>
+
+          <p className="text-sm text-[#5C5347]">© {new Date().getFullYear()} App7i. All rights reserved.</p>
         </div>
-
-        <nav className="flex flex-wrap gap-4 text-sm text-[#5c5347]">
-          {links.map((link) => (
-            <a key={link.href} href={link.href} className="transition hover:text-[#2d3b2d]">
-              {link.label}
-            </a>
-          ))}
-          <Link to="/privacy" className="transition hover:text-[#2d3b2d]">
-            Privacy
-          </Link>
-          <Link to="/terms" className="transition hover:text-[#2d3b2d]">
-            Terms
-          </Link>
-          <Link to="/support" className="transition hover:text-[#2d3b2d]">
-            Support
-          </Link>
-          <Link to="/login" className="transition hover:text-[#2d3b2d]">
-            Log In
-          </Link>
-        </nav>
-
-        <p className="text-sm text-[#5c5347]">© {year} App7i. All rights reserved.</p>
       </div>
     </footer>
   );
 }
-
