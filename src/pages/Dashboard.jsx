@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { getStudents, getLessons, sendMessage, getInstructorProfile, updateLesson } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import TopBar from "../components/TopBar";
-import "../components/TopBar.css";
 import DrivingMotionHero from "../components/DrivingMotionHero";
 import {
   getProgressSummary,
@@ -150,18 +148,11 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="dashboard-wrapper">
-        <TopBar title="Dashboard" subtitle="Loading..." />
-        <div className="dashboard-container dashboard-loading"><p>Loading dashboard...</p></div>
-      </div>
-    );
+    return <div className="dashboard-container dashboard-loading"><p>Loading dashboard...</p></div>;
   }
 
   return (
-    <div className="dashboard-wrapper">
-      <TopBar title="Dashboard" subtitle={`Welcome back, ${instructorName || "Instructor"}`} />
-      <div className="dashboard-container">
+    <div className="dashboard-container">
         {passedToday.length > 0 && (
         <div className="dash-banner dash-banner-green">
           <span style={{ fontSize: "28px" }}>🏆</span>
@@ -328,15 +319,14 @@ export default function Dashboard() {
         </div>
       )}
 
-        <div className="quick-actions dash-fade-in" style={{ animationDelay: "0.18s" }}>
-          <h2>Quick Actions</h2>
-          <div className="actions-grid">
-            {quickActionConfig.map(action => (
-              <Link key={action.to} to={action.to}>
-                <button className={`action-button ${action.className}`}>{action.label}</button>
-              </Link>
-            ))}
-          </div>
+      <div className="quick-actions dash-fade-in" style={{ animationDelay: "0.18s" }}>
+        <h2>Quick Actions</h2>
+        <div className="actions-grid">
+          {quickActionConfig.map(action => (
+            <Link key={action.to} to={action.to}>
+              <button className={`action-button ${action.className}`}>{action.label}</button>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

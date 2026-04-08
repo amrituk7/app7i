@@ -1,13 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Premium Dashboard — Linear/Vercel Quality
-   Glass/Paper aesthetic with clean hierarchy
+   App7i Dashboard — Clean instructor-focused layout
+   Earthy palette with cream backgrounds and deep green brand color
    ═══════════════════════════════════════════════════════════════════════════ */
-
-.dashboard-wrapper {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
 
 .dashboard-container {
   max-width: 1200px;
