@@ -352,119 +352,123 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   CAR ANIMATION
+   CAR ANIMATION - Realistic learner car driving left to center
 ───────────────────────────────────────────────────────────────────────────── */
-.car-animation-container {
+.car-scene {
   position: relative;
   width: 100%;
-  height: 140px;
+  height: 160px;
   overflow: hidden;
 }
 
+/* Road */
 .car-road {
   position: absolute;
-  bottom: 25px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 6px;
-  background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
-  border-radius: 3px;
-  overflow: hidden;
+  height: 40px;
 }
 
-.road-line {
+.road-surface {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 50px;
-  height: 3px;
-  background: #94a3b8;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+  border-radius: 4px 4px 0 0;
+}
+
+.road-markings {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  display: flex;
+  gap: 40px;
+  padding-left: 20px;
+  animation: roadMove 0.8s linear infinite;
+}
+
+.road-markings span {
+  flex-shrink: 0;
+  width: 60px;
+  height: 4px;
+  background: #fbbf24;
   border-radius: 2px;
-  animation: roadScroll 1.2s linear infinite;
 }
 
-.road-line:nth-child(1) { left: 10%; animation-delay: 0s; }
-.road-line:nth-child(2) { left: 40%; animation-delay: 0.4s; }
-.road-line:nth-child(3) { left: 70%; animation-delay: 0.8s; }
-
-@keyframes roadScroll {
-  0% { 
-    transform: translateY(-50%) translateX(-100px); 
-    opacity: 0; 
-  }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { 
-    transform: translateY(-50%) translateX(100px); 
-    opacity: 0; 
-  }
+@keyframes roadMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100px); }
 }
 
+/* Car wrapper - drives from left to center */
 .car-wrapper {
   position: absolute;
-  bottom: 35px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: carBob 2s ease-in-out infinite, carDrive 8s ease-in-out infinite;
+  bottom: 36px;
+  left: -200px;
+  animation: driveIn 2s ease-out forwards, carIdle 1.5s ease-in-out 2s infinite;
+}
+
+@keyframes driveIn {
+  0% { 
+    left: -200px;
+    transform: translateY(0);
+  }
+  100% { 
+    left: calc(50% - 100px);
+    transform: translateY(0);
+  }
+}
+
+@keyframes carIdle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
 
 .car-svg {
-  width: 140px;
-  height: 60px;
-  filter: drop-shadow(0 8px 16px rgba(16, 185, 129, 0.2));
+  width: 200px;
+  height: 80px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
 }
 
-@keyframes carBob {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-3px); }
-}
-
-@keyframes carDrive {
-  0%, 100% { left: 50%; }
-  25% { left: 60%; }
-  50% { left: 50%; }
-  75% { left: 40%; }
-}
-
-.car-shadow {
-  position: absolute;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 12px;
-  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.12) 0%, transparent 70%);
-  animation: carDrive 8s ease-in-out infinite;
+/* Wheel spin animation */
+.car-svg circle[cx="55"],
+.car-svg circle[cx="145"] {
+  transform-origin: center;
 }
 
 /* Blurred dashboard behind car */
 .hero-dashboard-blur {
   position: absolute;
-  top: -30px;
+  top: -40px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 16px;
-  opacity: 0.35;
-  filter: blur(10px);
+  opacity: 0.3;
+  filter: blur(12px);
 }
 
 .blur-card {
-  width: 100px;
-  height: 60px;
+  width: 120px;
+  height: 70px;
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .blur-card.small {
-  width: 70px;
-  height: 45px;
+  width: 80px;
+  height: 50px;
 }
 
 .blur-card.tall {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 100px;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

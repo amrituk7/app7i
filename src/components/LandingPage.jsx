@@ -99,55 +99,94 @@ const PRICING_FEATURES = [
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ANIMATED CAR COMPONENT
+   ANIMATED CAR COMPONENT - Realistic learner car
 ───────────────────────────────────────────────────────────────────────────── */
 function AnimatedCar() {
   return (
-    <div className="car-animation-container">
+    <div className="car-scene">
+      {/* Road */}
       <div className="car-road">
-        <div className="road-line" />
-        <div className="road-line" />
-        <div className="road-line" />
+        <div className="road-surface" />
+        <div className="road-markings">
+          <span /><span /><span /><span /><span /><span />
+        </div>
       </div>
+      
+      {/* Car */}
       <div className="car-wrapper">
-        <svg className="car-svg" viewBox="0 0 120 50" fill="none">
-          {/* Car body */}
-          <path
-            d="M15 35 L20 20 L40 15 L80 15 L95 20 L105 35 L105 40 L15 40 Z"
-            fill="url(#carGradient)"
+        <svg className="car-svg" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Shadow under car */}
+          <ellipse cx="100" cy="72" rx="70" ry="6" fill="rgba(0,0,0,0.15)" />
+          
+          {/* Car body - main shape */}
+          <path 
+            d="M20 50 L25 50 L30 35 L55 25 L145 25 L165 35 L175 50 L180 50 L180 58 L20 58 Z" 
+            fill="url(#bodyGradient)" 
           />
+          
+          {/* Lower body trim */}
+          <path 
+            d="M25 58 L25 62 L40 62 L40 58 M65 58 L65 62 L135 62 L135 58 M160 58 L160 62 L175 62 L175 58" 
+            fill="#1e293b" 
+          />
+          
           {/* Windows */}
-          <path
-            d="M25 22 L38 18 L75 18 L88 22 L85 30 L28 30 Z"
-            fill="#0f172a"
-            opacity="0.8"
+          <path 
+            d="M58 28 L55 42 L82 42 L82 28 Z" 
+            fill="#1e3a5f" 
+            opacity="0.9"
           />
-          {/* Roof */}
-          <path
-            d="M35 18 L42 12 L78 12 L85 18"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
+          <path 
+            d="M86 28 L86 42 L140 42 L145 28 Z" 
+            fill="#1e3a5f" 
+            opacity="0.9"
           />
+          
+          {/* Window frames */}
+          <path d="M55 42 L58 28 L82 28 L82 42" stroke="#e5e7eb" strokeWidth="2" fill="none" />
+          <path d="M86 28 L86 42 L140 42 L145 28" stroke="#e5e7eb" strokeWidth="2" fill="none" />
+          <line x1="84" y1="28" x2="84" y2="42" stroke="#e5e7eb" strokeWidth="3" />
+          
+          {/* Roof box / L plate holder */}
+          <rect x="60" y="18" width="80" height="8" rx="2" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="1" />
+          <text x="100" y="24" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#dc2626">L</text>
+          
+          {/* Headlights */}
+          <ellipse cx="172" cy="45" rx="4" ry="6" fill="#fef3c7" />
+          <ellipse cx="172" cy="45" rx="2" ry="3" fill="#fde047" />
+          
+          {/* Tail lights */}
+          <rect x="22" y="42" width="4" height="10" rx="1" fill="#ef4444" />
+          <rect x="23" y="44" width="2" height="4" rx="0.5" fill="#fca5a5" />
+          
           {/* Front wheel */}
-          <circle cx="30" cy="42" r="8" fill="#1e293b" />
-          <circle cx="30" cy="42" r="4" fill="#475569" />
+          <circle cx="55" cy="62" r="14" fill="#1e293b" />
+          <circle cx="55" cy="62" r="10" fill="#374151" />
+          <circle cx="55" cy="62" r="6" fill="#6b7280" />
+          <circle cx="55" cy="62" r="2" fill="#9ca3af" />
+          
           {/* Back wheel */}
-          <circle cx="90" cy="42" r="8" fill="#1e293b" />
-          <circle cx="90" cy="42" r="4" fill="#475569" />
-          {/* Headlight */}
-          <ellipse cx="103" cy="32" rx="3" ry="2" fill="#fbbf24" />
-          {/* Tail light */}
-          <rect x="15" y="30" width="4" height="6" rx="1" fill="#ef4444" />
+          <circle cx="145" cy="62" r="14" fill="#1e293b" />
+          <circle cx="145" cy="62" r="10" fill="#374151" />
+          <circle cx="145" cy="62" r="6" fill="#6b7280" />
+          <circle cx="145" cy="62" r="2" fill="#9ca3af" />
+          
+          {/* Side mirror */}
+          <ellipse cx="50" cy="38" rx="5" ry="3" fill="#64748b" />
+          
+          {/* Door handle */}
+          <rect x="95" y="44" width="12" height="2" rx="1" fill="#94a3b8" />
+          
+          {/* Gradient definitions */}
           <defs>
-            <linearGradient id="carGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#059669" />
+            <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#f8fafc" />
+              <stop offset="50%" stopColor="#e2e8f0" />
+              <stop offset="100%" stopColor="#cbd5e1" />
             </linearGradient>
           </defs>
         </svg>
       </div>
-      <div className="car-shadow" />
     </div>
   );
 }
@@ -454,8 +493,8 @@ export default function LandingPage() {
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="final-cta">
         <div className="cta-inner">
-          <h2>Start your journey today</h2>
-          <p>Join hundreds of UK driving instructors who&apos;ve simplified their business.</p>
+          <h2>Ready to simplify your business?</h2>
+          <p>Join hundreds of UK driving instructors who&apos;ve modernised their workflow.</p>
           <div className="cta-actions">
             <Link to="/register-instructor" className="btn-white btn-lg">Start Free Trial</Link>
             <Link to="/login" className="btn-ghost-light btn-lg">Log In</Link>
