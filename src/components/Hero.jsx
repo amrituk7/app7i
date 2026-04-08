@@ -37,29 +37,26 @@ const heroStats = [
 
 export default function Hero() {
   return (
-    <section
-      className="relative overflow-hidden pb-16 pt-24 md:pb-24 md:pt-32"
-      style={{ background: "linear-gradient(135deg, #3D3229 0%, #2D3B2D 50%, #1F3026 100%)" }}
-    >
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-cream to-soft pb-16 pt-24 md:pb-24 md:pt-32">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-[#5C7A5C]/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#8B6F47]/20 blur-3xl" />
+        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-forest/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-moss/5 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="text-center lg:text-left">
-            <div className="animate-fade-in-up mb-6 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
+            <div className="animate-fade-in-up mb-6 inline-flex items-center rounded-full border border-forest/15 bg-forest/5 px-4 py-1.5 text-sm font-medium text-forest">
               Built for UK driving instructors
             </div>
 
-            <h1 className="animate-fade-in-up animation-delay-100 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+            <h1 className="animate-fade-in-up animation-delay-100 text-4xl font-bold tracking-tight text-forest sm:text-5xl md:text-6xl">
               Run your lessons.
               <br />
-              <span className="text-white/70">Not your paperwork.</span>
+              <span className="text-forest/70">Not your paperwork.</span>
             </h1>
 
-            <p className="animate-fade-in-up animation-delay-200 mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/80 lg:mx-0">
+            <p className="animate-fade-in-up animation-delay-200 mx-auto mt-6 max-w-xl text-lg leading-relaxed text-body lg:mx-0">
               A complete toolkit for driving instructors: bookings, progress tracking, earnings, invoices, and a
               student portal.
             </p>
@@ -67,26 +64,26 @@ export default function Hero() {
             <div className="animate-fade-in-up animation-delay-300 mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <Link
                 to="/register-instructor"
-                className="inline-flex items-center justify-center rounded-full bg-cream px-6 py-3.5 text-base font-semibold text-forest shadow-lg shadow-black/20 transition hover:bg-soft"
+                className="inline-flex items-center justify-center rounded-full bg-forest px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-forest/30 transition hover:bg-pine"
               >
                 Claim Early Access
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/20"
+                className="inline-flex items-center justify-center rounded-full border border-forest/20 bg-forest/5 px-6 py-3.5 text-base font-semibold text-forest transition hover:bg-forest/10"
               >
                 {"I'm an Instructor"}
               </Link>
             </div>
 
-            <p className="animate-fade-in-up animation-delay-400 mt-6 text-sm text-white/60">
+            <p className="animate-fade-in-up animation-delay-400 mt-6 text-sm text-body/70">
               No contract. Cancel any time. 3-day free trial.
             </p>
           </div>
 
           <div className="animate-fade-in-up animation-delay-300 relative lg:pl-8">
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="rounded-2xl border border-white/15 bg-paper/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-sm">
+              <div className="rounded-2xl border border-forest/10 bg-paper p-6 shadow-lg shadow-forest/15">
                 <div className="mb-6 flex items-center justify-between">
                   <div>
                     <p className="text-sm text-body">Good morning, Sarah</p>
