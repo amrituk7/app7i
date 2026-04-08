@@ -1,0 +1,134 @@
+.notification-container {
+  max-width: 700px;
+}
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.notif-header h1 {
+  font-size: 28px;
+  color: var(--text);
+  margin: 0;
+}
+
+.unread-count {
+  display: inline-block;
+  margin-left: 12px;
+  background: rgba(196, 106, 45, 0.1);
+  color: var(--primary-dark, #c46a2d);
+  border: 1px solid rgba(196, 106, 45, 0.2);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mark-all-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.mark-all-btn:hover { opacity: 0.85; }
+
+.no-notifications {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-dim);
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notif-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.notif-item.unread {
+  border-left: 4px solid var(--primary-dark, #c46a2d);
+  background: var(--surface);
+}
+
+body.dark .notif-item.unread {
+  background: rgba(196, 106, 45, 0.05);
+}
+
+.notif-item:hover {
+  border-color: rgba(196, 106, 45, 0.28);
+  box-shadow: var(--shadow-sm);
+}
+
+.notif-content h3 {
+  font-size: 16px;
+  color: var(--text);
+  margin: 0 0 8px 0;
+}
+
+.notif-content p {
+  color: var(--text-2);
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.notif-content small {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.notif-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.read-btn {
+  background: rgba(196, 106, 45, 0.08);
+  color: var(--primary-dark, #c46a2d);
+  border: 1px solid rgba(196, 106, 45, 0.18);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.read-btn:hover { background: rgba(196, 106, 45, 0.14); }
+
+.delete-btn {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger, #ef4444);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.delete-btn:hover { background: rgba(239, 68, 68, 0.14); }

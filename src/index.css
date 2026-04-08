@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+:root {
+  --app7i-cream: #faf8f5;
+  --app7i-paper: #fffdf9;
+  --app7i-soft: #f6f1ea;
+  --app7i-line: #e3dbd0;
+  --app7i-line-strong: #d8cebf;
+  --app7i-forest: #2d3b2d;
+  --app7i-pine: #1f3026;
+  --app7i-moss: #5c7a5c;
+  --app7i-espresso: #3d3229;
+  --app7i-body: #5c5347;
+  --app7i-gold: #9a8a3d;
+  --app7i-slate: #5c6b80;
+  --app7i-gradient: linear-gradient(135deg, #3d3229 0%, #2d3b2d 50%, #1f3026 100%);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html {
+  min-height: 100%;
+}
+
+body,
+#root {
+  min-height: 100vh;
+}
+
+body {
+  background: var(--app7i-cream);
+  color: var(--app7i-forest);
+  font-family: Georgia, "Times New Roman", serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(92, 122, 92, 0.18);
+  color: var(--app7i-pine);
+}
+
+.lp-eyebrow {
+  color: var(--app7i-moss);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.lp-title {
+  color: var(--app7i-forest);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.lp-copy {
+  color: var(--app7i-body);
+}
+
+.lp-surface {
+  background: var(--app7i-paper);
+  border: 1px solid var(--app7i-line);
+  box-shadow: 0 14px 40px rgba(45, 59, 45, 0.06);
+}
+
+.lp-surface-soft {
+  background: var(--app7i-soft);
+  border: 1px solid var(--app7i-line);
+}
+
+.lp-button-primary {
+  background: var(--app7i-forest);
+  color: white;
+  box-shadow: 0 16px 36px rgba(31, 48, 38, 0.14);
+}
+
+.lp-button-primary:hover {
+  background: var(--app7i-pine);
+}
+
+.lp-button-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.lp-button-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.lp-brand-gradient {
+  background: var(--app7i-gradient);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}

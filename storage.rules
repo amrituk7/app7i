@@ -1,0 +1,33 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function studentDoc(studentId) {
+      return firestore.get(/databases/(default)/documents/students/$(studentId));
+    }
+
+    function isStudentEmailForId(studentId) {
+      return request.auth != null
+        && request.auth.token.email != null
+        && studentDoc(studentId).data.email == request.auth.token.email;
+    }
+
+    function isInstructorForStudent(studentId) {
+      return request.auth != null
+        && studentDoc(studentId).data.instructorId == request.auth.uid;
+    }
+
+    // Profile pictures: instructor or student can write to the student's path
+    match /profile-pictures/{studentId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*')
+                   && (isInstructorForStudent(studentId) || isStudentEmailForId(studentId));
+    }
+
+    // Default: deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Ownership check: caller's UID matches the instructorId field on the document
+    function isInstructorFor(data) {
+      return isAuth() && data.instructorId == request.auth.uid;
+    }
+
+    function studentDoc(studentId) {
+      return get(/databases/$(database)/documents/students/$(studentId));
+    }
+
+    function isStudentEmailForId(studentId) {
+      return isAuth()
+        && request.auth.token.email != null
+        && studentDoc(studentId).data.email == request.auth.token.email;
+    }
+
+    function isStudentSelf(data) {
+      return isAuth()
+        && request.auth.token.email != null
+        && data.email == request.auth.token.email;
+    }
+
+    // Users: own doc only
+    match /users/{userId} {
+      allow create: if isAuth()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role in ["instructor", "student"];
+      allow read: if isAuth() && request.auth.uid == userId;
+      allow update: if isAuth() && request.auth.uid == userId
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["role", "uid"]));
+      allow delete: if false;
+    }
+
+    // Public instructor directory — only username, name, uid (no sensitive data)
+    match /instructorDirectory/{usernameDoc} {
+      allow read: if true;
+      allow write: if isAuth()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(["uid", "username", "name", "location", "rating", "transmissions"]);
+    }
+
+    // Students: instructor owns writes; self-onboarding is handled server-side
+    match /students/{studentId} {
+      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow read: if isInstructorFor(resource.data) || isStudentSelf(resource.data);
+      allow update, delete: if isInstructorFor(resource.data);
+    }
+
+    // Lessons: instructor owns, student can read if linked to their studentId
+    match /lessons/{lessonId} {
+      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow read: if isInstructorFor(resource.data) || isStudentEmailForId(resource.data.studentId);
+      allow update, delete: if isInstructorFor(resource.data);
+    }
+
+    // Messages
+    // Instructor reads via query: where("instructorId", "==", uid)
+    // Student reads via queries: where("sender", "==", studentDocId) or where("receiver", "==", studentDocId)
+    match /messages/{messageId} {
+      allow read: if isAuth()
+        && (resource.data.instructorId == request.auth.uid
+            || isStudentEmailForId(resource.data.sender)
+            || isStudentEmailForId(resource.data.receiver));
+      allow create: if isAuth() && (
+        (request.resource.data.instructorId == request.auth.uid
+          && (request.resource.data.sender == request.auth.uid
+              || request.resource.data.receiver == request.auth.uid))
+        || (isStudentEmailForId(request.resource.data.sender)
+            && request.resource.data.instructorId == studentDoc(request.resource.data.sender).data.instructorId
+            && request.resource.data.receiver == request.resource.data.instructorId)
+      );
+      allow update: if isInstructorFor(resource.data)
+        || (isAuth()
+            && (isStudentEmailForId(resource.data.sender) || isStudentEmailForId(resource.data.receiver))
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read"]));
+      allow delete: if isInstructorFor(resource.data)
+        || (isAuth() && isStudentEmailForId(resource.data.sender));
+    }
+
+    // Notifications: instructor-only
+    match /notifications/{notifId} {
+      allow read: if isInstructorFor(resource.data);
+      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow update, delete: if isInstructorFor(resource.data);
+    }
+
+    // Tips: instructor can write, students can read
+    match /tips/{tipId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow update, delete: if isInstructorFor(resource.data);
+    }
+
+    // Settings: instructor reads/writes own docs; any authenticated user can read profile docs
+    match /settings/{settingId} {
+      allow read: if isAuth()
+        && (settingId.matches(".*-profile")
+            || settingId == request.auth.uid + "-car");
+      allow write: if isAuth()
+        && (settingId == request.auth.uid + "-car"
+            || settingId == request.auth.uid + "-profile");
+    }
+
+    // Waiting list: instructor-only
+    match /waitingList/{entryId} {
+      allow read: if isInstructorFor(resource.data);
+      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow update, delete: if isInstructorFor(resource.data);
+    }
+
+    // Typing indicators: any authenticated user can read/write their own
+    match /typing/{typingId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth();
+      allow delete: if isAuth();
+    }
+
+    // Support tickets: any authenticated user can create, no one reads (admin via console)
+    match /supportTickets/{ticketId} {
+      allow create: if isAuth();
+      allow read, update, delete: if false;
+    }
+
+  }
+}

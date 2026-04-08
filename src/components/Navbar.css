@@ -1,0 +1,15 @@
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #0077cc;
+  font-weight: bold;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}

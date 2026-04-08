@@ -1,0 +1,544 @@
+.pricing-shell {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ── Status bar (active / trial / past-due) ── */
+.pricing-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  flex-wrap: wrap;
+}
+
+.pricing-status-bar--success {
+  background: var(--success-pale);
+  border-color: rgba(35, 111, 86, 0.18);
+}
+
+.pricing-status-bar--warning {
+  background: var(--warning-pale);
+  border-color: rgba(185, 109, 30, 0.18);
+}
+
+.pricing-status-bar--danger {
+  background: var(--danger-pale);
+  border-color: rgba(185, 30, 30, 0.18);
+}
+
+.pricing-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pricing-status-dot--success { background: var(--success); }
+.pricing-status-dot--warning { background: var(--warning); }
+.pricing-status-dot--danger  { background: var(--danger); }
+
+.pricing-status-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pricing-status-text strong {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.pricing-status-text span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pricing-status-action {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.72);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text);
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.pricing-status-action:hover { opacity: 0.8; }
+.pricing-status-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Return banners ── */
+.pricing-banner {
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pricing-banner--success {
+  border-color: rgba(35, 111, 86, 0.2);
+  background: var(--success-pale);
+  color: var(--success);
+}
+
+.pricing-banner--warning {
+  border-color: rgba(185, 109, 30, 0.2);
+  background: var(--warning-pale);
+  color: var(--warning);
+}
+
+/* ── Hero ── */
+.pricing-hero {
+  text-align: center;
+  padding: 8px 0 0;
+}
+
+.pricing-eyebrow {
+  margin: 0 0 10px;
+  color: var(--primary-dark, #b35a1a);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pricing-headline {
+  margin: 0 0 14px;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.pricing-sub {
+  margin: 0 auto 20px;
+  max-width: 52ch;
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.pricing-roi {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(196, 106, 45, 0.08);
+  border: 1px solid rgba(196, 106, 45, 0.2);
+  border-radius: 14px;
+  padding: 12px 18px;
+  max-width: 52ch;
+  text-align: left;
+}
+
+.pricing-roi-icon {
+  font-size: 18px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.pricing-roi p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.pricing-roi strong {
+  color: var(--text);
+}
+
+/* ── Pricing card ── */
+.pricing-card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.pricing-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(196, 106, 45, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255,252,248,0.95), rgba(248,240,229,0.98));
+  border: 1px solid rgba(189, 161, 130, 0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+}
+
+/* Toggle */
+.pricing-toggle-row {
+  display: flex;
+  background: rgba(0,0,0,0.05);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 24px;
+}
+
+.pricing-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 20px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.pricing-toggle-btn.active {
+  background: white;
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+.pricing-toggle-badge {
+  background: var(--success, #22863a);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+/* Price */
+.pricing-price-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.pricing-currency {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 10px;
+}
+
+.pricing-amount {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -2px;
+}
+
+.pricing-period-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-bottom: 8px;
+  gap: 2px;
+}
+
+.pricing-period {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pricing-billed-note {
+  font-size: 12px;
+  color: var(--success, #22863a);
+  font-weight: 700;
+}
+
+.pricing-clarity-list {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  text-align: left;
+}
+
+.pricing-clarity-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid rgba(189, 161, 130, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.pricing-clarity-item strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.pricing-clarity-item span {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+/* CTA */
+.pricing-cta-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px 24px;
+  background: var(--primary-dark, #b35a1a);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.pricing-cta-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.pricing-cta-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pricing-cta-micro {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--text-dim, #aaa);
+}
+
+/* Trust list */
+.pricing-trust-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+}
+
+.pricing-trust-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pricing-trust-list li svg {
+  color: var(--success, #22863a);
+  flex-shrink: 0;
+}
+
+.pricing-setup-note {
+  font-size: 13px;
+  color: var(--text-dim, #aaa);
+  text-align: center;
+}
+
+.pricing-setup-note a {
+  color: var(--primary-dark, #b35a1a);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ── Benefits ── */
+.pricing-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pricing-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  text-align: center;
+}
+
+.pricing-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.pricing-benefit-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.pricing-benefit-icon {
+  font-size: 26px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.pricing-benefit-card h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pricing-benefit-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.pricing-refund-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.pricing-refund-card h2 {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.pricing-refund-card p {
+  margin: 0 auto;
+  max-width: 56ch;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pricing-refund-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.pricing-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(189, 161, 130, 0.45);
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.pricing-secondary-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.pricing-secondary-btn--ghost {
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.pricing-secondary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Support ── */
+.pricing-support {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pricing-support a {
+  color: var(--primary-dark, #b35a1a);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pricing-feedback-row {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim, #aaa);
+}
+
+.pricing-feedback-row a {
+  color: var(--primary-dark, #b35a1a);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── Dark mode ── */
+body.dark .pricing-card {
+  background:
+    radial-gradient(circle at top right, rgba(229,155,90,0.08), transparent 28%),
+    linear-gradient(180deg, rgba(27,31,34,0.96), rgba(20,23,26,0.98));
+  border-color: rgba(86,97,107,0.5);
+}
+
+body.dark .pricing-toggle-btn.active {
+  background: rgba(255,255,255,0.1);
+}
+
+body.dark .pricing-status-action {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .pricing-shell {
+    padding: 24px 16px 60px;
+    gap: 24px;
+  }
+
+  .pricing-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-card {
+    padding: 24px 20px;
+  }
+
+  .pricing-amount {
+    font-size: 52px;
+  }
+
+  .pricing-clarity-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
