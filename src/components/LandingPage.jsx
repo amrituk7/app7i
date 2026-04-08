@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
 
@@ -10,12 +10,64 @@ const NAV_LINKS = [
 ];
 
 const FEATURES = [
-  { icon: "📅", title: "Smart Scheduling", desc: "Book, reschedule, and track lessons with ease." },
-  { icon: "👥", title: "Student Management", desc: "Progress tracking, notes, and test readiness." },
-  { icon: "💷", title: "Payment Tracking", desc: "Record cash, card, and bank transfers instantly." },
-  { icon: "📊", title: "Earnings Dashboard", desc: "See your weekly and monthly income at a glance." },
-  { icon: "📱", title: "Student Portal", desc: "Students book lessons and view their progress." },
-  { icon: "🔔", title: "Reminders", desc: "Automated lesson reminders for you and students." },
+  { 
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+      </svg>
+    ),
+    title: "Smart Scheduling", 
+    desc: "Book, reschedule, and track lessons with a calendar built for driving instructors." 
+  },
+  { 
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+      </svg>
+    ),
+    title: "Student Management", 
+    desc: "Track progress, add notes, monitor test readiness. Everything in one place." 
+  },
+  { 
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+      </svg>
+    ),
+    title: "Payment Tracking", 
+    desc: "Record cash, card, and bank transfers. See who owes what at a glance." 
+  },
+  { 
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M18 20V10M12 20V4M6 20v-6" />
+      </svg>
+    ),
+    title: "Earnings Dashboard", 
+    desc: "Weekly and monthly income reports. Know exactly where you stand." 
+  },
+  { 
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <path d="M12 18h.01" />
+      </svg>
+    ),
+    title: "Student Portal", 
+    desc: "Students book lessons and view their progress through their own link." 
+  },
+  { 
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+      </svg>
+    ),
+    title: "Reminders", 
+    desc: "Automated lesson reminders for you and your students. Never miss a lesson." 
+  },
 ];
 
 const PRICING_FEATURES = [
@@ -24,15 +76,15 @@ const PRICING_FEATURES = [
   "Payment tracking",
   "Progress reports",
   "Student portal",
-  "Email support",
+  "Priority support",
 ];
 
 const FAQ_ITEMS = [
-  { q: "Is there a free trial?", a: "Yes, 3 days free. No credit card required to start." },
-  { q: "Can students book their own lessons?", a: "Yes, via a personal booking link you share with them." },
-  { q: "How does the referral discount work?", a: "Share your link. New users pay £99.99/year, you get 20% off your next renewal." },
-  { q: "What payment methods can I track?", a: "Cash, card, and bank transfer. In-app payments coming soon." },
-  { q: "Can I export my data?", a: "Yes, export students, lessons, and earnings anytime." },
+  { q: "Is there a free trial?", a: "Yes. 3 days free, no credit card required. Cancel anytime." },
+  { q: "Can students book their own lessons?", a: "Yes. Share your personal booking link and students can self-schedule." },
+  { q: "How does the referral discount work?", a: "Share your link. New users pay £99.99/year (£20 off). You get 20% off your next renewal or a free month." },
+  { q: "What payment methods can I track?", a: "Cash, card, and bank transfer. In-app payment collection is coming soon." },
+  { q: "Can I export my data?", a: "Yes. Export students, lessons, and earnings anytime as CSV." },
 ];
 
 export default function LandingPage() {
@@ -40,7 +92,7 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
 
-  useState(() => {
+  useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -54,7 +106,7 @@ export default function LandingPage() {
       <header className={`lp-header ${scrolled ? "scrolled" : ""}`}>
         <div className="lp-header-inner">
           <Link to="/" className="lp-logo">
-            <span className="lp-logo-icon">7i</span>
+            <span className="lp-logo-mark">7i</span>
             <span className="lp-logo-text">App7i</span>
           </Link>
 
@@ -67,8 +119,8 @@ export default function LandingPage() {
           </nav>
 
           <div className="lp-header-actions">
-            <Link to="/login" className="lp-btn-ghost">I&apos;m an Instructor</Link>
-            <Link to="/register-instructor" className="lp-btn-primary">Claim Early Access</Link>
+            <Link to="/login" className="lp-btn-ghost">Log In</Link>
+            <Link to="/register-instructor" className="lp-btn-primary">Get Started</Link>
           </div>
 
           <button
@@ -87,10 +139,12 @@ export default function LandingPage() {
                 {link.label}
               </a>
             ))}
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>I&apos;m an Instructor</Link>
-            <Link to="/register-instructor" className="lp-btn-primary" onClick={() => setMobileMenuOpen(false)}>
-              Claim Early Access
-            </Link>
+            <div className="lp-mobile-actions">
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Log In</Link>
+              <Link to="/register-instructor" className="lp-btn-primary" onClick={() => setMobileMenuOpen(false)}>
+                Get Started
+              </Link>
+            </div>
           </div>
         )}
       </header>
@@ -99,27 +153,69 @@ export default function LandingPage() {
           HERO
       ══════════════════════════════════════════════════════════════════════ */}
       <section className="lp-hero">
-        <div className="lp-hero-bg" />
         <div className="lp-hero-content">
-          <span className="lp-badge">Early Access — First 50 Instructors</span>
-          <h1>Run your lessons.<br /><span>Not your paperwork.</span></h1>
-          <p>
-            The all-in-one platform for UK driving instructors. Schedule lessons,
-            track progress, and manage your business — all from one dashboard.
+          <h1>
+            The complete platform<br />
+            <span className="lp-hero-accent">for driving instructors.</span>
+          </h1>
+          <p className="lp-hero-sub">
+            Schedule lessons, track progress, manage payments, and grow your business.
+            Everything you need in one beautiful app.
           </p>
           <div className="lp-hero-actions">
-            <Link to="/register-instructor" className="lp-btn-primary lp-btn-lg">
-              Claim Early Access
+            <Link to="/register-instructor" className="lp-btn-primary lp-btn-xl">
+              Start Free Trial
             </Link>
-            <Link to="/login" className="lp-btn-outline lp-btn-lg">
-              I&apos;m an Instructor
-            </Link>
+            <a href="#features" className="lp-btn-secondary lp-btn-xl">
+              See Features
+            </a>
           </div>
           <p className="lp-hero-note">3-day free trial. No credit card required.</p>
         </div>
+      </section>
 
-        <div className="lp-hero-visual">
-          <DashboardPreview />
+      {/* ══════════════════════════════════════════════════════════════════════
+          DASHBOARD PREVIEW
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section className="lp-preview">
+        <div className="lp-preview-wrapper">
+          <div className="lp-preview-card">
+            <div className="lp-preview-header">
+              <div className="lp-preview-dots">
+                <span /><span /><span />
+              </div>
+            </div>
+            <div className="lp-preview-content">
+              <div className="lp-preview-greeting">
+                <p className="lp-preview-hello">Good morning, Sarah</p>
+                <h3>Dashboard</h3>
+              </div>
+              <div className="lp-preview-stats">
+                <div className="lp-preview-stat">
+                  <span className="lp-preview-stat-value">4</span>
+                  <span className="lp-preview-stat-label">Lessons Today</span>
+                </div>
+                <div className="lp-preview-stat">
+                  <span className="lp-preview-stat-value">12</span>
+                  <span className="lp-preview-stat-label">Students</span>
+                </div>
+                <div className="lp-preview-stat highlight">
+                  <span className="lp-preview-stat-value">£840</span>
+                  <span className="lp-preview-stat-label">This Month</span>
+                </div>
+              </div>
+              <div className="lp-preview-next">
+                <span className="lp-preview-next-label">Next Lesson</span>
+                <div className="lp-preview-next-card">
+                  <div className="lp-preview-next-time">9:00 AM</div>
+                  <div className="lp-preview-next-info">
+                    <span className="lp-preview-next-name">James Wilson</span>
+                    <span className="lp-preview-next-topic">Lesson 8 - Roundabouts</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -127,26 +223,27 @@ export default function LandingPage() {
           SOCIAL PROOF
       ══════════════════════════════════════════════════════════════════════ */}
       <section className="lp-proof">
-        <p>Trusted by early UK instructors and growing fast.</p>
+        <p>Trusted by driving instructors across the UK</p>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════════
           FEATURES
       ══════════════════════════════════════════════════════════════════════ */}
       <section id="features" className="lp-features">
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">Features</span>
-          <h2>Everything you need. One app.</h2>
-          <p>Stop juggling spreadsheets, WhatsApp, and paper diaries.</p>
-        </div>
-        <div className="lp-features-grid">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="lp-feature-card">
-              <span className="lp-feature-icon">{f.icon}</span>
-              <h3>{f.title}</h3>
-              <p>{f.desc}</p>
-            </div>
-          ))}
+        <div className="lp-container">
+          <div className="lp-section-header">
+            <h2>Everything you need.<br />Nothing you don&apos;t.</h2>
+            <p>Replace spreadsheets, WhatsApp groups, and paper diaries with one elegant solution.</p>
+          </div>
+          <div className="lp-features-grid">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="lp-feature-card">
+                <div className="lp-feature-icon">{f.icon}</div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -154,25 +251,27 @@ export default function LandingPage() {
           HOW IT WORKS
       ══════════════════════════════════════════════════════════════════════ */}
       <section id="how-it-works" className="lp-how">
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">How It Works</span>
-          <h2>Get started in 3 steps</h2>
-        </div>
-        <div className="lp-how-steps">
-          <div className="lp-step">
-            <span className="lp-step-num">1</span>
-            <h3>Create your profile</h3>
-            <p>Set up your instructor profile in under 2 minutes.</p>
+        <div className="lp-container">
+          <div className="lp-section-header">
+            <h2>Get started in minutes</h2>
+            <p>No complicated setup. No learning curve.</p>
           </div>
-          <div className="lp-step">
-            <span className="lp-step-num">2</span>
-            <h3>Add your students</h3>
-            <p>Import existing students or let them sign up via your link.</p>
-          </div>
-          <div className="lp-step">
-            <span className="lp-step-num">3</span>
-            <h3>Start teaching</h3>
-            <p>Schedule lessons, track progress, record payments.</p>
+          <div className="lp-how-grid">
+            <div className="lp-how-step">
+              <div className="lp-how-num">01</div>
+              <h3>Create your profile</h3>
+              <p>Sign up and set your availability, rates, and teaching area. Takes under 2 minutes.</p>
+            </div>
+            <div className="lp-how-step">
+              <div className="lp-how-num">02</div>
+              <h3>Add your students</h3>
+              <p>Import existing students or share your booking link for new sign-ups.</p>
+            </div>
+            <div className="lp-how-step">
+              <div className="lp-how-num">03</div>
+              <h3>Start teaching</h3>
+              <p>Book lessons, track progress, record payments. We handle the admin.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -181,56 +280,96 @@ export default function LandingPage() {
           PRICING
       ══════════════════════════════════════════════════════════════════════ */}
       <section id="pricing" className="lp-pricing">
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">Simple Pricing</span>
-          <h2>One plan. Everything included.</h2>
-          <p>No hidden fees. No per-student charges.</p>
-        </div>
-        <div className="lp-pricing-cards">
-          <PricingCard
-            title="Monthly"
-            price="£11.99"
-            period="/month"
-            features={PRICING_FEATURES}
-            cta="Start Free Trial"
-          />
-          <PricingCard
-            title="Yearly"
-            price="£119.99"
-            period="/year"
-            originalPrice="£145.00"
-            badge="Save £25"
-            highlight
-            features={[...PRICING_FEATURES, "2 months free"]}
-            cta="Start Free Trial"
-          />
-          <PricingCard
-            title="Referral"
-            price="£99.99"
-            period="/year"
-            originalPrice="£119.99"
-            badge="£20 OFF"
-            features={[...PRICING_FEATURES, "Exclusive referral rate"]}
-            cta="Get Referral Link"
-            note="When referred by a friend"
-          />
-        </div>
+        <div className="lp-container">
+          <div className="lp-section-header">
+            <h2>Simple, transparent pricing</h2>
+            <p>No hidden fees. No per-student charges. Cancel anytime.</p>
+          </div>
+          <div className="lp-pricing-grid">
+            <div className="lp-price-card">
+              <div className="lp-price-header">
+                <h3>Monthly</h3>
+                <p>Pay as you go</p>
+              </div>
+              <div className="lp-price-amount">
+                <span className="lp-price">£11.99</span>
+                <span className="lp-price-period">/month</span>
+              </div>
+              <ul className="lp-price-features">
+                {PRICING_FEATURES.map((f, i) => (
+                  <li key={i}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/register-instructor" className="lp-btn-outline lp-price-cta">
+                Start Free Trial
+              </Link>
+            </div>
 
-        <div className="lp-referral-box">
-          <h3>Refer &amp; Save</h3>
-          <p>Share your link. New instructors pay £99.99/year. You get 20% off your next renewal.</p>
-        </div>
-      </section>
+            <div className="lp-price-card featured">
+              <div className="lp-price-badge">Best Value</div>
+              <div className="lp-price-header">
+                <h3>Yearly</h3>
+                <p>Save £25 per year</p>
+              </div>
+              <div className="lp-price-amount">
+                <span className="lp-price-original">£145.00</span>
+                <span className="lp-price">£119.99</span>
+                <span className="lp-price-period">/year</span>
+              </div>
+              <ul className="lp-price-features">
+                {[...PRICING_FEATURES, "2 months free"].map((f, i) => (
+                  <li key={i}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/register-instructor" className="lp-btn-primary lp-price-cta">
+                Start Free Trial
+              </Link>
+            </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          PAYMENTS COMING SOON
-      ══════════════════════════════════════════════════════════════════════ */}
-      <section className="lp-payments">
-        <div className="lp-payments-inner">
-          <span className="lp-payments-icon">💳</span>
-          <h2>Track payments now. Accept payments later.</h2>
-          <p>Record every cash, card, and bank transfer today. In-app payment collection is coming soon.</p>
-          <span className="lp-coming-badge">Coming Soon</span>
+            <div className="lp-price-card">
+              <div className="lp-price-badge referral">Referral</div>
+              <div className="lp-price-header">
+                <h3>Friend Rate</h3>
+                <p>When referred by a friend</p>
+              </div>
+              <div className="lp-price-amount">
+                <span className="lp-price-original">£119.99</span>
+                <span className="lp-price">£99.99</span>
+                <span className="lp-price-period">/year</span>
+              </div>
+              <ul className="lp-price-features">
+                {[...PRICING_FEATURES, "£20 off first year"].map((f, i) => (
+                  <li key={i}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/register-instructor" className="lp-btn-outline lp-price-cta">
+                Get Referral Link
+              </Link>
+            </div>
+          </div>
+
+          <div className="lp-referral-banner">
+            <div className="lp-referral-content">
+              <h3>Refer a Friend</h3>
+              <p>Share your link. They get £20 off their first year. You get 20% off your next renewal or a free month.</p>
+            </div>
+            <Link to="/register-instructor" className="lp-btn-white">Learn More</Link>
+          </div>
         </div>
       </section>
 
@@ -238,20 +377,25 @@ export default function LandingPage() {
           FAQ
       ══════════════════════════════════════════════════════════════════════ */}
       <section id="faq" className="lp-faq">
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">FAQ</span>
-          <h2>Common questions</h2>
-        </div>
-        <div className="lp-faq-list">
-          {FAQ_ITEMS.map((item, i) => (
-            <div key={i} className={`lp-faq-item ${openFaq === i ? "open" : ""}`}>
-              <button onClick={() => setOpenFaq(openFaq === i ? -1 : i)}>
-                <span>{item.q}</span>
-                <span className="lp-faq-chevron">{openFaq === i ? "−" : "+"}</span>
-              </button>
-              {openFaq === i && <p>{item.a}</p>}
-            </div>
-          ))}
+        <div className="lp-container lp-container-sm">
+          <div className="lp-section-header">
+            <h2>Frequently asked questions</h2>
+          </div>
+          <div className="lp-faq-list">
+            {FAQ_ITEMS.map((item, i) => (
+              <div key={i} className={`lp-faq-item ${openFaq === i ? "open" : ""}`}>
+                <button onClick={() => setOpenFaq(openFaq === i ? -1 : i)}>
+                  <span>{item.q}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d={openFaq === i ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} />
+                  </svg>
+                </button>
+                <div className="lp-faq-answer">
+                  <p>{item.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -259,11 +403,13 @@ export default function LandingPage() {
           FINAL CTA
       ══════════════════════════════════════════════════════════════════════ */}
       <section className="lp-cta">
-        <h2>Ready to simplify your business?</h2>
-        <p>Join the next generation of UK instructors modernising their workflow.</p>
-        <div className="lp-cta-actions">
-          <Link to="/register-instructor" className="lp-btn-white lp-btn-lg">Claim Early Access</Link>
-          <Link to="/login" className="lp-btn-outline-white lp-btn-lg">I&apos;m an Instructor</Link>
+        <div className="lp-container">
+          <h2>Ready to transform your business?</h2>
+          <p>Join the next generation of UK driving instructors.</p>
+          <div className="lp-cta-actions">
+            <Link to="/register-instructor" className="lp-btn-white lp-btn-xl">Start Free Trial</Link>
+          </div>
+          <p className="lp-cta-note">3-day free trial. No credit card required.</p>
         </div>
       </section>
 
@@ -271,93 +417,37 @@ export default function LandingPage() {
           FOOTER
       ══════════════════════════════════════════════════════════════════════ */}
       <footer className="lp-footer">
-        <div className="lp-footer-inner">
-          <div className="lp-footer-brand">
-            <span className="lp-logo-icon">7i</span>
-            <span>App7i</span>
+        <div className="lp-container">
+          <div className="lp-footer-top">
+            <div className="lp-footer-brand">
+              <span className="lp-logo-mark">7i</span>
+              <span className="lp-logo-text">App7i</span>
+            </div>
+            <nav className="lp-footer-nav">
+              <div className="lp-footer-col">
+                <h4>Product</h4>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+              </div>
+              <div className="lp-footer-col">
+                <h4>Company</h4>
+                <Link to="/about">About</Link>
+                <Link to="/contact">Contact</Link>
+                <Link to="/support">Support</Link>
+              </div>
+              <div className="lp-footer-col">
+                <h4>Legal</h4>
+                <Link to="/privacy">Privacy</Link>
+                <Link to="/terms">Terms</Link>
+              </div>
+            </nav>
           </div>
-          <nav className="lp-footer-links">
-            {NAV_LINKS.map((link) => (
-              <a key={link.href} href={link.href}>{link.label}</a>
-            ))}
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
-            <Link to="/support">Support</Link>
-          </nav>
-          <p className="lp-footer-copy">© {new Date().getFullYear()} App7i. All rights reserved.</p>
+          <div className="lp-footer-bottom">
+            <p>© {new Date().getFullYear()} App7i. All rights reserved.</p>
+          </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   DASHBOARD PREVIEW COMPONENT
-═══════════════════════════════════════════════════════════════════════════ */
-function DashboardPreview() {
-  return (
-    <div className="lp-dash-preview">
-      <div className="lp-dash-card">
-        <div className="lp-dash-header">
-          <div>
-            <p className="lp-dash-greeting">Good morning, Sarah</p>
-            <h3>Your Dashboard</h3>
-          </div>
-          <span className="lp-dash-logo">7i</span>
-        </div>
-        <div className="lp-dash-stats">
-          <div className="lp-dash-stat">
-            <span className="lp-dash-value">4</span>
-            <span className="lp-dash-label">Lessons Today</span>
-          </div>
-          <div className="lp-dash-stat">
-            <span className="lp-dash-value">12</span>
-            <span className="lp-dash-label">Students</span>
-          </div>
-          <div className="lp-dash-stat accent">
-            <span className="lp-dash-value">£840</span>
-            <span className="lp-dash-label">This Month</span>
-          </div>
-        </div>
-        <div className="lp-dash-next">
-          <p className="lp-dash-next-label">Next Lesson</p>
-          <div className="lp-dash-next-row">
-            <span className="lp-dash-time">9:00</span>
-            <div>
-              <p className="lp-dash-student">James Wilson</p>
-              <p className="lp-dash-topic">Lesson 8 - Roundabouts</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="lp-dash-notif">
-        <p className="lp-notif-title">New booking!</p>
-        <p className="lp-notif-text">Emma - Tomorrow 2pm</p>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   PRICING CARD COMPONENT
-═══════════════════════════════════════════════════════════════════════════ */
-function PricingCard({ title, price, period, originalPrice, badge, highlight, features, cta, note }) {
-  return (
-    <div className={`lp-price-card ${highlight ? "highlight" : ""}`}>
-      {badge && <span className="lp-price-badge">{badge}</span>}
-      <h3>{title}</h3>
-      <div className="lp-price-amount">
-        {originalPrice && <span className="lp-price-original">{originalPrice}</span>}
-        <span className="lp-price">{price}</span>
-        <span className="lp-period">{period}</span>
-      </div>
-      <ul className="lp-price-features">
-        {features.map((f, i) => (
-          <li key={i}>✓ {f}</li>
-        ))}
-      </ul>
-      <Link to="/register-instructor" className="lp-btn-primary lp-price-cta">{cta}</Link>
-      {note && <p className="lp-price-note">{note}</p>}
     </div>
   );
 }
