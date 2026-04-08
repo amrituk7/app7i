@@ -3,6 +3,12 @@
    Glass/Paper aesthetic with clean hierarchy
    ═══════════════════════════════════════════════════════════════════════════ */
 
+.dashboard-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .dashboard-container {
   max-width: 1200px;
   display: flex;

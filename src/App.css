@@ -59,8 +59,8 @@
   --shadow-lg: 0 28px 64px rgba(43, 33, 20, 0.14);
   --transition: 0.18s ease;
 
-  --sidebar-width: 268px;
-  --sidebar-offset: 292px;
+  --sidebar-width: 256px;
+  --sidebar-offset: 280px;
 }
 
 body.dark {
