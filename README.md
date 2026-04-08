@@ -1,70 +1,73 @@
-# Getting Started with Create React App
+# App7i
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+App7i is a Vite + React application for driving instructors and students. The current codebase includes a marketing landing page, instructor workflows, and student-facing screens.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+- React 19
+- Vite 8
+- React Router
+- Firebase client SDK
+- Tailwind CSS
+- Capacitor for Android packaging
 
-### `npm start`
+## Scripts
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- `npm start` or `npm run dev`: run the local Vite dev server
+- `npm run build`: create a production build
+- `npm run preview`: preview the built app locally
+- `npm test`: run tests
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Public Repository Safety
 
-### `npm test`
+This repository is prepared to stay safe for public GitHub use.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Do not commit real API keys, tokens, `.env` files, keystores, or local service config.
+- Keep all environment-specific values in ignored local files.
+- Use placeholders only in committed code and documentation.
 
-### `npm run build`
+### Expected Local Environment Variables
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Create a local env file such as `.env.local` and define placeholders like:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+VITE_FIREBASE_API_KEY=your_local_value
+VITE_FIREBASE_AUTH_DOMAIN=your_local_value
+VITE_FIREBASE_PROJECT_ID=your_local_value
+VITE_FIREBASE_STORAGE_BUCKET=your_local_value
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_local_value
+VITE_FIREBASE_APP_ID=your_local_value
+VITE_FIREBASE_MEASUREMENT_ID=your_local_value
+VITE_FIREBASE_FUNCTIONS_REGION=us-central1
+VITE_FIREBASE_VAPID_KEY=your_local_value
+VITE_CREATE_CHECKOUT_SESSION_URL=your_local_value
+VITE_CREATE_PORTAL_SESSION_URL=your_local_value
+VITE_VALIDATE_REFERRAL_CODE_URL=your_local_value
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+For Android builds, keep `android/app/google-services.json` local and out of git.
 
-### `npm run eject`
+## Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- [`src/components`](c:/Users/amrit/driving-app/src/components): reusable UI and landing-page sections
+- [`src/pages`](c:/Users/amrit/driving-app/src/pages): route-level screens
+- [`src/context`](c:/Users/amrit/driving-app/src/context): shared app state providers
+- [`src/demo`](c:/Users/amrit/driving-app/src/demo): demo-mode data and helpers
+- [`functions`](c:/Users/amrit/driving-app/functions): backend-related workspace code that should remain placeholder-safe in public docs
+- [`android`](c:/Users/amrit/driving-app/android): Capacitor Android project
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Design Direction
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The public landing experience uses:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- warm cream backgrounds
+- deep green / earthy neutrals
+- simple rounded cards
+- clear instructor-focused messaging
 
-## Learn More
+Future safe improvements can focus on:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- unifying landing-page spacing and section rhythm
+- aligning route/page naming conventions
+- extracting shared design tokens
+- documenting component patterns for contributors
