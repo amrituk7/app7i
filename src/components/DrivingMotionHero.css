@@ -4,14 +4,11 @@
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
   gap: 28px;
   padding: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top left, rgba(239, 179, 122, 0.2), transparent 28%),
-    radial-gradient(circle at 85% 18%, rgba(123, 183, 163, 0.16), transparent 24%),
-    var(--app7i-gradient);
-  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .driving-hero::before {
@@ -50,8 +47,8 @@
 
 .driving-hero-copy h1 {
   margin: 0;
-  color: var(--app7i-paper);
-  font-size: clamp(2.5rem, 2rem + 1vw, 3.5rem);
+  color: #f8fafc;
+  font-size: clamp(2rem, 1.6rem + 0.8vw, 2.8rem);
 }
 
 .driving-hero-copy p {
@@ -70,17 +67,18 @@
 
 .hero-highlight-card {
   display: flex;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.06) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
   animation: fadeInUp 0.45s ease-out both;
-  transition: transform var(--transition), border-color var(--transition);
+  transition: all 0.15s ease;
 }
 
 .hero-highlight-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(239, 179, 122, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .hero-highlight-link {
@@ -93,22 +91,22 @@
 }
 
 .hero-highlight-link strong {
-  color: var(--app7i-paper);
-  font-size: 30px;
-  font-weight: 800;
+  color: #f8fafc;
+  font-size: 26px;
+  font-weight: 700;
 }
 
 .hero-highlight-link span {
-  color: rgba(255, 240, 227, 0.8);
+  color: #94a3b8;
   font-size: 13px;
 }
 
 .hero-highlight-link small {
-  color: var(--primary-hover);
+  color: #10b981;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
 }
 
 .hero-highlight-link:focus-visible {
@@ -227,8 +225,8 @@
 
 .scene-status-card strong,
 .scene-coach-card strong {
-  color: var(--app7i-paper);
-  font-size: 18px;
+  color: #f8fafc;
+  font-size: 16px;
 }
 
 .scene-status-card small {
@@ -269,15 +267,15 @@
 }
 
 .traffic-bulb.red {
-  background: var(--danger);
+  background: #ef4444;
 }
 
 .traffic-bulb.amber {
-  background: var(--warning);
+  background: #f59e0b;
 }
 
 .traffic-bulb.green {
-  background: var(--accent);
+  background: #10b981;
   animation: greenPulse 2.2s ease-in-out infinite;
 }
 
@@ -301,7 +299,7 @@
   width: 34px;
   height: 48px;
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, var(--primary-hover) 0%, var(--primary) 100%);
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
 }
 
 .marker-cone::before,
@@ -329,11 +327,11 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: var(--app7i-paper);
-  color: var(--accent);
+  background: #f8fafc;
+  color: #10b981;
   font-size: 20px;
-  font-weight: 800;
-  box-shadow: var(--shadow);
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .road-frame {
@@ -371,8 +369,8 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 6px var(--accent-pale);
+  background: #10b981;
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.2);
   animation: dotPulse 1.8s ease-in-out infinite;
 }
 
@@ -397,14 +395,14 @@
   position: absolute;
   z-index: 2;
   padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--app7i-paper);
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   animation: noteSway 2.6s ease-in-out infinite alternate;
 }
 
@@ -450,8 +448,8 @@
   justify-content: center;
   gap: 8px;
   border-radius: 22px 22px 18px 18px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 46%, var(--primary-pale) 100%);
-  box-shadow: var(--shadow);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 46%, #6ee7b7 100%);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
 }
 
 .road-car-window {
