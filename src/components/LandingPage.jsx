@@ -35,14 +35,14 @@ const FEATURES = [
 ];
 
 const FAQ_ITEMS = [
-  { q: "Is there a free trial?", a: "Yes. 3 days free, no credit card required." },
-  { q: "Can students book their own lessons?", a: "Yes. Share your personal booking link and students can self-schedule around your availability." },
-  { q: "How does the referral programme work?", a: "Share your referral link. New instructors pay £99.99 instead of £119.99. You get 20% off your next renewal or one month free." },
-  { q: "What payment methods can I track?", a: "Cash, card, and bank transfer. In-app payment collection is coming soon." },
-  { q: "Can I export my data?", a: "Yes. Export everything as CSV anytime." },
-  { q: "Is my data secure?", a: "Absolutely. We use industry-standard encryption and never share your data with third parties." },
+  { q: "Is App7i live today?", a: "Yes—payment tracking is live. In-app payment collection is coming soon." },
+  { q: "Do I need any special hardware?", a: "No. App7i runs in your browser and works on desktop, tablet, and mobile." },
+  { q: "Can I export my data?", a: "Yes, you can export your records for accounting or backup." },
+  { q: "Who is App7i for?", a: "Small businesses, solo founders, and teams who want a clear view of their payments." },
+  { q: "How does the referral programme work?", a: "Invite a friend. They pay £99.99 instead of £119.99. You get 20% off your next renewal or one month free." },
+  { q: "Is my data secure?", a: "Absolutely. We use industry-standard encryption and never share your data." },
   { q: "Can I cancel anytime?", a: "Yes. No lock-in contracts. Cancel whenever you need to." },
-  { q: "Do you offer support?", a: "Yes. Email support is included with all plans. We typically respond within 24 hours." },
+  { q: "Is there a free trial?", a: "Yes. 3 days free, no credit card required." },
 ];
 
 export default function LandingPage() {
@@ -85,7 +85,7 @@ export default function LandingPage() {
             <span>Accept them anywhere.</span>
           </h1>
           <p>
-            Every cash, card, and bank transfer — organised with elegance.
+            Every cash, card, and bank transfer—organised in one calm, elegant dashboard.
             <br />
             In-app payment collection is coming soon.
           </p>
@@ -112,8 +112,9 @@ export default function LandingPage() {
               <span>Clearer than ever.</span>
             </h2>
             <p>
-              App7i brings every transaction into one calm, beautifully designed 
-              space — so you can focus on what matters.
+              App7i brings every transaction into one beautifully designed space. 
+              No more scattered notes, screenshots, or spreadsheets—just a single, 
+              focused view of how money moves through your business.
             </p>
           </div>
           <div className="lp-value-visual" />
@@ -124,6 +125,13 @@ export default function LandingPage() {
           CINEMATIC PRODUCT REVEAL
       ═══════════════════════════════════════════════════════════════════ */}
       <section id="product" className="lp-product">
+        <div className="lp-section-header">
+          <h2>See everything at a glance.</h2>
+          <p className="lp-section-sub">
+            From daily totals to long-term trends, App7i turns raw payments into a clear, 
+            visual story of your business performance.
+          </p>
+        </div>
         <div className="lp-product-wrapper">
           <div className="lp-product-window">
             <div className="lp-window-bar">
@@ -197,17 +205,17 @@ export default function LandingPage() {
           <div className="lp-step">
             <span className="lp-step-num">01</span>
             <h3>Record</h3>
-            <p>Add cash, card, or bank transfers instantly.</p>
+            <p>Add cash, card, or bank transfers in seconds.</p>
           </div>
           <div className="lp-step">
             <span className="lp-step-num">02</span>
             <h3>Review</h3>
-            <p>See your daily, weekly, and monthly totals.</p>
+            <p>Track daily, weekly, and monthly performance in a clean dashboard.</p>
           </div>
           <div className="lp-step">
             <span className="lp-step-num">03</span>
             <h3>Grow</h3>
-            <p>Use insights to make smarter decisions.</p>
+            <p>Use insights to make smarter decisions and spot opportunities faster.</p>
           </div>
         </div>
       </section>
@@ -275,7 +283,7 @@ export default function LandingPage() {
       ═══════════════════════════════════════════════════════════════════ */}
       <section id="faq" className="lp-faq">
         <div className="lp-section-header">
-          <h2>Questions? Answers.</h2>
+          <h2>Questions, answered.</h2>
         </div>
         <div className="lp-faq-list">
           {FAQ_ITEMS.map((item, i) => (
@@ -302,7 +310,7 @@ export default function LandingPage() {
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="lp-cta">
         <h2>Ready to simplify your business?</h2>
-        <p>Start tracking payments beautifully.</p>
+        <p>Start tracking payments beautifully and see your business more clearly than ever.</p>
         <Link to="/register-instructor" className="lp-btn lp-btn-lg lp-btn-white">
           Get Started
         </Link>

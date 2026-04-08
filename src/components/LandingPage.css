@@ -519,9 +519,19 @@
    Section Header
    ═══════════════════════════════════════════════════════════════════════════ */
 .lp-section-header {
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto 64px;
   text-align: center;
+}
+
+.lp-section-header h2 {
+  margin-bottom: 20px;
+}
+
+.lp-section-sub {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
