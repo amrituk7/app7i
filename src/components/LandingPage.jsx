@@ -4,21 +4,12 @@ import "./LandingPage.css";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    App7i Landing Page — Premium World-Class SaaS Design
-   Linear-level polish, Vercel-level minimalism, Tesla-level animations
+   Stripe clarity • Linear polish • Vercel minimalism • Notion spacing
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const NAV_LINKS = [
   { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How It Works" },
   { href: "#pricing", label: "Pricing" },
-  { href: "#referral", label: "Referral" },
-];
-
-const STATS = [
-  { value: "10,000+", label: "Lessons Tracked" },
-  { value: "4.9/5", label: "Instructor Rating" },
-  { value: "2,000+", label: "Active Students" },
-  { value: "98%", label: "Pass Rate Tracked" },
 ];
 
 const FEATURES = [
@@ -99,7 +90,7 @@ const PRICING_FEATURES = [
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ANIMATED CAR COMPONENT - Realistic learner car
+   ANIMATED CAR - Premium learner car driving left to center
 ───────────────────────────────────────────────────────────────────────────── */
 function AnimatedCar() {
   return (
@@ -108,80 +99,70 @@ function AnimatedCar() {
       <div className="car-road">
         <div className="road-surface" />
         <div className="road-markings">
-          <span /><span /><span /><span /><span /><span />
+          <span /><span /><span /><span /><span /><span /><span /><span />
         </div>
       </div>
       
       {/* Car */}
       <div className="car-wrapper">
-        <svg className="car-svg" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Shadow under car */}
-          <ellipse cx="100" cy="72" rx="70" ry="6" fill="rgba(0,0,0,0.15)" />
+        <svg className="car-svg" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Shadow */}
+          <ellipse cx="120" cy="92" rx="80" ry="8" fill="rgba(0,0,0,0.1)" />
           
-          {/* Car body - main shape */}
+          {/* Body - sleek hatchback shape */}
           <path 
-            d="M20 50 L25 50 L30 35 L55 25 L145 25 L165 35 L175 50 L180 50 L180 58 L20 58 Z" 
-            fill="url(#bodyGradient)" 
-          />
-          
-          {/* Lower body trim */}
-          <path 
-            d="M25 58 L25 62 L40 62 L40 58 M65 58 L65 62 L135 62 L135 58 M160 58 L160 62 L175 62 L175 58" 
-            fill="#1e293b" 
+            d="M30 60 L35 60 L45 40 L70 28 L170 28 L195 40 L210 60 L215 60 L218 65 L218 75 L22 75 L22 65 Z" 
+            fill="url(#carBody)"
           />
           
           {/* Windows */}
-          <path 
-            d="M58 28 L55 42 L82 42 L82 28 Z" 
-            fill="#1e3a5f" 
-            opacity="0.9"
-          />
-          <path 
-            d="M86 28 L86 42 L140 42 L145 28 Z" 
-            fill="#1e3a5f" 
-            opacity="0.9"
-          />
+          <path d="M72 32 L68 55 L95 55 L95 32 Z" fill="#1e3a5f" opacity="0.85" />
+          <path d="M100 32 L100 55 L165 55 L172 32 Z" fill="#1e3a5f" opacity="0.85" />
           
-          {/* Window frames */}
-          <path d="M55 42 L58 28 L82 28 L82 42" stroke="#e5e7eb" strokeWidth="2" fill="none" />
-          <path d="M86 28 L86 42 L140 42 L145 28" stroke="#e5e7eb" strokeWidth="2" fill="none" />
-          <line x1="84" y1="28" x2="84" y2="42" stroke="#e5e7eb" strokeWidth="3" />
+          {/* Window chrome trim */}
+          <path d="M68 55 L72 32 L95 32 L95 55" stroke="#d1d5db" strokeWidth="2" fill="none" />
+          <path d="M100 32 L100 55 L165 55 L172 32" stroke="#d1d5db" strokeWidth="2" fill="none" />
+          <line x1="97.5" y1="32" x2="97.5" y2="55" stroke="#d1d5db" strokeWidth="3" />
           
-          {/* Roof box / L plate holder */}
-          <rect x="60" y="18" width="80" height="8" rx="2" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="1" />
-          <text x="100" y="24" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#dc2626">L</text>
+          {/* Roof L sign */}
+          <rect x="75" y="20" width="90" height="10" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="1" />
+          <rect x="115" y="22" width="14" height="6" rx="1" fill="#dc2626" />
+          <text x="122" y="27" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#ffffff">L</text>
           
           {/* Headlights */}
-          <ellipse cx="172" cy="45" rx="4" ry="6" fill="#fef3c7" />
-          <ellipse cx="172" cy="45" rx="2" ry="3" fill="#fde047" />
+          <ellipse cx="208" cy="58" rx="5" ry="8" fill="#fef9c3" />
+          <ellipse cx="208" cy="58" rx="3" ry="5" fill="#fef08a" />
           
           {/* Tail lights */}
-          <rect x="22" y="42" width="4" height="10" rx="1" fill="#ef4444" />
-          <rect x="23" y="44" width="2" height="4" rx="0.5" fill="#fca5a5" />
+          <rect x="25" y="52" width="6" height="14" rx="2" fill="#dc2626" />
+          <rect x="27" y="55" width="2" height="6" rx="1" fill="#fca5a5" />
           
           {/* Front wheel */}
-          <circle cx="55" cy="62" r="14" fill="#1e293b" />
-          <circle cx="55" cy="62" r="10" fill="#374151" />
-          <circle cx="55" cy="62" r="6" fill="#6b7280" />
-          <circle cx="55" cy="62" r="2" fill="#9ca3af" />
+          <circle cx="70" cy="78" r="18" fill="#1f2937" />
+          <circle cx="70" cy="78" r="14" fill="#374151" />
+          <circle cx="70" cy="78" r="8" fill="#6b7280" />
+          <circle cx="70" cy="78" r="3" fill="#9ca3af" />
           
           {/* Back wheel */}
-          <circle cx="145" cy="62" r="14" fill="#1e293b" />
-          <circle cx="145" cy="62" r="10" fill="#374151" />
-          <circle cx="145" cy="62" r="6" fill="#6b7280" />
-          <circle cx="145" cy="62" r="2" fill="#9ca3af" />
+          <circle cx="170" cy="78" r="18" fill="#1f2937" />
+          <circle cx="170" cy="78" r="14" fill="#374151" />
+          <circle cx="170" cy="78" r="8" fill="#6b7280" />
+          <circle cx="170" cy="78" r="3" fill="#9ca3af" />
           
           {/* Side mirror */}
-          <ellipse cx="50" cy="38" rx="5" ry="3" fill="#64748b" />
+          <ellipse cx="62" cy="48" rx="6" ry="4" fill="#9ca3af" />
           
           {/* Door handle */}
-          <rect x="95" y="44" width="12" height="2" rx="1" fill="#94a3b8" />
+          <rect x="115" y="56" width="14" height="3" rx="1.5" fill="#d1d5db" />
           
-          {/* Gradient definitions */}
+          {/* Wheel arches */}
+          <path d="M45 75 Q70 60 95 75" stroke="#e5e7eb" strokeWidth="2" fill="none" />
+          <path d="M145 75 Q170 60 195 75" stroke="#e5e7eb" strokeWidth="2" fill="none" />
+          
           <defs>
-            <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="carBody" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#f8fafc" />
-              <stop offset="50%" stopColor="#e2e8f0" />
+              <stop offset="40%" stopColor="#e2e8f0" />
               <stop offset="100%" stopColor="#cbd5e1" />
             </linearGradient>
           </defs>
@@ -192,7 +173,50 @@ function AnimatedCar() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   FEATURE CARD COMPONENT
+   DASHBOARD PREVIEW - Premium floating card
+───────────────────────────────────────────────────────────────────────────── */
+function DashboardPreview() {
+  return (
+    <div className="dashboard-preview">
+      <div className="dash-header">
+        <div>
+          <span className="dash-greeting">Good morning, Sarah</span>
+          <h3 className="dash-title">Your Dashboard</h3>
+        </div>
+        <div className="dash-avatar">S</div>
+      </div>
+      
+      <div className="dash-stats">
+        <div className="dash-stat">
+          <span className="dash-stat-value">4</span>
+          <span className="dash-stat-label">Lessons Today</span>
+        </div>
+        <div className="dash-stat">
+          <span className="dash-stat-value">18</span>
+          <span className="dash-stat-label">Students</span>
+        </div>
+        <div className="dash-stat accent">
+          <span className="dash-stat-value">£847</span>
+          <span className="dash-stat-label">This Month</span>
+        </div>
+      </div>
+      
+      <div className="dash-next">
+        <span className="dash-next-label">Next Lesson</span>
+        <div className="dash-next-row">
+          <div className="dash-next-time">9:00</div>
+          <div className="dash-next-info">
+            <span className="dash-next-name">James Wilson</span>
+            <span className="dash-next-topic">Lesson 8 - Roundabouts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FEATURE CARD
 ───────────────────────────────────────────────────────────────────────────── */
 function FeatureCard({ icon, title, desc }) {
   return (
@@ -205,7 +229,7 @@ function FeatureCard({ icon, title, desc }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   PRICING CARD COMPONENT
+   PRICING CARD
 ───────────────────────────────────────────────────────────────────────────── */
 function PricingCard({ title, price, period, originalPrice, badge, highlight, features, cta, note }) {
   return (
@@ -231,18 +255,6 @@ function PricingCard({ title, price, period, originalPrice, badge, highlight, fe
         {cta}
       </Link>
       {note && <span className="pricing-note">{note}</span>}
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   STAT ITEM COMPONENT
-───────────────────────────────────────────────────────────────────────────── */
-function StatItem({ value, label }) {
-  return (
-    <div className="stat-item">
-      <span className="stat-value">{value}</span>
-      <span className="stat-label">{label}</span>
     </div>
   );
 }
@@ -279,8 +291,8 @@ export default function LandingPage() {
           </nav>
 
           <div className="lp-header-actions">
-            <Link to="/login" className="btn-ghost">Log In</Link>
-            <Link to="/register-instructor" className="btn-primary">Get Started</Link>
+            <Link to="/login" className="btn-ghost">Log in</Link>
+            <Link to="/register-instructor" className="btn-primary">Start Free</Link>
           </div>
 
           <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
@@ -293,64 +305,44 @@ export default function LandingPage() {
             {NAV_LINKS.map((l) => (
               <a key={l.href} href={l.href} onClick={() => setMobileOpen(false)}>{l.label}</a>
             ))}
-            <Link to="/login" onClick={() => setMobileOpen(false)}>Log In</Link>
+            <Link to="/login" onClick={() => setMobileOpen(false)}>Log in</Link>
             <Link to="/register-instructor" className="btn-primary" onClick={() => setMobileOpen(false)}>
-              Get Started
+              Start Free
             </Link>
           </div>
         )}
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HERO — Premium with animated car
+          HERO
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="hero">
-        <div className="hero-bg">
-          <div className="hero-gradient" />
-          <div className="hero-blur-1" />
-          <div className="hero-blur-2" />
-        </div>
-
+        <div className="hero-bg" />
+        
         <div className="hero-content">
-          <span className="hero-badge">Built for UK Driving Instructors</span>
-          <h1>
-            Run your lessons.<br />
-            <span>Not your paperwork.</span>
-          </h1>
-          <p>
-            The all-in-one platform for independent driving instructors. Schedule lessons,
-            track progress, and manage your business — all from one beautiful dashboard.
+          <h1>Built for UK driving instructors</h1>
+          <p className="hero-tagline">Run your lessons. Not your paperwork.</p>
+          <p className="hero-desc">
+            A complete toolkit for driving instructors — bookings, progress tracking,
+            earnings, invoices, and a student portal.
           </p>
           <div className="hero-actions">
-            <Link to="/register-instructor" className="btn-primary btn-lg">
-              Start Free Trial
-            </Link>
-            <Link to="/login" className="btn-outline btn-lg">
-              {"I'm an Instructor"}
-            </Link>
+            <Link to="/register-instructor" className="btn-primary btn-lg">Start Free</Link>
+            <Link to="/login" className="btn-outline btn-lg">Log in</Link>
           </div>
-          <span className="hero-note">3-day free trial. No credit card required.</span>
         </div>
 
         <div className="hero-visual">
+          <DashboardPreview />
           <AnimatedCar />
-          <div className="hero-dashboard-blur">
-            <div className="blur-card" />
-            <div className="blur-card small" />
-            <div className="blur-card tall" />
-          </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          SOCIAL PROOF / STATS
+          SOCIAL PROOF
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="stats-section">
-        <div className="stats-inner">
-          {STATS.map((s) => (
-            <StatItem key={s.label} value={s.value} label={s.label} />
-          ))}
-        </div>
+      <section className="social-proof">
+        <p>Trusted by early UK instructors and growing fast.</p>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
@@ -375,7 +367,7 @@ export default function LandingPage() {
 
       {/* ═══════════════════════════════════════════════════════════════════
           FEATURES
-      ═══════════════════════════════════════���═══════════════════════════ */}
+      ═══════════════════════════════════════════════════════════════════ */}
       <section id="features" className="features-section">
         <div className="section-header">
           <span className="section-tag">Features</span>
@@ -432,9 +424,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          REFERRAL PROGRAM
+          REFERRAL
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="referral" className="referral-section">
+      <section className="referral-section">
         <div className="referral-inner">
           <div className="referral-content">
             <span className="section-tag">Referral Program</span>
@@ -443,23 +435,11 @@ export default function LandingPage() {
           </div>
           <div className="referral-cards">
             <div className="referral-card">
-              <div className="referral-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                </svg>
-              </div>
               <h3>New Instructor Gets</h3>
               <span className="referral-discount">£20 OFF</span>
               <p>Pay £99.99 instead of £119.99 for your first year</p>
             </div>
             <div className="referral-card">
-              <div className="referral-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
               <h3>Referrer Gets</h3>
               <span className="referral-discount">20% OFF</span>
               <p>Next month free OR £99.99 on your next yearly renewal</p>
@@ -473,12 +453,6 @@ export default function LandingPage() {
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="payments-section">
         <div className="payments-inner">
-          <div className="payments-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="1" y="4" width="22" height="16" rx="2" />
-              <path d="M1 10h22" />
-            </svg>
-          </div>
           <h2>Track payments now. Accept payments later.</h2>
           <p>
             Record every cash, card, and bank transfer today. In-app payment collection
@@ -493,13 +467,12 @@ export default function LandingPage() {
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="final-cta">
         <div className="cta-inner">
-          <h2>Ready to simplify your business?</h2>
-          <p>Join hundreds of UK driving instructors who&apos;ve modernised their workflow.</p>
+          <h2>Start your journey today</h2>
+          <p>Join the next generation of UK instructors modernising their workflow.</p>
           <div className="cta-actions">
-            <Link to="/register-instructor" className="btn-white btn-lg">Start Free Trial</Link>
-            <Link to="/login" className="btn-ghost-light btn-lg">Log In</Link>
+            <Link to="/register-instructor" className="btn-white btn-lg">Start Free</Link>
+            <Link to="/login" className="btn-ghost-light btn-lg">Log in</Link>
           </div>
-          <span>3-day free trial. No credit card. Cancel anytime.</span>
         </div>
       </section>
 
