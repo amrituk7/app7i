@@ -2,6 +2,7 @@
   "name": "driving-app",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.12.1",
   "dependencies": {
     "@capacitor/android": "^8.2.0",
     "@capacitor/cli": "^8.2.0",
