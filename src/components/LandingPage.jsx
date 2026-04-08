@@ -103,66 +103,82 @@ function AnimatedCar() {
         </div>
       </div>
       
-      {/* Car */}
+      {/* Car - Clean, realistic learner vehicle */}
       <div className="car-wrapper">
-        <svg className="car-svg" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Shadow */}
-          <ellipse cx="120" cy="92" rx="80" ry="8" fill="rgba(0,0,0,0.1)" />
+        <svg className="car-svg" viewBox="0 0 280 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Ground shadow */}
+          <ellipse cx="140" cy="102" rx="100" ry="8" fill="rgba(0,0,0,0.08)" />
           
-          {/* Body - sleek hatchback shape */}
+          {/* Main body - Modern hatchback silhouette */}
           <path 
-            d="M30 60 L35 60 L45 40 L70 28 L170 28 L195 40 L210 60 L215 60 L218 65 L218 75 L22 75 L22 65 Z" 
-            fill="url(#carBody)"
+            d="M25 68 L30 68 L42 45 L75 30 L205 30 L235 45 L252 68 L258 68 L260 74 L260 84 L20 84 L20 74 Z" 
+            fill="url(#carBodyPremium)"
+            stroke="#cbd5e1"
+            strokeWidth="1"
           />
           
-          {/* Windows */}
-          <path d="M72 32 L68 55 L95 55 L95 32 Z" fill="#1e3a5f" opacity="0.85" />
-          <path d="M100 32 L100 55 L165 55 L172 32 Z" fill="#1e3a5f" opacity="0.85" />
+          {/* Lower body accent line */}
+          <path d="M28 84 L28 88 L252 88 L252 84" fill="#94a3b8" />
           
-          {/* Window chrome trim */}
-          <path d="M68 55 L72 32 L95 32 L95 55" stroke="#d1d5db" strokeWidth="2" fill="none" />
-          <path d="M100 32 L100 55 L165 55 L172 32" stroke="#d1d5db" strokeWidth="2" fill="none" />
-          <line x1="97.5" y1="32" x2="97.5" y2="55" stroke="#d1d5db" strokeWidth="3" />
+          {/* Windows - darker blue glass */}
+          <path d="M78 34 L72 62 L108 62 L108 34 Z" fill="#1e3a5f" />
+          <path d="M114 34 L114 62 L200 62 L210 34 Z" fill="#1e3a5f" />
           
-          {/* Roof L sign */}
-          <rect x="75" y="20" width="90" height="10" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="1" />
-          <rect x="115" y="22" width="14" height="6" rx="1" fill="#dc2626" />
-          <text x="122" y="27" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#ffffff">L</text>
+          {/* Window reflections */}
+          <path d="M80 36 L76 58 L90 58 L90 36 Z" fill="rgba(255,255,255,0.15)" />
+          <path d="M116 36 L116 58 L145 58 L145 36 Z" fill="rgba(255,255,255,0.1)" />
           
-          {/* Headlights */}
-          <ellipse cx="208" cy="58" rx="5" ry="8" fill="#fef9c3" />
-          <ellipse cx="208" cy="58" rx="3" ry="5" fill="#fef08a" />
+          {/* Chrome window trim */}
+          <path d="M72 62 L78 34 L108 34 L108 62" stroke="#e5e7eb" strokeWidth="2.5" fill="none" />
+          <path d="M114 34 L114 62 L200 62 L210 34" stroke="#e5e7eb" strokeWidth="2.5" fill="none" />
+          <line x1="111" y1="34" x2="111" y2="62" stroke="#e5e7eb" strokeWidth="4" />
+          
+          {/* Roof sign - L plate */}
+          <rect x="85" y="20" width="110" height="12" rx="4" fill="#ffffff" stroke="#d1d5db" strokeWidth="1.5" />
+          <rect x="132" y="22" width="16" height="8" rx="2" fill="#dc2626" />
+          <text x="140" y="29" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#ffffff">L</text>
+          
+          {/* Headlights - modern LED style */}
+          <path d="M248 58 L255 54 L255 72 L248 68 Z" fill="#fef9c3" />
+          <ellipse cx="251" cy="63" rx="3" ry="6" fill="#fef08a" />
           
           {/* Tail lights */}
-          <rect x="25" y="52" width="6" height="14" rx="2" fill="#dc2626" />
-          <rect x="27" y="55" width="2" height="6" rx="1" fill="#fca5a5" />
+          <rect x="24" y="55" width="8" height="18" rx="3" fill="#dc2626" />
+          <rect x="26" y="59" width="4" height="8" rx="1.5" fill="#fca5a5" />
           
+          {/* Front wheel well */}
+          <path d="M50 84 Q80 65 110 84" fill="#374151" />
           {/* Front wheel */}
-          <circle cx="70" cy="78" r="18" fill="#1f2937" />
-          <circle cx="70" cy="78" r="14" fill="#374151" />
-          <circle cx="70" cy="78" r="8" fill="#6b7280" />
-          <circle cx="70" cy="78" r="3" fill="#9ca3af" />
+          <circle cx="80" cy="88" r="20" fill="#1f2937" />
+          <circle cx="80" cy="88" r="16" fill="#374151" />
+          <circle cx="80" cy="88" r="11" fill="#4b5563" />
+          <circle cx="80" cy="88" r="6" fill="#6b7280" />
+          <circle cx="80" cy="88" r="3" fill="#9ca3af" />
           
-          {/* Back wheel */}
-          <circle cx="170" cy="78" r="18" fill="#1f2937" />
-          <circle cx="170" cy="78" r="14" fill="#374151" />
-          <circle cx="170" cy="78" r="8" fill="#6b7280" />
-          <circle cx="170" cy="78" r="3" fill="#9ca3af" />
+          {/* Rear wheel well */}
+          <path d="M170 84 Q200 65 230 84" fill="#374151" />
+          {/* Rear wheel */}
+          <circle cx="200" cy="88" r="20" fill="#1f2937" />
+          <circle cx="200" cy="88" r="16" fill="#374151" />
+          <circle cx="200" cy="88" r="11" fill="#4b5563" />
+          <circle cx="200" cy="88" r="6" fill="#6b7280" />
+          <circle cx="200" cy="88" r="3" fill="#9ca3af" />
           
           {/* Side mirror */}
-          <ellipse cx="62" cy="48" rx="6" ry="4" fill="#9ca3af" />
+          <ellipse cx="64" cy="52" rx="8" ry="5" fill="#94a3b8" stroke="#e5e7eb" strokeWidth="1" />
+          
+          {/* Door line */}
+          <line x1="111" y1="62" x2="111" y2="82" stroke="#cbd5e1" strokeWidth="1.5" />
           
           {/* Door handle */}
-          <rect x="115" y="56" width="14" height="3" rx="1.5" fill="#d1d5db" />
+          <rect x="130" y="66" width="16" height="4" rx="2" fill="#cbd5e1" />
           
-          {/* Wheel arches */}
-          <path d="M45 75 Q70 60 95 75" stroke="#e5e7eb" strokeWidth="2" fill="none" />
-          <path d="M145 75 Q170 60 195 75" stroke="#e5e7eb" strokeWidth="2" fill="none" />
-          
+          {/* Gradient definitions */}
           <defs>
-            <linearGradient id="carBody" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#f8fafc" />
-              <stop offset="40%" stopColor="#e2e8f0" />
+            <linearGradient id="carBodyPremium" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="30%" stopColor="#f1f5f9" />
+              <stop offset="70%" stopColor="#e2e8f0" />
               <stop offset="100%" stopColor="#cbd5e1" />
             </linearGradient>
           </defs>
@@ -192,11 +208,11 @@ function DashboardPreview() {
           <span className="dash-stat-label">Lessons Today</span>
         </div>
         <div className="dash-stat">
-          <span className="dash-stat-value">18</span>
+          <span className="dash-stat-value">12</span>
           <span className="dash-stat-label">Students</span>
         </div>
         <div className="dash-stat accent">
-          <span className="dash-stat-value">£847</span>
+          <span className="dash-stat-value">£840</span>
           <span className="dash-stat-label">This Month</span>
         </div>
       </div>
@@ -338,7 +354,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════
+      {/* ════════════════════════════════════════════════════════════════��══
           SOCIAL PROOF
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="social-proof">
@@ -478,7 +494,7 @@ export default function LandingPage() {
 
       {/* ═══════════════════════════════════════════════════════════════════
           FOOTER
-      ═══════════════════════════════════════════════════════════════════ */}
+      ═════════════════════════���═════════════════════════════════════════ */}
       <footer className="lp-footer">
         <div className="footer-inner">
           <div className="footer-brand">
