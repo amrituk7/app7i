@@ -67,15 +67,15 @@ export default function Hero() {
             <div className="animate-fade-in-up animation-delay-300 mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <Link
                 to="/register-instructor"
-                className="inline-flex items-center justify-center rounded-full bg-[#FAF8F5] px-6 py-3.5 text-base font-semibold text-[#2D3B2D] shadow-lg shadow-black/20 transition hover:bg-[#F2EDE6]"
+                className="inline-flex items-center justify-center rounded-full bg-cream px-6 py-3.5 text-base font-semibold text-forest shadow-lg shadow-black/20 transition hover:bg-soft"
               >
-                Start Free
+                Claim Early Access
               </Link>
               <Link
                 to="/login"
                 className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/20"
               >
-                Student Portal
+                {"I'm an Instructor"}
               </Link>
             </div>
 
@@ -86,14 +86,14 @@ export default function Hero() {
 
           <div className="animate-fade-in-up animation-delay-300 relative lg:pl-8">
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="rounded-2xl border border-white/15 bg-[#FFFDF9]/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-sm">
+              <div className="rounded-2xl border border-white/15 bg-paper/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-sm">
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-[#5C5347]">Good morning, Sarah</p>
-                    <h3 className="text-lg font-semibold text-[#2D3B2D]">Your Dashboard</h3>
+                    <p className="text-sm text-body">Good morning, Sarah</p>
+                    <h3 className="text-lg font-semibold text-forest">Your Dashboard</h3>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2D3B2D]/10">
-                    <span className="text-sm font-bold text-[#2D3B2D]">7i</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/10">
+                    <span className="text-sm font-bold text-forest">7i</span>
                   </div>
                 </div>
 
@@ -101,29 +101,29 @@ export default function Hero() {
                   {heroStats.map((stat) => (
                     <div key={stat.title} className={`rounded-xl p-4 transition-transform hover:scale-105 ${stat.tint}`}>
                       <div className="mb-2">{stat.icon}</div>
-                      <p className="text-2xl font-bold text-[#2D3B2D]">{stat.value}</p>
-                      <p className="text-xs text-[#5C5347]">{stat.title}</p>
+                      <p className="text-2xl font-bold text-forest">{stat.value}</p>
+                      <p className="text-xs text-body">{stat.title}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-6 space-y-3">
-                  <p className="text-sm font-medium text-[#2D3B2D]">Next Up</p>
-                  <div className="flex items-center gap-3 rounded-lg border border-[#E3DBD0] bg-[#F6F1EA] p-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2D3B2D] text-sm font-bold text-white">
+                  <p className="text-sm font-medium text-forest">Next Up</p>
+                  <div className="flex items-center gap-3 rounded-lg border border-line bg-soft p-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-forest text-sm font-bold text-white">
                       9:00
                     </div>
                     <div>
-                      <p className="font-medium text-[#2D3B2D]">James Wilson</p>
-                      <p className="text-sm text-[#5C5347]">Lesson 8 - Roundabouts</p>
+                      <p className="font-medium text-forest">James Wilson</p>
+                      <p className="text-sm text-body">Lesson 8 - Roundabouts</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="animate-float absolute -right-4 -top-4 rounded-lg border border-[#E3DBD0] bg-[#FFFDF9] p-3 shadow-lg shadow-black/10">
-                <p className="text-xs text-[#5C5347]">New booking!</p>
-                <p className="text-sm font-medium text-[#2D3B2D]">Emma - Tomorrow 2pm</p>
+              <div className="animate-float absolute -right-4 -top-4 rounded-lg border border-line bg-paper p-3 shadow-lg shadow-black/10">
+                <p className="text-xs text-body">New booking!</p>
+                <p className="text-sm font-medium text-forest">Emma - Tomorrow 2pm</p>
               </div>
             </div>
           </div>

@@ -10,9 +10,9 @@ import Footer from "./Footer";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#2D3B2D]">
+    <div className="min-h-screen bg-cream text-forest">
       <Header />
-      <main className="bg-[#FAF8F5]">
+      <main className="bg-cream">
         <Hero />
         <HowItWorks />
         <Stats />

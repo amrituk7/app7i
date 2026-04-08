@@ -73,14 +73,14 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="bg-[#FAF8F5] py-20 md:py-32">
+    <section id="features" className="bg-cream py-20 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#5C7A5C]">Features</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#2D3B2D] sm:text-4xl md:text-5xl">
+          <p className="text-sm font-semibold uppercase tracking-wider text-moss">Features</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-forest sm:text-4xl md:text-5xl">
             Everything you need. One app.
           </h2>
-          <p className="mt-4 text-lg text-[#5C5347]">
+          <p className="mt-4 text-lg text-body">
             Stop juggling spreadsheets, WhatsApp groups, and paper diaries. App7i replaces all of it.
           </p>
         </div>
@@ -89,15 +89,15 @@ export default function Features() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="group rounded-2xl border border-[#E3DBD0] bg-[#FFFDF9] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#2D3B2D]/20 hover:shadow-lg hover:shadow-[#2D3B2D]/5"
+              className="group rounded-2xl border border-line bg-paper p-6 transition-all duration-300 hover:-translate-y-1 hover:border-forest/20 hover:shadow-lg hover:shadow-forest/5"
             >
               <div
                 className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${feature.colorClass} transition-transform duration-300 group-hover:scale-110`}
               >
                 {feature.icon}
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-[#2D3B2D]">{feature.title}</h3>
-              <p className="text-sm leading-relaxed text-[#5C5347]">{feature.description}</p>
+              <h3 className="mb-2 text-lg font-semibold text-forest">{feature.title}</h3>
+              <p className="text-sm leading-relaxed text-body">{feature.description}</p>
             </div>
           ))}
         </div>

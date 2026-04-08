@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const steps = [
   {
@@ -54,14 +54,14 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-[#faf8f5] py-20 md:py-28">
+    <section id="how-it-works" className="bg-cream py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="lp-eyebrow">How It Works</p>
-          <h2 className="lp-title mt-3 text-4xl sm:text-5xl">
+          <p className="text-sm font-semibold uppercase tracking-wider text-moss">How It Works</p>
+          <h2 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
             Get started in 3 simple steps
           </h2>
-          <p className="lp-copy mx-auto mt-4 max-w-2xl text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-body">
             Set up your profile, share your link, and bring students into one clear workflow.
           </p>
         </div>
@@ -92,20 +92,20 @@ export default function HowItWorks() {
           {steps.map((step) => (
             <article
               key={step.number}
-              className="lp-surface rounded-[2rem] p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="rounded-[2rem] border border-line bg-paper p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#2d3b2d] text-sm font-semibold text-white">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-forest text-sm font-semibold text-white">
                 {step.number}
               </span>
-              <h3 className="mt-4 text-xl font-semibold text-[#2d3b2d]">{step.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-[#5c5347]">{step.description}</p>
+              <h3 className="mt-4 text-xl font-semibold text-forest">{step.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-body">{step.description}</p>
               <div className="mt-6">{step.visual}</div>
-              {step.detail && <p className="mt-3 text-sm text-[#5c5347]">{step.detail}</p>}
+              {step.detail && <p className="mt-3 text-sm text-body">{step.detail}</p>}
             </article>
           ))}
         </div>
 
-        <div className="lp-brand-gradient mt-10 rounded-[2rem] px-6 py-8 text-white shadow-xl shadow-black/10">
+        <div className="mt-10 rounded-[2rem] bg-gradient-to-br from-espresso via-forest to-pine px-6 py-8 text-white shadow-xl shadow-black/10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/80">Early Access - First 50 Instructors</p>
@@ -113,7 +113,7 @@ export default function HowItWorks() {
             </div>
             <Link
               to="/register-instructor"
-              className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-[#2d3b2d] transition hover:bg-white/90"
+              className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-forest transition hover:bg-white/90"
             >
               Claim Early Access
             </Link>

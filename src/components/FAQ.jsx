@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 
 const items = [
   {
@@ -39,37 +39,37 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section id="faq" className="bg-[#faf8f5] py-20 md:py-28">
+    <section id="faq" className="bg-cream py-20 md:py-28">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="lp-eyebrow">FAQ</p>
-          <h2 className="lp-title mt-3 text-4xl sm:text-5xl">
+          <p className="text-sm font-semibold uppercase tracking-wider text-moss">FAQ</p>
+          <h2 className="mt-3 text-4xl font-bold tracking-tight text-forest sm:text-5xl">
             Common questions, answered clearly
           </h2>
-          <p className="lp-copy mt-4 text-lg">Everything an instructor needs before getting started.</p>
+          <p className="mt-4 text-lg text-body">Everything an instructor needs before getting started.</p>
         </div>
 
-        <div className="lp-surface mt-12 overflow-hidden rounded-[2rem]">
+        <div className="mt-12 overflow-hidden rounded-[2rem] border border-line bg-paper">
           {items.map((item, index) => {
             const isOpen = openIndex === index;
 
             return (
-              <article key={item.question} className="border-b border-[#e3dbd0] last:border-b-0">
+              <article key={item.question} className="border-b border-line last:border-b-0">
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
-                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition hover:bg-[#f6f1ea]"
+                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition hover:bg-soft"
                 >
-                  <span className="text-base font-semibold text-[#2d3b2d]">{item.question}</span>
-                  <span className="text-[#5c5347]">
+                  <span className="text-base font-semibold text-forest">{item.question}</span>
+                  <span className="text-body">
                     <svg viewBox="0 0 24 24" className={`h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="m6 9 6 6 6-6" />
                     </svg>
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5 text-sm leading-7 text-[#5c5347]">{item.answer}</div>
+                  <div className="px-6 pb-5 text-sm leading-7 text-body">{item.answer}</div>
                 )}
               </article>
             );

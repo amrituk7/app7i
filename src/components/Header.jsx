@@ -32,7 +32,7 @@ export default function Header() {
     <header
       className={[
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        isScrolled ? "border-b border-[#E3DBD0] bg-[#FAF8F5]/95 shadow-sm backdrop-blur-md" : "bg-transparent",
+        isScrolled ? "border-b border-line bg-cream/95 shadow-sm backdrop-blur-md" : "bg-transparent",
       ].join(" ")}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -40,12 +40,12 @@ export default function Header() {
           <div
             className={[
               "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
-              isScrolled ? "bg-[#2D3B2D]" : "bg-white/15 ring-1 ring-white/15",
+              isScrolled ? "bg-forest" : "bg-white/15 ring-1 ring-white/15",
             ].join(" ")}
           >
             <span className="text-sm font-bold text-white">7i</span>
           </div>
-          <span className={["text-xl font-semibold transition-colors", isScrolled ? "text-[#2D3B2D]" : "text-white"].join(" ")}>
+          <span className={["text-xl font-semibold transition-colors", isScrolled ? "text-forest" : "text-white"].join(" ")}>
             App7i
           </span>
         </Link>
@@ -57,7 +57,7 @@ export default function Header() {
               href={item.href}
               className={[
                 "text-sm transition-colors",
-                isScrolled ? "text-[#5C5347] hover:text-[#2D3B2D]" : "text-white/80 hover:text-white",
+                isScrolled ? "text-body hover:text-forest" : "text-white/80 hover:text-white",
               ].join(" ")}
             >
               {item.label}
@@ -71,7 +71,7 @@ export default function Header() {
             className={[
               "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition",
               isScrolled
-                ? "text-[#5C5347] hover:bg-[#F2EDE6] hover:text-[#2D3B2D]"
+                ? "text-body hover:bg-soft hover:text-forest"
                 : "text-white hover:bg-white/10 hover:text-white",
             ].join(" ")}
           >
@@ -81,10 +81,10 @@ export default function Header() {
             to="/register-instructor"
             className={[
               "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition",
-              isScrolled ? "bg-[#2D3B2D] text-white hover:bg-[#1F3026]" : "bg-[#FAF8F5] text-[#2D3B2D] hover:bg-[#F2EDE6]",
+              isScrolled ? "bg-forest text-white hover:bg-pine" : "bg-cream text-forest hover:bg-soft",
             ].join(" ")}
           >
-            Start Free
+            Claim Early Access
           </Link>
         </div>
 
@@ -99,19 +99,19 @@ export default function Header() {
             <span
               className={[
                 "block h-0.5 w-5 rounded transition-colors",
-                isScrolled ? "bg-[#2D3B2D]" : "bg-white",
+                isScrolled ? "bg-forest" : "bg-white",
               ].join(" ")}
             />
             <span
               className={[
                 "block h-0.5 w-5 rounded transition-colors",
-                isScrolled ? "bg-[#2D3B2D]" : "bg-white",
+                isScrolled ? "bg-forest" : "bg-white",
               ].join(" ")}
             />
             <span
               className={[
                 "block h-0.5 w-5 rounded transition-colors",
-                isScrolled ? "bg-[#2D3B2D]" : "bg-white",
+                isScrolled ? "bg-forest" : "bg-white",
               ].join(" ")}
             />
           </div>
@@ -119,23 +119,23 @@ export default function Header() {
       </div>
 
       {isMobileOpen && (
-        <div className="border-t border-[#E8E4DD] bg-[#FAF8F5] md:hidden">
+        <div className="border-t border-line bg-cream md:hidden">
           <nav className="flex flex-col gap-4 p-4">
             {NAV_LINKS.map((item) => (
-              <a key={item.href} href={item.href} className="text-sm text-[#5C5347]" onClick={closeMenu}>
+              <a key={item.href} href={item.href} className="text-sm text-body" onClick={closeMenu}>
                 {item.label}
               </a>
             ))}
             <div className="flex flex-col gap-2 pt-4">
-              <Link to="/login" onClick={closeMenu} className="rounded-full px-3 py-2 text-sm text-[#5C5347]">
+              <Link to="/login" onClick={closeMenu} className="rounded-full px-3 py-2 text-sm text-body">
                 Log in
               </Link>
               <Link
                 to="/register-instructor"
                 onClick={closeMenu}
-                className="rounded-full bg-[#2D3B2D] px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-[#3D4B3D]"
+                className="rounded-full bg-forest px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-pine"
               >
-                Start Free
+                Claim Early Access
               </Link>
             </div>
           </nav>
