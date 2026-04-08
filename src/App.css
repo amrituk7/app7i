@@ -134,6 +134,44 @@ body.dark {
   }
 }
 
+/* Landing page animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes car {
+  0% { left: -150px; }
+  100% { left: calc(100% + 150px); }
+}
+
+@keyframes road {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-80px); }
+}
+
+@keyframes scan {
+  0%, 100% { transform: translateY(-100%); opacity: 0; }
+  50% { transform: translateY(100%); opacity: 1; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-car {
+  position: absolute;
+  animation: car 8s linear infinite;
+}
+
+.animate-road {
+  animation: road 0.4s linear infinite;
+}
+
+.animate-scan {
+  animation: scan 2s ease-in-out infinite;
+}
+
 @keyframes pulse-ring {
   0% {
     box-shadow: 0 0 0 0 rgba(194, 75, 67, 0.34);
