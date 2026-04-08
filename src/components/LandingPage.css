@@ -745,6 +745,14 @@
   margin-bottom: 28px;
 }
 
+.price-original {
+  display: block;
+  font-size: 18px;
+  color: var(--lp-text-muted);
+  text-decoration: line-through;
+  margin-bottom: 4px;
+}
+
 .pricing-amount .price {
   font-size: 48px;
   font-weight: 700;
@@ -936,6 +944,62 @@
   .referral-cards {
     grid-template-columns: 1fr;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAYMENTS COMING SOON
+───────────────────────────────────────────────────────────────────────────── */
+.payments-section {
+  padding: 96px 24px;
+  background: white;
+  text-align: center;
+}
+
+.payments-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.payments-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lp-accent-light);
+  border-radius: 20px;
+  margin: 0 auto 28px;
+}
+
+.payments-icon svg {
+  width: 36px;
+  height: 36px;
+  stroke: var(--lp-accent);
+}
+
+.payments-section h2 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: var(--lp-text);
+}
+
+.payments-section p {
+  font-size: 17px;
+  color: var(--lp-text-muted);
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.payments-badge {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--lp-bg);
+  border: 1px solid var(--lp-border);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lp-text-muted);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

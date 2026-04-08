@@ -168,12 +168,13 @@ function FeatureCard({ icon, title, desc }) {
 /* ─────────────────────────────────────────────────────────────────────────────
    PRICING CARD COMPONENT
 ───────────────────────────────────────────────────────────────────────────── */
-function PricingCard({ title, price, period, badge, highlight, features, cta, note }) {
+function PricingCard({ title, price, period, originalPrice, badge, highlight, features, cta, note }) {
   return (
     <div className={`pricing-card ${highlight ? "highlight" : ""}`}>
       {badge && <span className="pricing-badge">{badge}</span>}
       <h3 className="pricing-title">{title}</h3>
       <div className="pricing-amount">
+        {originalPrice && <span className="price-original">{originalPrice}</span>}
         <span className="price">{price}</span>
         <span className="period">{period}</span>
       </div>
@@ -278,8 +279,8 @@ export default function LandingPage() {
             <span>Not your paperwork.</span>
           </h1>
           <p>
-            The all-in-one platform for independent driving instructors. Schedule, track, 
-            and get paid — all from one beautiful dashboard.
+            The all-in-one platform for independent driving instructors. Schedule lessons,
+            track progress, and manage your business — all from one beautiful dashboard.
           </p>
           <div className="hero-actions">
             <Link to="/register-instructor" className="btn-primary btn-lg">
@@ -335,7 +336,7 @@ export default function LandingPage() {
 
       {/* ═══════════════════════════════════════════════════════════════════
           FEATURES
-      ═══════════════════════════════════════════════════════════════════ */}
+      ═══════════════════════════════════════���═══════════════════════════ */}
       <section id="features" className="features-section">
         <div className="section-header">
           <span className="section-tag">Features</span>
@@ -371,20 +372,22 @@ export default function LandingPage() {
             title="Yearly"
             price="£119.99"
             period="/year"
-            badge="Save 17%"
+            originalPrice="£145.00"
+            badge="Save £25"
             highlight
             features={[...PRICING_FEATURES, "2 months free"]}
             cta="Start Free Trial"
             note="Best value"
           />
           <PricingCard
-            title="Referral Yearly"
+            title="Referral"
             price="£99.99"
             period="/year"
-            badge="Save 30%"
+            originalPrice="£119.99"
+            badge="£20 OFF"
             features={[...PRICING_FEATURES, "Exclusive referral rate", "Priority onboarding"]}
             cta="Get Referral Link"
-            note="For referred users"
+            note="When referred by a friend"
           />
         </div>
       </section>
@@ -408,9 +411,9 @@ export default function LandingPage() {
                   <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
                 </svg>
               </div>
-              <h3>New User Gets</h3>
-              <span className="referral-discount">40% OFF</span>
-              <p>First year at just £99.99 instead of £119.99</p>
+              <h3>New Instructor Gets</h3>
+              <span className="referral-discount">£20 OFF</span>
+              <p>Pay £99.99 instead of £119.99 for your first year</p>
             </div>
             <div className="referral-card">
               <div className="referral-icon">
@@ -418,11 +421,31 @@ export default function LandingPage() {
                   <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3>You Get</h3>
+              <h3>Referrer Gets</h3>
               <span className="referral-discount">20% OFF</span>
-              <p>Next month free or £99.99 yearly renewal</p>
+              <p>Next month free OR £99.99 on your next yearly renewal</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          PAYMENTS COMING SOON
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="payments-section">
+        <div className="payments-inner">
+          <div className="payments-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="1" y="4" width="22" height="16" rx="2" />
+              <path d="M1 10h22" />
+            </svg>
+          </div>
+          <h2>Track payments now. Accept payments later.</h2>
+          <p>
+            Record every cash, card, and bank transfer today. In-app payment collection
+            is coming soon — and you&apos;ll be first to know.
+          </p>
+          <span className="payments-badge">Coming Soon</span>
         </div>
       </section>
 
