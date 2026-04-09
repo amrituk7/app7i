@@ -2,79 +2,109 @@ import { Link } from "react-router-dom";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-[#3D3229] via-[#2D3B2D] to-[#1F3026]">
-      <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-[#4A5D4A]/20 blur-[80px] pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-[#5C4D3C]/20 blur-[80px] pointer-events-none" />
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#3D3229] via-[#2D3B2D] to-[#1F3026] pt-24 pb-16 md:pt-32 md:pb-24">
+      <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),transparent_60%)]" />
+      <div className="absolute -top-32 right-0 h-80 w-80 rounded-full bg-[#5C7A5C]/20 blur-[100px]" />
+      <div className="absolute -bottom-24 left-0 h-72 w-72 rounded-full bg-[#C4A77D]/15 blur-[100px]" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="text-center lg:text-left">
-            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 text-sm font-medium text-amber-300 mb-6 animate-fade-in">
-              Early Access - First 50 Instructors
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">
-              Run your classes
-              <br />
-              <span className="text-white/70">without the chaos</span>
-            </h1>
-            <p className="mt-6 text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              App7i automates attendance, payments, scheduling, and communication so you can focus on teaching.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/register-instructor" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#2D3B2D] font-medium rounded-lg shadow-lg hover:bg-white/90 hover:-translate-y-0.5 transition-all">
-                Claim Early Access
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-              </Link>
-              <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/30 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-all">
-                Log In
-              </Link>
-            </div>
-            <p className="mt-6 text-sm text-white/60">
-              Lock in GBP 11.99/month instead of GBP 19.99/month while your subscription remains active
-            </p>
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+        <div className="text-center lg:text-left">
+          <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-medium text-white/80">
+            Built for independent driving instructors
           </div>
+          <h1 className="mt-6 lp-display text-5xl leading-[0.95] text-white sm:text-6xl md:text-7xl">
+            Run your driving school without the admin drag.
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/76 lg:mx-0">
+            App7i brings bookings, student progress, payments, and messages into one calm dashboard so your business feels organised from the first lesson.
+          </p>
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
+            <Link
+              to="/register-instructor"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3.5 font-medium text-[#2D3B2D] shadow-lg shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-white/90"
+            >
+              Claim early access
+            </Link>
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/8 px-6 py-3.5 font-medium text-white transition-all hover:bg-white/14"
+            >
+              Log In
+            </Link>
+          </div>
+          <div className="mt-10 grid gap-4 text-left sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/12 bg-white/8 p-4 backdrop-blur-sm">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/50">Admin</p>
+              <p className="mt-2 text-base font-semibold text-white">Lessons, payments, and messages in one place</p>
+            </div>
+            <div className="rounded-2xl border border-white/12 bg-white/8 p-4 backdrop-blur-sm">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/50">Students</p>
+              <p className="mt-2 text-base font-semibold text-white">Share progress and upcoming lessons clearly</p>
+            </div>
+            <div className="rounded-2xl border border-white/12 bg-white/8 p-4 backdrop-blur-sm">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/50">Offer</p>
+              <p className="mt-2 text-base font-semibold text-white">Early access at GBP 11.99/month</p>
+            </div>
+          </div>
+        </div>
 
-          <div className="relative lg:pl-8">
-            <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="rounded-2xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                <div className="flex justify-between items-start mb-6">
+        <div className="mx-auto w-full max-w-xl">
+          <div className="overflow-hidden rounded-[28px] border border-white/12 bg-[#F8F4EC] shadow-[0_30px_80px_rgba(0,0,0,0.28)]">
+            <div className="border-b border-[#E3DBD0] bg-white px-5 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[#5C5347]">Today at a glance</p>
+                  <h3 className="text-xl font-semibold text-[#2D3B2D]">Instructor dashboard</h3>
+                </div>
+                <div className="rounded-xl bg-[#2D3B2D] px-3 py-2 text-sm font-semibold text-white">App7i</div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 p-5">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#E8E4DD]">
+                  <p className="text-xs uppercase tracking-wide text-[#5C5347]">Lessons</p>
+                  <p className="mt-2 text-3xl font-semibold text-[#2D3B2D]">4</p>
+                  <p className="text-sm text-[#5C5347]">Booked today</p>
+                </div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#E8E4DD]">
+                  <p className="text-xs uppercase tracking-wide text-[#5C5347]">Students</p>
+                  <p className="mt-2 text-3xl font-semibold text-[#2D3B2D]">12</p>
+                  <p className="text-sm text-[#5C5347]">Active learners</p>
+                </div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#E8E4DD]">
+                  <p className="text-xs uppercase tracking-wide text-[#5C5347]">Revenue</p>
+                  <p className="mt-2 text-3xl font-semibold text-[#2D3B2D]">GBP 840</p>
+                  <p className="text-sm text-[#5C5347]">This month</p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-[#E8E4DD]">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-[#5C5347]">Good morning, Sarah</p>
-                    <h3 className="text-lg font-semibold text-[#2D3B2D]">Your Dashboard</h3>
+                    <p className="text-sm text-[#5C5347]">Next lesson</p>
+                    <p className="text-xl font-semibold text-[#2D3B2D]">James Wilson</p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-[#2D3B2D]/10 flex items-center justify-center text-sm font-bold text-[#2D3B2D]">7i</div>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="rounded-xl bg-blue-50 p-4 hover:scale-105 transition-transform">
-                    <svg className="w-5 h-5 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" strokeWidth={2} /><path strokeWidth={2} d="M16 2v4M8 2v4M3 10h18" /></svg>
-                    <p className="text-2xl font-bold text-[#2D3B2D]">4</p>
-                    <p className="text-xs text-[#5C5347]">Lessons Today</p>
-                  </div>
-                  <div className="rounded-xl bg-green-50 p-4 hover:scale-105 transition-transform">
-                    <svg className="w-5 h-5 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" strokeWidth={2} /><path strokeWidth={2} d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>
-                    <p className="text-2xl font-bold text-[#2D3B2D]">12</p>
-                    <p className="text-xs text-[#5C5347]">Students</p>
-                  </div>
-                  <div className="rounded-xl bg-amber-50 p-4 hover:scale-105 transition-transform">
-                    <svg className="w-5 h-5 text-amber-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth={2} d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>
-                    <p className="text-2xl font-bold text-[#2D3B2D]">GBP 840</p>
-                    <p className="text-xs text-[#5C5347]">This Month</p>
+                  <div className="rounded-2xl bg-[#2D3B2D] px-4 py-3 text-center text-white">
+                    <p className="text-xs uppercase tracking-wide text-white/60">Start</p>
+                    <p className="text-lg font-semibold">9:00</p>
                   </div>
                 </div>
-                <div className="mt-6">
-                  <p className="text-sm font-medium text-[#2D3B2D] mb-3">Next Up</p>
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-[#E8E4DD] bg-[#FAF8F5]/50">
-                    <div className="w-10 h-10 rounded-lg bg-[#2D3B2D] text-white flex items-center justify-center text-sm font-bold">9:00</div>
-                    <div>
-                      <p className="font-medium text-[#2D3B2D]">James Wilson</p>
-                      <p className="text-sm text-[#5C5347]">Lesson 8 - Roundabouts</p>
-                    </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl bg-[#FAF8F5] p-4">
+                    <p className="text-sm font-medium text-[#2D3B2D]">Lesson focus</p>
+                    <p className="mt-1 text-sm text-[#5C5347]">Roundabouts, lane discipline, mock test route</p>
+                  </div>
+                  <div className="rounded-2xl bg-[#FAF8F5] p-4">
+                    <p className="text-sm font-medium text-[#2D3B2D]">Student status</p>
+                    <p className="mt-1 text-sm text-[#5C5347]">Test readiness 87%, theory passed, practical booked</p>
                   </div>
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 bg-white p-3 rounded-lg border border-[#E8E4DD] shadow-lg">
-                <p className="text-xs text-[#5C5347]">New booking!</p>
-                <p className="text-sm font-medium text-[#2D3B2D]">Emma - Tomorrow 2pm</p>
+
+              <div className="rounded-3xl bg-[#2D3B2D] p-5 text-white">
+                <p className="text-sm text-white/70">Why instructors switch</p>
+                <p className="mt-2 text-lg font-semibold">Less diary chasing, fewer payment gaps, clearer student progress.</p>
               </div>
             </div>
           </div>

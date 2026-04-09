@@ -18,12 +18,12 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
 
   return (
-    <section id="pricing" className="bg-[#FAF8F5] py-20 md:py-32">
+    <section id="pricing" className="bg-[#FAF8F5] py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto text-center mb-12">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#5C7A5C]">Simple pricing</p>
-          <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D3B2D] tracking-tight">One plan. Everything included.</h2>
-          <p className="mt-4 text-lg text-[#5C5347]">No add-ons. No per-student fees. No hidden costs.</p>
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="lp-eyebrow">Simple pricing</p>
+          <h2 className="mt-4 lp-display text-4xl sm:text-5xl">One plan. No clutter.</h2>
+          <p className="mt-5 text-lg text-[#5C5347]">A single instructor plan with the tools people actually care about, not a page full of upsells.</p>
         </div>
 
         <div className="flex items-center justify-center gap-4 mb-12">
@@ -35,25 +35,29 @@ export default function Pricing() {
           {isYearly && <span className="px-3 py-1 text-xs font-semibold bg-[#7A9B7A]/20 text-[#5C7A5C] rounded-full">Save 30%</span>}
         </div>
 
-        <div className="max-w-lg mx-auto">
-          <div className="relative bg-white border-2 border-[#2D3B2D]/20 rounded-3xl p-8 md:p-10 shadow-xl shadow-[#2D3B2D]/5 overflow-hidden">
-            <div className="absolute -right-12 top-6 rotate-45 bg-[#2D3B2D] px-12 py-1 text-xs font-semibold text-white">Early Access</div>
-
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold text-[#2D3B2D]">{isYearly ? "GBP 99.99" : "GBP 11.99"}</span>
-              <span className="text-[#5C5347]">/{isYearly ? "year" : "month"}</span>
+        <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-[32px] border border-[#DED4C8] bg-[#FFFDF9] p-8 shadow-[0_22px_60px_rgba(45,59,45,0.06)] md:p-10">
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8B6F47]">Instructor plan</p>
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="text-5xl font-semibold text-[#2D3B2D]">{isYearly ? "GBP 99.99" : "GBP 11.99"}</span>
+                  <span className="pb-1 text-[#5C5347]">/{isYearly ? "year" : "month"}</span>
+                </div>
+                {isYearly && <p className="mt-2 text-sm text-[#5C5347]"><span className="line-through">GBP 143.88</span> if paid monthly</p>}
+                <p className="mt-3 text-sm font-medium text-[#8B6F47]">Normally GBP 19.99/month while closed beta pricing is active.</p>
+              </div>
+              <div className="rounded-2xl bg-[#F3EEE6] px-4 py-3 text-sm font-medium text-[#2D3B2D]">
+                3-day free trial
+              </div>
             </div>
-            {isYearly && <p className="mt-2 text-sm text-[#5C5347]"><span className="line-through">GBP 143.88</span> if paid monthly</p>}
-            <p className="mt-2 text-sm text-amber-600 font-medium">Normally GBP 19.99/month - locked while subscribed</p>
-            <p className="mt-4 text-[#5C5347]">Everything you need to run your driving school professionally.</p>
 
-            <Link to="/register-instructor" className="block w-full mt-8 py-3 text-center bg-[#2D3B2D] text-white font-medium rounded-lg shadow-lg shadow-[#2D3B2D]/25 hover:bg-[#3D4B3D] hover:shadow-xl transition-all">
-              Claim Early Access
-            </Link>
-            <p className="mt-4 text-center text-sm text-[#5C5347]">3-day free trial. Payments via Stripe.</p>
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#5C5347]">
+              This plan covers the core instructor workflow: diary, students, progress, invoicing, messages, and the student portal.
+            </p>
 
             <div className="mt-8 pt-8 border-t border-[#E8E4DD]">
-              <ul className="grid sm:grid-cols-2 gap-3">
+              <ul className="grid gap-3 sm:grid-cols-2">
                 {includedFeatures.map((feature) => (
                   <li key={feature} className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full bg-[#7A9B7A]/20 flex items-center justify-center shrink-0">
@@ -66,9 +70,20 @@ export default function Pricing() {
             </div>
           </div>
 
-          <p className="mt-8 text-center text-sm text-[#5C5347]">
-            Want your own branded app with a custom name and logo? <a href="#" className="font-medium text-[#2D3B2D] hover:underline">Contact us</a> for a custom quote.
-          </p>
+          <div className="rounded-[32px] bg-[#2D3B2D] p-8 text-white shadow-[0_28px_70px_rgba(31,48,38,0.2)] md:p-10">
+            <p className="text-sm uppercase tracking-[0.18em] text-white/55">Launch offer</p>
+            <h3 className="mt-4 text-3xl font-semibold">Get in early and keep the lower rate while subscribed.</h3>
+            <p className="mt-4 text-base leading-relaxed text-white/72">
+              No per-student fee. No tier maze. No separate portal upgrade. The pricing stays clear because the product should too.
+            </p>
+            <Link
+              to="/register-instructor"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-white px-6 py-3.5 font-medium text-[#2D3B2D] transition-all hover:-translate-y-0.5 hover:bg-white/92"
+            >
+              Claim early access
+            </Link>
+            <p className="mt-4 text-center text-sm text-white/60">Payments handled securely at checkout.</p>
+          </div>
         </div>
       </div>
     </section>

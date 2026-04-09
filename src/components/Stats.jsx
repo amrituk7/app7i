@@ -14,16 +14,16 @@ const colorClasses = {
 
 export default function Stats() {
   return (
-    <section className="bg-[#FAF8F5] border-y border-[#E8E4DD] py-8">
+    <section className="border-y border-[#E8E4DD] bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (
-            <div key={stat.label} className="group flex items-center gap-4 p-4 bg-white border border-[#E8E4DD] rounded-xl shadow-sm hover:shadow-md transition-all">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${colorClasses[stat.color]}`}>{stat.icon}</div>
+            <div key={stat.label} className="group flex items-center gap-4 rounded-2xl border border-[#E8E4DD] bg-[#FAF8F5] p-5 transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${colorClasses[stat.color]}`}>{stat.icon}</div>
               <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-[#5C5347]">{stat.label}</p>
-                <p className="text-xl font-bold text-[#2D3B2D]">{stat.value}</p>
-                <p className="text-xs text-[#5C5347] truncate">{stat.subtext}</p>
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#5C5347]">{stat.label}</p>
+                <p className="mt-1 text-2xl font-semibold text-[#2D3B2D]">{stat.value}</p>
+                <p className="text-sm text-[#5C5347]">{stat.subtext}</p>
               </div>
             </div>
           ))}
