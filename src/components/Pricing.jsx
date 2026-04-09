@@ -1,89 +1,117 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const includedFeatures = [
-  "Unlimited students",
-  "Unlimited lessons",
-  "Earnings dashboard and CSV export",
-  "Professional lesson invoices",
-  "Student portal with progress tracking",
-  "In-app messaging",
-  "Calendar view",
-  "Waiting list",
-  "Car details and MOT/insurance alerts",
-  "Mobile-ready on any device",
+const planContent = {
+  monthly: {
+    price: "GBP 11.99",
+    cadence: "/month",
+    normal: "Normally GBP 19.99/month during standard pricing.",
+    summary: "A low-friction way to start using App7i immediately with the full instructor workflow.",
+  },
+  yearly: {
+    price: "GBP 119.99",
+    cadence: "/year",
+    normal: "Normally GBP 150/year. Referred instructors still access the early-access yearly rate.",
+    summary: "The stronger value option for instructors who already know they want the cleaner long-term setup.",
+  },
+};
+
+const included = [
+  "Instructor dashboard and student portal",
+  "Lesson and progress management",
+  "Messaging and cleaner student follow-up",
+  "Professional billing direction with room to grow",
+  "Referral reward logic built into the offer story",
 ];
 
 export default function Pricing() {
-  const [isYearly, setIsYearly] = useState(false);
+  const [plan, setPlan] = useState("yearly");
 
   return (
-    <section id="pricing" className="bg-[#FAF8F5] py-20 md:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <p className="lp-eyebrow">Simple pricing</p>
-          <h2 className="mt-4 lp-display text-4xl sm:text-5xl">One plan. No clutter.</h2>
-          <p className="mt-5 text-lg text-[#5C5347]">A single instructor plan with the tools people actually care about, not a page full of upsells.</p>
+    <section id="pricing" className="app7i-section">
+      <div className="app7i-shell">
+        <div className="app7i-section-header centered">
+          <div className="app7i-kicker-light app7i-kicker">Pricing</div>
+          <h2 className="app7i-title">Simple public pricing. Strong referral upside.</h2>
+          <p className="app7i-copy">
+            The main offer stays easy to understand. The referral benefit adds extra motivation without turning the pricing table into a mess.
+          </p>
         </div>
 
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <span className={`text-sm ${!isYearly ? "font-semibold text-[#2D3B2D]" : "text-[#5C5347]"}`}>Monthly</span>
-          <button onClick={() => setIsYearly(!isYearly)} className="relative w-14 h-7 bg-[#E8E4DD] rounded-full hover:bg-[#DDD9D2] transition-colors">
-            <div className={`absolute top-0.5 w-6 h-6 bg-[#2D3B2D] rounded-full transition-transform ${isYearly ? "translate-x-7" : "translate-x-0.5"}`} />
-          </button>
-          <span className={`text-sm ${isYearly ? "font-semibold text-[#2D3B2D]" : "text-[#5C5347]"}`}>Yearly</span>
-          {isYearly && <span className="px-3 py-1 text-xs font-semibold bg-[#7A9B7A]/20 text-[#5C7A5C] rounded-full">Save 30%</span>}
-        </div>
+        <div className="app7i-pricing-grid">
+          <article className="app7i-pricing-card">
+            <div className="app7i-plan-switch" role="tablist" aria-label="Pricing plan toggle">
+              <button type="button" className={plan === "monthly" ? "is-active" : ""} onClick={() => setPlan("monthly")}>Monthly</button>
+              <button type="button" className={plan === "yearly" ? "is-active" : ""} onClick={() => setPlan("yearly")}>Yearly</button>
+            </div>
 
-        <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="rounded-[32px] border border-[#DED4C8] bg-[#FFFDF9] p-8 shadow-[0_22px_60px_rgba(45,59,45,0.06)] md:p-10">
-            <div className="flex flex-wrap items-start justify-between gap-6">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8B6F47]">Instructor plan</p>
-                <div className="mt-4 flex items-end gap-2">
-                  <span className="text-5xl font-semibold text-[#2D3B2D]">{isYearly ? "GBP 99.99" : "GBP 11.99"}</span>
-                  <span className="pb-1 text-[#5C5347]">/{isYearly ? "year" : "month"}</span>
+            <div className="app7i-price-row">
+              <div className="app7i-price">{planContent[plan].price}</div>
+              <div className="app7i-price-caption">{planContent[plan].cadence}</div>
+            </div>
+
+            <div className="app7i-inline-badge" style={{ marginTop: 16 }}>Early-access pricing</div>
+            <p className="app7i-price-note">{planContent[plan].summary}</p>
+            <p className="app7i-price-note">{planContent[plan].normal}</p>
+
+            <div className="app7i-benefits">
+              <div className="app7i-benefit">
+                <span className="app7i-list-bullet is-good">✓</span>
+                <span><strong>3-day free trial</strong> before the first charge.</span>
+              </div>
+              <div className="app7i-benefit">
+                <span className="app7i-list-bullet is-good">✓</span>
+                <span><strong>Referred instructors</strong> still get the GBP 119.99 early-access yearly rate.</span>
+              </div>
+              <div className="app7i-benefit">
+                <span className="app7i-list-bullet is-good">✓</span>
+                <span><strong>Clear upgrade logic</strong> for monthly users who unlock the GBP 99.99 yearly offer.</span>
+              </div>
+            </div>
+
+            <ul className="app7i-pricing-list">
+              {included.map((item) => (
+                <li key={item}>
+                  <span>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <div className="app7i-actions-row">
+              <Link to="/register-instructor" className="app7i-button app7i-button-primary">Start Early Access</Link>
+            </div>
+          </article>
+
+          <article className="app7i-pricing-card dark">
+            <div className="app7i-kicker">Referral reward</div>
+            <div className="app7i-price-row">
+              <div className="app7i-price dark">GBP 99.99</div>
+              <div className="app7i-price-caption dark">best yearly outcome after a successful referral</div>
+            </div>
+            <p className="app7i-price-note dark">
+              Referral pricing should feel like a meaningful benefit, not a confusing refund story.
+            </p>
+
+            <div className="app7i-referral-card">
+              <h3>How it works</h3>
+              <div className="app7i-referral-points">
+                <div className="app7i-referral-point">
+                  <strong>If you already paid yearly at GBP 119.99:</strong> one successful referral applies GBP 20 credit to your next renewal, making the next yearly bill effectively GBP 99.99.
                 </div>
-                {isYearly && <p className="mt-2 text-sm text-[#5C5347]"><span className="line-through">GBP 143.88</span> if paid monthly</p>}
-                <p className="mt-3 text-sm font-medium text-[#8B6F47]">Normally GBP 19.99/month while closed beta pricing is active.</p>
-              </div>
-              <div className="rounded-2xl bg-[#F3EEE6] px-4 py-3 text-sm font-medium text-[#2D3B2D]">
-                3-day free trial
+                <div className="app7i-referral-point">
+                  <strong>If you are on monthly:</strong> one successful referral unlocks a yearly switch offer at GBP 99.99.
+                </div>
+                <div className="app7i-referral-point">
+                  <strong>If your referred instructor joins:</strong> they get the GBP 119.99 early-access yearly rate through your link.
+                </div>
               </div>
             </div>
 
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#5C5347]">
-              This plan covers the core instructor workflow: diary, students, progress, invoicing, messages, and the student portal.
+            <p className="app7i-price-note dark">
+              This is the kind of reward message we can reinforce later in email: “You have 1 successful referral. Your next renewal will be GBP 99.99.”
             </p>
-
-            <div className="mt-8 pt-8 border-t border-[#E8E4DD]">
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {includedFeatures.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#7A9B7A]/20 flex items-center justify-center shrink-0">
-                      <svg className="w-3 h-3 text-[#5C7A5C]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <span className="text-sm text-[#2D3B2D]">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="rounded-[32px] bg-[#2D3B2D] p-8 text-white shadow-[0_28px_70px_rgba(31,48,38,0.2)] md:p-10">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/55">Launch offer</p>
-            <h3 className="mt-4 text-3xl font-semibold">Get in early and keep the lower rate while subscribed.</h3>
-            <p className="mt-4 text-base leading-relaxed text-white/72">
-              No per-student fee. No tier maze. No separate portal upgrade. The pricing stays clear because the product should too.
-            </p>
-            <Link
-              to="/register-instructor"
-              className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-white px-6 py-3.5 font-medium text-[#2D3B2D] transition-all hover:-translate-y-0.5 hover:bg-white/92"
-            >
-              Claim early access
-            </Link>
-            <p className="mt-4 text-center text-sm text-white/60">Payments handled securely at checkout.</p>
-          </div>
+          </article>
         </div>
       </div>
     </section>

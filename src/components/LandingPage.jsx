@@ -7,12 +7,13 @@ import Pricing from "./Pricing";
 import FAQ from "./FAQ";
 import CTA from "./CTA";
 import Footer from "./Footer";
+import "./LandingPage.css";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#2D3B2D]">
+    <div className="app7i-landing">
       <Header />
-      <main className="bg-[#FAF8F5]">
+      <main>
         <Hero />
         <HowItWorks />
         <Stats />
