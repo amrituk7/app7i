@@ -260,7 +260,7 @@ export const getUserProfile = async (uid) => {
   const docRef = doc(db, "users", uid);
   const snapshot = await getDoc(docRef);
   if (!snapshot.exists()) return null;
-  return { id: snapshot.id, ...snapshot.data() };
+  return { ...snapshot.data(), id: snapshot.id };
 };
 
 // Real-time listener for user profile — calls callback whenever the doc changes
@@ -273,12 +273,12 @@ export const subscribeUserProfile = (uid, callback) => {
   }
   const docRef = doc(db, "users", uid);
   return onSnapshot(docRef, (snapshot) => {
-    callback(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
+    callback(snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null);
   }, async () => {
     // Listener failed — fall back to one-time read instead of returning null
     try {
       const snapshot = await getDoc(docRef);
-      callback(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
+      callback(snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null);
     } catch {
       callback(null);
     }
@@ -355,7 +355,7 @@ export const getStudents = async () => {
   if (!uid) return [];
   const q = query(collection(db, "students"), where("instructorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 };
 
 // Paginated version for large student lists
@@ -376,7 +376,7 @@ export const getStudentsPaginated = async (pageSize = 25, lastDoc = null) => {
   const q = query(collection(db, "students"), ...constraints);
   const snapshot = await getDocs(q);
   return {
-    students: snapshot.docs.map((d) => ({ id: d.id, ...d.data() })),
+    students: snapshot.docs.map((d) => ({ ...d.data(), id: d.id })),
     lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
     hasMore: snapshot.docs.length === pageSize
   };
@@ -389,7 +389,7 @@ export const getStudent = async (id) => {
   }
   const docRef = doc(db, "students", id);
   const snapshot = await getDoc(docRef);
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null;
 };
 
 // Used by student portal -- finds student record by email (no instructor filter)
@@ -402,7 +402,7 @@ export const getStudentByEmail = async (email) => {
   const snapshot = await getDocs(q);
   if (!snapshot.empty) {
     const d = snapshot.docs[0];
-    return { id: d.id, ...d.data() };
+    return { ...d.data(), id: d.id };
   }
   return null;
 };
@@ -465,7 +465,7 @@ export const getLessons = async () => {
   if (!uid) return [];
   const q = query(collection(db, "lessons"), where("instructorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 };
 
 // Paginated version for large lesson lists
@@ -486,7 +486,7 @@ export const getLessonsPaginated = async (pageSize = 25, lastDoc = null) => {
   const q = query(collection(db, "lessons"), ...constraints);
   const snapshot = await getDocs(q);
   return {
-    lessons: snapshot.docs.map((d) => ({ id: d.id, ...d.data() })),
+    lessons: snapshot.docs.map((d) => ({ ...d.data(), id: d.id })),
     lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
     hasMore: snapshot.docs.length === pageSize
   };
@@ -498,7 +498,7 @@ export const getLessonsForStudent = async (studentId) => {
   }
   const q = query(collection(db, "lessons"), where("studentId", "==", studentId));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 };
 
 export const getLesson = async (id) => {
@@ -508,7 +508,7 @@ export const getLesson = async (id) => {
   }
   const docRef = doc(db, "lessons", id);
   const snapshot = await getDoc(docRef);
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null;
 };
 
 export const updateLesson = async (id, data) => {
@@ -572,7 +572,7 @@ export const getMessagesForStudent = async (studentId, instructorId) => {
     ? query(collection(db, "messages"), where("instructorId", "==", iId))
     : collection(db, "messages");
   const snapshot = await getDocs(q);
-  const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const all = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
   return all
     .filter((m) => m.sender === studentId || m.receiver === studentId)
     .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
@@ -586,7 +586,7 @@ export const getAllMessages = async () => {
   if (!uid) return [];
   const q = query(collection(db, "messages"), where("instructorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 };
 
 export const markMessageRead = async (id) => {
@@ -663,7 +663,7 @@ export const getNotifications = async () => {
   if (!uid) return [];
   const q = query(collection(db, "notifications"), where("instructorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 };
 
 export const markNotificationRead = async (id) => {
@@ -716,7 +716,7 @@ export const getTips = async (instructorId) => {
   if (!uid) return [];
   const q = query(collection(db, "tips"), where("instructorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 };
 
 export const deleteTip = async (id) => {
@@ -846,7 +846,7 @@ export const getWaitingList = async () => {
   if (!uid) return [];
   const q = query(collection(db, "waitingList"), where("instructorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id })).sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
 };
 
 export const addToWaitingList = async (entry) => {
@@ -962,7 +962,7 @@ export const subscribeToMessages = (studentId, instructorId, callback) => {
     const q = query(collection(db, "messages"), where("instructorId", "==", iId));
     return onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
+        .map((d) => ({ ...d.data(), id: d.id }))
         .filter(
           (m) =>
             (m.sender === iId && m.receiver === studentId) ||
@@ -995,12 +995,12 @@ export const subscribeToMessages = (studentId, instructorId, callback) => {
   }
 
   const unsub1 = onSnapshot(qSent, (snapshot) => {
-    sentMsgs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    sentMsgs = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
     merge();
   });
 
   const unsub2 = onSnapshot(qReceived, (snapshot) => {
-    receivedMsgs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    receivedMsgs = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
     merge();
   });
 
