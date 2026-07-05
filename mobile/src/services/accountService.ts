@@ -1,6 +1,7 @@
 import { deleteUser } from "firebase/auth";
 import { doc, deleteDoc, collection, query, where, getDocs, writeBatch } from "firebase/firestore";
-import { firebaseAuth, firestore, isFirebaseConfigured } from "./firebase";
+import { httpsCallable } from "firebase/functions";
+import { firebaseAuth, firestore, functions, isFirebaseConfigured } from "./firebase";
 
 /**
  * Delete the signed-in user's account.
@@ -8,13 +9,15 @@ import { firebaseAuth, firestore, isFirebaseConfigured } from "./firebase";
  * Google Play Data Deletion policy (effective Apr 2024) requires every app
  * with login to expose this in-app. Apple guideline 5.1.1.v requires the same.
  *
- * Order matters:
- * 1. Best-effort wipe of Firestore docs that the rules let the user delete
- *    (their /users doc, their student profile, their messages).
- * 2. deleteUser() removes the Firebase Auth account.
+ * Preferred path: the `deleteAccount` Cloud Function wipes ALL data the
+ * account owns (users doc + subcollections, student profile, messages,
+ * feedback rows, notifications — things rules block clients from touching)
+ * and then deletes the Auth account server-side.
  *
- * If step 2 fails with auth/requires-recent-login, the caller should prompt
- * the user to sign in again, then retry.
+ * Fallback (function unreachable, e.g. offline or not yet deployed): the
+ * legacy client-side best-effort wipe, then deleteUser(). If that fails with
+ * auth/requires-recent-login, the caller should prompt the user to sign in
+ * again, then retry.
  */
 export async function deleteCurrentAccount(): Promise<void> {
   if (!isFirebaseConfigured || !firebaseAuth || !firestore) {
@@ -23,10 +26,25 @@ export async function deleteCurrentAccount(): Promise<void> {
   const user = firebaseAuth.currentUser;
   if (!user) throw new Error("You must be signed in.");
 
+  if (functions) {
+    try {
+      await httpsCallable(functions, "deleteAccount")({});
+      // Auth account is already gone server-side; drop the local session.
+      try {
+        await firebaseAuth.signOut();
+      } catch {}
+      return;
+    } catch (err) {
+      console.warn(
+        "[account] server-side deleteAccount failed, falling back to client wipe",
+        err instanceof Error ? err.message.slice(0, 200) : err,
+      );
+    }
+  }
+
   const uid = user.uid;
 
-  // Best-effort cleanup. Failures here don't block deleteUser — server-side
-  // cleanup runs from a Cloud Function once the auth account is gone.
+  // Best-effort cleanup; failures here don't block deleteUser.
   try {
     await deleteDoc(doc(firestore, "users", uid));
   } catch {}

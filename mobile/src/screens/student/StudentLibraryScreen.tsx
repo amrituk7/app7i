@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../components/ui/Screen";
+import { useAuth } from "../../context/AuthContext";
+import { deleteCurrentAccount } from "../../services/accountService";
 import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -76,6 +78,40 @@ export function StudentLibraryScreen({ navigation }: { navigation: Nav }) {
   const styles = useThemedStyles(makeStyles);
   const c = useColors();
   const { mode, setMode } = useTheme();
+  const { logout } = useAuth();
+
+  function confirmDelete() {
+    Alert.alert(
+      "Delete account?",
+      "This permanently removes your App7i account, profile and lesson feedback. It cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: runDelete },
+      ],
+    );
+  }
+
+  async function runDelete() {
+    try {
+      await deleteCurrentAccount();
+      Alert.alert("Account deleted", "Your account has been removed.");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Delete did not go through.";
+      if (/recent.*login|requires-recent-login/i.test(msg)) {
+        Alert.alert(
+          "Please sign in again",
+          "For your security, sign in again then retry deleting the account.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Sign out", style: "destructive", onPress: logout },
+          ],
+        );
+      } else {
+        Alert.alert("Delete did not go through", "Check your connection and tap again.");
+      }
+    }
+  }
+
   return (
     <Screen>
       <Text style={styles.kicker}>Library</Text>
@@ -154,6 +190,38 @@ export function StudentLibraryScreen({ navigation }: { navigation: Nav }) {
             </Pressable>
           );
         })}
+      </View>
+
+      <Text style={styles.sectionLabel}>ACCOUNT</Text>
+      <View style={styles.appearanceCard}>
+        <Pressable
+          onPress={logout}
+          style={({ pressed }) => [
+            styles.appearanceRow,
+            styles.appearanceDivider,
+            pressed && { opacity: 0.7 },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Log out"
+        >
+          <View style={styles.appearanceIconWrap}>
+            <Ionicons name="log-out-outline" size={18} color={c.emeraldDark} />
+          </View>
+          <Text style={styles.appearanceLabel}>Log out</Text>
+          <Ionicons name="chevron-forward" size={16} color={c.slate300} />
+        </Pressable>
+        <Pressable
+          onPress={confirmDelete}
+          style={({ pressed }) => [styles.appearanceRow, pressed && { opacity: 0.7 }]}
+          accessibilityRole="button"
+          accessibilityLabel="Delete account"
+        >
+          <View style={[styles.appearanceIconWrap, { backgroundColor: c.redSoft }]}>
+            <Ionicons name="trash-outline" size={18} color={c.red} />
+          </View>
+          <Text style={[styles.appearanceLabel, { color: c.red }]}>Delete account</Text>
+          <Ionicons name="chevron-forward" size={16} color={c.slate300} />
+        </Pressable>
       </View>
     </Screen>
   );

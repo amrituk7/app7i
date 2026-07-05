@@ -5,105 +5,231 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isVerifiedAuth() {
+      return isAuth() && request.auth.token.email_verified == true;
+    }
+
     // Ownership check: caller's UID matches the instructorId field on the document
     function isInstructorFor(data) {
-      return isAuth() && data.instructorId == request.auth.uid;
+      return isVerifiedAuth() && data.instructorId == request.auth.uid;
     }
 
     function studentDoc(studentId) {
       return get(/databases/$(database)/documents/students/$(studentId));
     }
 
-    function isStudentEmailForId(studentId) {
-      return isAuth()
-        && request.auth.token.email != null
-        && studentDoc(studentId).data.email == request.auth.token.email;
+    function isStudentUidForId(studentId) {
+      return isVerifiedAuth()
+        && studentDoc(studentId).data.uid == request.auth.uid;
     }
 
     function isStudentSelf(data) {
-      return isAuth()
-        && request.auth.token.email != null
+      return isVerifiedAuth()
+        && data.uid == request.auth.uid;
+    }
+
+    function hasNoStudentUid(data) {
+      return !data.keys().hasAny(["uid"]) || data.uid == "";
+    }
+
+    function isStudentEmailMatch(data) {
+      return isVerifiedAuth()
         && data.email == request.auth.token.email;
     }
 
+    function isStudentClaimUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(["uid", "linkedAt", "updatedAt"])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.instructorId == resource.data.instructorId;
+    }
+
+    function messageStudentId(data) {
+      return data.sender == data.instructorId ? data.receiver : data.sender;
+    }
+
+    function conversationBlockId(instructorId, studentId) {
+      return instructorId + "__" + studentId;
+    }
+
+    function isConversationBlocked(instructorId, studentId) {
+      return exists(/databases/$(database)/documents/conversationBlocks/$(conversationBlockId(instructorId, studentId)));
+    }
+
     // Users: own doc only
+    // Server-managed fields (billing, referrals, dev flag) are blocked from
+    // both create and update; clients must never self-grant trials, referral
+    // credits, or instructor-of-record links — those are written by Cloud
+    // Functions via the admin SDK in response to verified events.
     match /users/{userId} {
       allow create: if isAuth()
         && request.auth.uid == userId
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.role in ["instructor", "student"];
+        && request.resource.data.role in ["instructor", "student"]
+        && !request.resource.data.keys().hasAny([
+            "isDeveloper",
+            "stripeCustomerId",
+            "stripeSubscriptionId",
+            "currentPeriodEnd",
+            "trialEnd",
+            "firstPaidChargeAt",
+            "refundEligibleUntil",
+            "referralEarningsTotal",
+            "lastPaidAt",
+            "referralCode",
+            "referredByCode",
+            "referredByInstructorUid",
+            "instructorId"
+          ])
+        && (!request.resource.data.keys().hasAny(["themeAccent"])
+            || (request.resource.data.themeAccent is string && request.resource.data.themeAccent.size() <= 32))
+        && (!request.resource.data.keys().hasAny(["subscriptionStatus"]) || request.resource.data.subscriptionStatus == "trialing");
       allow read: if isAuth() && request.auth.uid == userId;
       allow update: if isAuth() && request.auth.uid == userId
-        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["role", "uid"]));
-      allow delete: if false;
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            "role",
+            "uid",
+            "instructorId",
+            "email",
+            "isDeveloper",
+            "subscriptionStatus",
+            "stripeCustomerId",
+            "stripeSubscriptionId",
+            "trialEnd",
+            "currentPeriodEnd",
+            "firstPaidChargeAt",
+            "refundEligibleUntil",
+            "referralEarningsTotal",
+            "lastPaidAt",
+            "referralCode",
+            "referredByCode",
+            "referredByInstructorUid",
+            "calendarToken",
+            "calendarTokenUpdatedAt"
+          ]))
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["themeAccent"])
+            || (request.resource.data.themeAccent is string && request.resource.data.themeAccent.size() <= 32));
+      allow delete: if isAuth() && request.auth.uid == userId;
     }
 
     // Public instructor directory — only username, name, uid (no sensitive data)
+    // Write restricted to instructors to prevent students creating fake listings
     match /instructorDirectory/{usernameDoc} {
       allow read: if true;
-      allow write: if isAuth()
+      allow write: if isVerifiedAuth()
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.keys().hasOnly(["uid", "username", "name", "location", "rating", "transmissions"]);
+        && request.resource.data.keys().hasOnly(["uid", "username", "name", "location", "rating", "transmissions"])
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "instructor";
     }
 
     // Students: instructor owns writes; self-onboarding is handled server-side
     match /students/{studentId} {
-      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
-      allow read: if isInstructorFor(resource.data) || isStudentSelf(resource.data);
+      allow create: if isVerifiedAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow read: if isInstructorFor(resource.data) || isStudentSelf(resource.data) || isStudentEmailMatch(resource.data);
+      allow update: if isInstructorFor(resource.data)
+        || (isStudentEmailMatch(resource.data) && hasNoStudentUid(resource.data) && isStudentClaimUpdate());
+      // Students may delete their own claimed profile (account-deletion flow);
+      // full server-side cleanup runs via the deleteAccount callable.
+      allow delete: if isInstructorFor(resource.data) || isStudentSelf(resource.data);
+    }
+
+    // Lessons: instructor owns, student can read if linked to their UID-backed studentId
+    match /lessons/{lessonId} {
+      allow create: if isVerifiedAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow read: if isInstructorFor(resource.data) || isStudentUidForId(resource.data.studentId);
       allow update, delete: if isInstructorFor(resource.data);
     }
 
-    // Lessons: instructor owns, student can read if linked to their studentId
-    match /lessons/{lessonId} {
-      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
-      allow read: if isInstructorFor(resource.data) || isStudentEmailForId(resource.data.studentId);
-      allow update, delete: if isInstructorFor(resource.data);
+    // Expenses: instructor-owned ledger of business outgoings. Used to compute
+    // net profit on the Earnings screen and the HMRC tax-year summary export.
+    // Students never see these — strictly the instructor's private records.
+    match /expenses/{expenseId} {
+      allow read, update, delete: if isInstructorFor(resource.data);
+      allow create: if isVerifiedAuth()
+        && request.resource.data.instructorId == request.auth.uid
+        && request.resource.data.amount is number
+        && request.resource.data.date is string;
+    }
+
+    // Mileage entries: instructor-owned. HMRC allows 45p/mile for the first
+    // 10,000 business miles per tax year, then 25p. Records here feed the
+    // mileage allowance line on the tax-year summary.
+    match /mileage/{mileageId} {
+      allow read, update, delete: if isInstructorFor(resource.data);
+      allow create: if isVerifiedAuth()
+        && request.resource.data.instructorId == request.auth.uid
+        && request.resource.data.miles is number
+        && request.resource.data.date is string;
     }
 
     // Messages
     // Instructor reads via query: where("instructorId", "==", uid)
     // Student reads via queries: where("sender", "==", studentDocId) or where("receiver", "==", studentDocId)
     match /messages/{messageId} {
-      allow read: if isAuth()
+      allow read: if isVerifiedAuth()
         && (resource.data.instructorId == request.auth.uid
-            || isStudentEmailForId(resource.data.sender)
-            || isStudentEmailForId(resource.data.receiver));
-      allow create: if isAuth() && (
+            || isStudentUidForId(resource.data.sender)
+            || isStudentUidForId(resource.data.receiver));
+      allow create: if isVerifiedAuth() && (
         (request.resource.data.instructorId == request.auth.uid
           && (request.resource.data.sender == request.auth.uid
-              || request.resource.data.receiver == request.auth.uid))
-        || (isStudentEmailForId(request.resource.data.sender)
+              || request.resource.data.receiver == request.auth.uid)
+          && !isConversationBlocked(request.resource.data.instructorId, messageStudentId(request.resource.data)))
+        || (isStudentUidForId(request.resource.data.sender)
             && request.resource.data.instructorId == studentDoc(request.resource.data.sender).data.instructorId
-            && request.resource.data.receiver == request.resource.data.instructorId)
+            && request.resource.data.receiver == request.resource.data.instructorId
+            && !isConversationBlocked(request.resource.data.instructorId, request.resource.data.sender))
       );
       allow update: if isInstructorFor(resource.data)
-        || (isAuth()
-            && (isStudentEmailForId(resource.data.sender) || isStudentEmailForId(resource.data.receiver))
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read"]));
+        // Student can mark a message as read OR soft-delete their OWN sent message.
+        // Soft-delete patches: text (clear), deleted (true), deletedAt, deletedBy.
+        // The sender check (isStudentUidForId(resource.data.sender)) prevents a
+        // student deleting the instructor's messages.
+        || (isVerifiedAuth()
+            && (isStudentUidForId(resource.data.sender) || isStudentUidForId(resource.data.receiver))
+            && (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read"])
+              || (isStudentUidForId(resource.data.sender)
+                  && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["text", "deleted", "deletedAt", "deletedBy"])
+                  && request.resource.data.deleted == true
+                  && request.resource.data.deletedBy == request.auth.uid)
+            ));
       allow delete: if isInstructorFor(resource.data)
-        || (isAuth() && isStudentEmailForId(resource.data.sender));
+        || (isVerifiedAuth() && isStudentUidForId(resource.data.sender));
     }
 
-    // Notifications: instructor-only
+    // Notifications: scoped to the intended recipient; legacy instructor-only docs remain readable
     match /notifications/{notifId} {
-      allow read: if isInstructorFor(resource.data);
-      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
-      allow update, delete: if isInstructorFor(resource.data);
+      allow read: if isVerifiedAuth()
+        && (
+          resource.data.recipientUid == request.auth.uid
+          || (!resource.data.keys().hasAny(["recipientUid"]) && resource.data.instructorId == request.auth.uid)
+        );
+      allow create: if isVerifiedAuth()
+        && request.resource.data.recipientUid == request.auth.uid
+        && request.resource.data.instructorId == request.auth.uid;
+      allow update, delete: if isVerifiedAuth()
+        && (
+          resource.data.recipientUid == request.auth.uid
+          || (!resource.data.keys().hasAny(["recipientUid"]) && resource.data.instructorId == request.auth.uid)
+        );
     }
 
-    // Tips: instructor can write, students can read
+    // Tips: instructor reads/writes own, student reads only their instructor's tips
     match /tips/{tipId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow read: if isVerifiedAuth()
+        && (resource.data.instructorId == request.auth.uid
+            || resource.data.instructorId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.instructorId);
+      allow create: if isVerifiedAuth() && request.resource.data.instructorId == request.auth.uid;
       allow update, delete: if isInstructorFor(resource.data);
     }
 
-    // Settings: instructor reads/writes own docs; any authenticated user can read profile docs
+    // Settings: instructor reads/writes only their own profile and car docs
     match /settings/{settingId} {
-      allow read: if isAuth()
-        && (settingId.matches(".*-profile")
-            || settingId == request.auth.uid + "-car");
-      allow write: if isAuth()
+      allow read: if isVerifiedAuth()
+        && (settingId == request.auth.uid + "-car"
+            || settingId == request.auth.uid + "-profile");
+      allow write: if isVerifiedAuth()
         && (settingId == request.auth.uid + "-car"
             || settingId == request.auth.uid + "-profile");
     }
@@ -111,21 +237,121 @@ service cloud.firestore {
     // Waiting list: instructor-only
     match /waitingList/{entryId} {
       allow read: if isInstructorFor(resource.data);
-      allow create: if isAuth() && request.resource.data.instructorId == request.auth.uid;
+      allow create: if isVerifiedAuth() && request.resource.data.instructorId == request.auth.uid;
       allow update, delete: if isInstructorFor(resource.data);
     }
 
-    // Typing indicators: any authenticated user can read/write their own
+    // Typing indicators: only lesson participants can read/write
     match /typing/{typingId} {
-      allow read: if isAuth();
-      allow create, update: if isAuth();
-      allow delete: if isAuth();
+      allow read: if isVerifiedAuth()
+        && (
+          resource.data.instructorId == request.auth.uid
+          || isStudentUidForId(resource.data.studentId)
+        );
+      allow create, update: if isVerifiedAuth()
+        && request.resource.data.instructorId is string
+        && request.resource.data.studentId is string
+        && (
+          request.resource.data.instructorId == request.auth.uid
+          || isStudentUidForId(request.resource.data.studentId)
+        );
+      allow delete: if isVerifiedAuth()
+        && (
+          resource.data.instructorId == request.auth.uid
+          || isStudentUidForId(resource.data.studentId)
+        );
+    }
+
+    match /conversationBlocks/{blockId} {
+      allow read: if isVerifiedAuth()
+        && (
+          resource.data.instructorId == request.auth.uid
+          || isStudentUidForId(resource.data.studentId)
+        );
+      allow create: if isVerifiedAuth()
+        && request.resource.data.instructorId is string
+        && request.resource.data.studentId is string
+        && request.resource.data.blockedByUid == request.auth.uid
+        && request.resource.data.blockedByRole in ["instructor", "student"]
+        && (
+          request.resource.data.instructorId == request.auth.uid
+          || isStudentUidForId(request.resource.data.studentId)
+        );
+      allow delete: if isVerifiedAuth()
+        && (
+          resource.data.instructorId == request.auth.uid
+          || isStudentUidForId(resource.data.studentId)
+        );
+      allow update: if false;
     }
 
     // Support tickets: any authenticated user can create, no one reads (admin via console)
     match /supportTickets/{ticketId} {
       allow create: if isAuth();
       allow read, update, delete: if false;
+    }
+
+    // Anonymous lesson feedback (Phase 2).
+    // Doc ID format: `${lessonId}__${studentUid}` — encodes ownership in the
+    // ID itself so we don't need a studentUid field in the body. Instructors
+    // never read this collection; only the writing student and the server can.
+    // The aggregator Cloud Function (Phase 3) reads via admin SDK, bypassing rules.
+    match /lessonFeedback/{feedbackId} {
+      function feedbackOwnerUid() {
+        return feedbackId.split("__")[1];
+      }
+      function feedbackLessonId() {
+        return feedbackId.split("__")[0];
+      }
+      // Body must contain instructorId + lessonId (lessonId must match the
+      // doc id), rating 1-5, and the three text/array fields. We deny any
+      // attempt to write a raw studentUid into the body.
+      function validFeedbackBody() {
+        return request.resource.data.lessonId == feedbackLessonId()
+          && request.resource.data.instructorId is string
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5
+          && !request.resource.data.keys().hasAny(["studentUid", "studentUidHash", "studentName", "studentEmail"]);
+      }
+      allow create, update: if isVerifiedAuth()
+        && feedbackOwnerUid() == request.auth.uid
+        && validFeedbackBody();
+      allow read: if isVerifiedAuth() && feedbackOwnerUid() == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // Instructor feedback summaries (Phase 3) — read-only for the instructor
+    // they belong to. Doc ID prefix matches the instructor uid.
+    match /instructorFeedbackSummaries/{summaryId} {
+      allow read: if isVerifiedAuth() && summaryId.split("_")[0] == request.auth.uid;
+      allow write: if false; // server-only
+    }
+
+    // knownDevices: written exclusively by the recordSignIn Cloud Function (admin SDK).
+    // Clients have no direct access — read would leak device fingerprints; write would let
+    // a user fake "known" devices and suppress security emails.
+    match /users/{userId}/knownDevices/{deviceHash} {
+      allow read, write: if false;
+    }
+
+    // User-owned settings subcollection. Currently used for reminder preferences.
+    // Each user can read/write only their own docs. The scheduled reminder
+    // Cloud Function reads via admin SDK and bypasses these rules.
+    match /users/{userId}/settings/{settingId} {
+      allow read, write: if isAuth() && request.auth.uid == userId;
+    }
+
+    // Server-only collections — managed exclusively by Cloud Functions (admin SDK).
+    // Explicit deny prevents any client-side access.
+    match /notificationDispatches/{docId} {
+      allow read, write: if false;
+    }
+    match /referralCodes/{docId} {
+      allow read, write: if false;
+    }
+    match /referralEarnings/{docId} {
+      allow read, write: if false;
     }
 
   }

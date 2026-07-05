@@ -49,7 +49,7 @@ const SECTIONS: { heading: string; body: string }[] = [
   {
     heading: "Subscription + payment",
     body:
-      "Some features may require a paid subscription. Pricing is shown in-app before you subscribe. You can cancel at any time from Settings — your access continues until the end of the paid period. UK consumers have 14-day rights of withdrawal where applicable.",
+      "Some instructor features may require a paid subscription. Subscriptions are purchased and managed on the App7i website (app7i.com) — this app does not sell subscriptions or take payments. If you cancel on the website, your access continues until the end of the paid period. UK consumers have 14-day rights of withdrawal where applicable.",
   },
   {
     heading: "Ending your account",
