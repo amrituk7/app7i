@@ -1,0 +1,111 @@
+{
+  "expo": {
+    "name": "App7i",
+    "slug": "app7i-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "app7i",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a2f23"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.app7i.app",
+      "buildNumber": "1",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Used when uploading a profile picture.",
+        "NSPhotoLibraryUsageDescription": "Used when uploading a profile picture.",
+        "NSCalendarsUsageDescription": "App7i checks your calendar to warn you before booking a lesson that clashes with another event. Calendar data is read locally and never sent to App7i."
+      },
+      "associatedDomains": [
+        "applinks:app7i.com"
+      ]
+    },
+    "android": {
+      "package": "com.app7i.app",
+      "versionCode": 2,
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a2f23"
+      },
+      "permissions": [
+        "NOTIFICATIONS",
+        "POST_NOTIFICATIONS",
+        "READ_CALENDAR"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "app7i.com"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-apple-authentication",
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1"
+          },
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
+          }
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "@sentry/react-native",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#1a2f23",
+          "defaultChannel": "app7i-default"
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "App7i checks your calendar to warn you before booking a lesson that clashes with another event. Calendar data is read locally on your device and never sent to App7i."
+        }
+      ]
+    ],
+    "extra": {
+      "supportEmail": "support@app7i.com",
+      "privacyPolicyUrl": "https://app7i.com/privacy",
+      "termsUrl": "https://app7i.com/terms",
+      "eas": {
+        "projectId": "da081787-4289-4c52-8574-eb37f5a0acc9"
+      }
+    },
+    "owner": "amrituk07",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/da081787-4289-4c52-8574-eb37f5a0acc9"
+    }
+  }
+}

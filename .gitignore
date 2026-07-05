@@ -43,6 +43,15 @@ keystore/*.keystore
 # Capacitor
 capacitor.config.ts.bak
 
+# Expo (mobile/)
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/google-services.json
+mobile/eas-build-*
+.expo/
+
 # Logs
 .codex-devserver.log
 firebase-debug.log
@@ -62,3 +71,6 @@ ux-captures/
 android/app/google-services.json
 *.jks
 *.keystore
+
+# Play Store reviewer notes (contain test credentials)
+docs/google-play-reviewer-notes.md
