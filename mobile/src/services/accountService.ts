@@ -35,6 +35,20 @@ export async function deleteCurrentAccount(): Promise<void> {
       } catch {}
       return;
     } catch (err) {
+      // The callable may fail AFTER the server already deleted the account
+      // (e.g. network drop on the response). Probe before falling back so a
+      // completed deletion isn't reported as an error.
+      try {
+        await user.reload();
+      } catch (reloadErr) {
+        const code = (reloadErr as { code?: string })?.code || "";
+        if (/user-not-found|user-token-expired|user-disabled/.test(code)) {
+          try {
+            await firebaseAuth.signOut();
+          } catch {}
+          return;
+        }
+      }
       console.warn(
         "[account] server-side deleteAccount failed, falling back to client wipe",
         err instanceof Error ? err.message.slice(0, 200) : err,

@@ -2701,50 +2701,52 @@ exports.deleteAccount = onCall({ cors: ALLOWED_ORIGINS }, async (request) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Sign in first.");
 
-  const userSnap = await db.collection("users").doc(uid).get();
-  const role = userSnap.exists ? userSnap.data().role || "student" : "student";
-
   const refs = [];
 
-  if (role === "instructor") {
-    // Everything the instructor's business owns carries instructorId.
-    const ownedCollections = [
-      "students", "lessons", "expenses", "mileage", "tips", "waitingList",
-      "typing", "messages", "conversationBlocks", "lessonFeedback",
-      "notifications", "notificationDispatches"
-    ];
-    for (const coll of ownedCollections) {
-      await collectQueryRefs(db.collection(coll).where("instructorId", "==", uid), refs);
-    }
-    await collectQueryRefs(db.collection("instructorDirectory").where("uid", "==", uid), refs);
-    // Feedback summaries encode ownership in the doc id prefix `${uid}_`.
-    await collectQueryRefs(
-      db.collection("instructorFeedbackSummaries")
-        .where(FieldPath.documentId(), ">=", `${uid}_`)
-        .where(FieldPath.documentId(), "<", `${uid}_\uf8ff`),
-      refs
-    );
-    refs.push(db.collection("settings").doc(`${uid}-car`));
-    refs.push(db.collection("settings").doc(`${uid}-profile`));
-  } else {
-    const studentSnap = await db.collection("students").where("uid", "==", uid).get();
-    const studentIds = studentSnap.docs.map((d) => d.id);
-    studentSnap.docs.forEach((d) => refs.push(d.ref));
-    for (const sid of studentIds) {
-      await collectQueryRefs(db.collection("messages").where("sender", "==", sid), refs);
-      await collectQueryRefs(db.collection("messages").where("receiver", "==", sid), refs);
-      await collectQueryRefs(db.collection("typing").where("studentId", "==", sid), refs);
-      await collectQueryRefs(db.collection("conversationBlocks").where("studentId", "==", sid), refs);
-    }
-    // Anonymous feedback rows encode ownership in the doc id suffix `__${uid}`
-    // (no student field in the body by design), so filter a full scan.
-    const feedbackSnap = await db.collection("lessonFeedback").get();
-    feedbackSnap.docs
-      .filter((d) => d.id.endsWith(`__${uid}`))
-      .forEach((d) => refs.push(d.ref));
-  }
+  // Both sweeps run unconditionally: users/{uid}.role is client-writable at
+  // create time, so branching on it would let a mislabeled account skip half
+  // its cleanup. Wrong-role queries are self-scoped no-ops.
 
-  // Common to both roles.
+  // Instructor-owned business data (everything carries instructorId).
+  const ownedCollections = [
+    "students", "lessons", "expenses", "mileage", "tips", "waitingList",
+    "typing", "messages", "conversationBlocks", "lessonFeedback",
+    "notifications", "notificationDispatches"
+  ];
+  for (const coll of ownedCollections) {
+    await collectQueryRefs(db.collection(coll).where("instructorId", "==", uid), refs);
+  }
+  await collectQueryRefs(db.collection("instructorDirectory").where("uid", "==", uid), refs);
+  // Feedback summaries encode ownership in the doc id prefix `${uid}_`.
+  await collectQueryRefs(
+    db.collection("instructorFeedbackSummaries")
+      .where(FieldPath.documentId(), ">=", `${uid}_`)
+      .where(FieldPath.documentId(), "<", `${uid}_\uf8ff`),
+    refs
+  );
+  refs.push(db.collection("settings").doc(`${uid}-car`));
+  refs.push(db.collection("settings").doc(`${uid}-profile`));
+
+  // Learner-side data.
+  const studentSnap = await db.collection("students").where("uid", "==", uid).get();
+  const studentIds = studentSnap.docs.map((d) => d.id);
+  studentSnap.docs.forEach((d) => refs.push(d.ref));
+  for (const sid of studentIds) {
+    await collectQueryRefs(db.collection("messages").where("sender", "==", sid), refs);
+    await collectQueryRefs(db.collection("messages").where("receiver", "==", sid), refs);
+    await collectQueryRefs(db.collection("typing").where("studentId", "==", sid), refs);
+    await collectQueryRefs(db.collection("conversationBlocks").where("studentId", "==", sid), refs);
+  }
+  // Anonymous feedback rows encode ownership in the doc id suffix `__${uid}`
+  // (no student field in the body by design), so filter a full scan.
+  const feedbackSnap = await db.collection("lessonFeedback").get();
+  feedbackSnap.docs
+    .filter((d) => d.id.endsWith(`__${uid}`))
+    .forEach((d) => refs.push(d.ref));
+
+  // Common to both roles. supportTickets store uid/email/name/message \u2014
+  // admin-only by rules, so only this callable can purge them.
+  await collectQueryRefs(db.collection("supportTickets").where("uid", "==", uid), refs);
   await collectQueryRefs(db.collection("notifications").where("recipientUid", "==", uid), refs);
   await collectQueryRefs(db.collection("notificationDispatches").where("recipientUid", "==", uid), refs);
   for (const sub of ["knownDevices", "settings"]) {
@@ -2761,6 +2763,6 @@ exports.deleteAccount = onCall({ cors: ALLOWED_ORIGINS }, async (request) => {
 
   await adminAuth.deleteUser(uid);
 
-  console.log("[deleteAccount] account deleted", { uid, role, docsDeleted: refs.length });
+  console.log("[deleteAccount] account deleted", { uid, docsDeleted: refs.length });
   return { ok: true, docsDeleted: refs.length };
 });
