@@ -1,0 +1,12 @@
+# EAS upload filter. When this file exists EAS uses it INSTEAD of .gitignore,
+# which is exactly why it exists: google-services.json is gitignored (kept out
+# of the repo) but MUST be uploaded to the EAS builder for FCM to work.
+# Everything else mirrors the effective .gitignore for the mobile app.
+node_modules/
+.expo/
+dist/
+web-build/
+.env
+.env.local
+eas-build-*
+.claude/
