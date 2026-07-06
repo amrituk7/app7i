@@ -105,6 +105,14 @@ export async function deleteNotification(notificationId: string): Promise<void> 
   await deleteDoc(doc(db(), "notifications", notificationId));
 }
 
+export async function deleteNotifications(notificationIds: string[]): Promise<void> {
+  if (notificationIds.length === 0) return;
+  // Firestore batches cap at 500 writes; the inbox loads at most 100.
+  const batch = writeBatch(db());
+  notificationIds.forEach((id) => batch.delete(doc(db(), "notifications", id)));
+  await batch.commit();
+}
+
 export async function markAllNotificationsRead(uid: string): Promise<number> {
   const snap = await getDocs(
     query(

@@ -107,8 +107,27 @@ export function StudentTestReadinessScreen() {
 
       <Card style={styles.section}>
         <Text style={styles.sectionTitle}>Practical test</Text>
-        <Row label="Booked for" value={student.practicalTestDate || "Not booked yet"} />
+        <Row
+          label="Booked for"
+          value={
+            student.practicalTestDate
+              ? `${student.practicalTestDate}${student.practicalTestTime ? ` at ${student.practicalTestTime}` : ""}`
+              : "Not booked yet"
+          }
+        />
         <Row label="Test centre" value={student.testCentre || "—"} />
+        {student.testBookingRef ? (
+          <Row label="Booking reference" value={student.testBookingRef} />
+        ) : null}
+        {student.testCandidateNumber ? (
+          <Row label="Licence number" value={student.testCandidateNumber} />
+        ) : null}
+        {student.testBookingFee ? (
+          <Row
+            label="Booking fee"
+            value={`£${student.testBookingFee}${student.testBookingPaid ? " · paid" : " · to pay"}`}
+          />
+        ) : null}
         <Row
           label="Result"
           value={

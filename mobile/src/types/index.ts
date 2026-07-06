@@ -90,6 +90,12 @@ export type Student = {
   testCentre?: string;
   /** Fee paid to book the practical test slot (DVSA fee, £23 standard). */
   testBookingFee?: number;
+  /** DVSA booking reference for the practical test slot. */
+  testBookingRef?: string;
+  /** Candidate's driving licence number used for the DVSA booking. */
+  testCandidateNumber?: string;
+  /** Whether the student has paid / reimbursed the booking fee. */
+  testBookingPaid?: boolean;
   /** Set after the practical test happens. */
   testResult?: TestResult;
   /** DVSA fault counts on the actual test. Useful for retake planning. */

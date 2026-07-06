@@ -535,6 +535,9 @@ export type TestReadinessUpdate = Partial<{
   practicalTestTime: string;
   testCentre: string;
   testBookingFee: number | null;
+  testBookingRef: string;
+  testCandidateNumber: string;
+  testBookingPaid: boolean;
   testResult: TestResult;
   testFaults: { minor: number; serious: number; dangerous: number };
   readinessScore: number;
@@ -556,6 +559,11 @@ export async function updateStudentTestReadiness(
     const fee = update.testBookingFee;
     payload.testBookingFee = typeof fee === "number" && fee > 0 ? fee : null;
   }
+  if ("testBookingRef" in update) payload.testBookingRef = (update.testBookingRef || "").trim() || null;
+  if ("testCandidateNumber" in update) {
+    payload.testCandidateNumber = (update.testCandidateNumber || "").trim().toUpperCase() || null;
+  }
+  if ("testBookingPaid" in update) payload.testBookingPaid = Boolean(update.testBookingPaid);
   if ("testResult" in update) payload.testResult = update.testResult || null;
   if ("testFaults" in update) {
     payload.testFaults = update.testFaults

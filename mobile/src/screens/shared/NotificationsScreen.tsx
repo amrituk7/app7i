@@ -17,6 +17,7 @@ import { SwipeableRow } from "../../components/ui/SwipeableRow";
 import { useAuth } from "../../context/AuthContext";
 import {
   deleteNotification,
+  deleteNotifications,
   getNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -82,6 +83,8 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     if (!user?.uid) return;
@@ -140,6 +143,33 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
     }
   }
 
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelected(new Set());
+  }
+
+  async function onDeleteSelected() {
+    if (selected.size === 0) return;
+    hapticTap();
+    const ids = Array.from(selected);
+    setItems((prev) => prev.filter((n) => !selected.has(n.id)));
+    exitSelectMode();
+    try {
+      await deleteNotifications(ids);
+    } catch {
+      await load();
+    }
+  }
+
   return (
     <Screen
       refreshControl={
@@ -158,20 +188,58 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
         <View style={styles.backButton} />
       </View>
 
-      <View style={styles.subHeaderRow}>
-        <Text style={styles.subHeaderText}>
-          {unreadCount > 0
-            ? `${unreadCount} unread · swipe left to delete`
-            : items.length > 0
-              ? "All caught up · swipe left to delete"
-              : "You're all caught up"}
-        </Text>
-        {unreadCount > 0 ? (
-          <Pressable onPress={onMarkAllRead} style={({ pressed }) => pressed && styles.pressed}>
-            <Text style={styles.markAllText}>Mark all read</Text>
-          </Pressable>
-        ) : null}
-      </View>
+      {selectMode ? (
+        <View style={styles.subHeaderRow}>
+          <Text style={styles.subHeaderText}>
+            {selected.size > 0 ? `${selected.size} selected` : "Tap notifications to select"}
+          </Text>
+          <View style={styles.subHeaderActions}>
+            <Pressable
+              onPress={() => setSelected(new Set(items.map((n) => n.id)))}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <Text style={styles.markAllText}>All</Text>
+            </Pressable>
+            <Pressable
+              onPress={onDeleteSelected}
+              disabled={selected.size === 0}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <Text style={[styles.deleteText, selected.size === 0 && styles.actionDisabled]}>
+                Delete{selected.size > 0 ? ` (${selected.size})` : ""}
+              </Text>
+            </Pressable>
+            <Pressable onPress={exitSelectMode} style={({ pressed }) => pressed && styles.pressed}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.subHeaderRow}>
+          <Text style={styles.subHeaderText}>
+            {unreadCount > 0
+              ? `${unreadCount} unread · swipe left to delete`
+              : items.length > 0
+                ? "All caught up · swipe left to delete"
+                : "You're all caught up"}
+          </Text>
+          <View style={styles.subHeaderActions}>
+            {items.length > 0 ? (
+              <Pressable
+                onPress={() => setSelectMode(true)}
+                style={({ pressed }) => pressed && styles.pressed}
+              >
+                <Text style={styles.markAllText}>Select</Text>
+              </Pressable>
+            ) : null}
+            {unreadCount > 0 ? (
+              <Pressable onPress={onMarkAllRead} style={({ pressed }) => pressed && styles.pressed}>
+                <Text style={styles.markAllText}>Mark all read</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+      )}
 
       {error ? (
         <Card style={styles.errorCard}>
@@ -195,22 +263,40 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
         <View style={styles.list}>
           {items.map((item, index) => (
             <FadeInView key={item.id} delay={Math.min(index, 10) * 40}>
-              <SwipeableRow radius={16} onAction={() => onDelete(item)}>
+              <SwipeableRow radius={16} disabled={selectMode} onAction={() => onDelete(item)}>
                 <Pressable
-                  onPress={() => onItemPress(item)}
+                  onPress={() => (selectMode ? toggleSelected(item.id) : onItemPress(item))}
+                  onLongPress={() => {
+                    if (!selectMode) {
+                      hapticTap();
+                      setSelectMode(true);
+                      setSelected(new Set([item.id]));
+                    }
+                  }}
                   style={({ pressed }) => [
                     styles.row,
                     !item.read && styles.rowUnread,
+                    selectMode && selected.has(item.id) && styles.rowSelected,
                     pressed && styles.pressed,
                   ]}
                 >
-                  <View style={[styles.rowIcon, !item.read && styles.rowIconUnread]}>
-                    <Ionicons
-                      name={typeIcon(item.type)}
-                      size={18}
-                      color={item.read ? c.slate500 : c.emerald}
-                    />
-                  </View>
+                  {selectMode ? (
+                    <View style={styles.rowIcon}>
+                      <Ionicons
+                        name={selected.has(item.id) ? "checkmark-circle" : "ellipse-outline"}
+                        size={22}
+                        color={selected.has(item.id) ? c.emerald : c.slate500}
+                      />
+                    </View>
+                  ) : (
+                    <View style={[styles.rowIcon, !item.read && styles.rowIconUnread]}>
+                      <Ionicons
+                        name={typeIcon(item.type)}
+                        size={18}
+                        color={item.read ? c.slate500 : c.emerald}
+                      />
+                    </View>
+                  )}
                   <View style={styles.rowBody}>
                     <View style={styles.rowTitleLine}>
                       <Text style={[styles.rowTitle, !item.read && styles.rowTitleUnread]} numberOfLines={1}>
@@ -222,7 +308,7 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
                       {item.message}
                     </Text>
                   </View>
-                  {!item.read ? <View style={styles.unreadDot} /> : null}
+                  {!selectMode && !item.read ? <View style={styles.unreadDot} /> : null}
                 </Pressable>
               </SwipeableRow>
             </FadeInView>
@@ -270,6 +356,28 @@ const makeStyles = (c: ColorPalette) =>
       color: c.emerald,
       fontSize: 13,
       fontWeight: "700",
+    },
+    subHeaderActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.md,
+    },
+    deleteText: {
+      color: c.red,
+      fontSize: 13,
+      fontWeight: "700",
+    },
+    cancelText: {
+      color: c.slate500,
+      fontSize: 13,
+      fontWeight: "700",
+    },
+    actionDisabled: {
+      opacity: 0.4,
+    },
+    rowSelected: {
+      borderWidth: 1,
+      borderColor: c.emerald,
     },
     errorCard: {
       backgroundColor: c.redSoft,

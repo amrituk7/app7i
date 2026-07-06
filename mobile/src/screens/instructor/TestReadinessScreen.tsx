@@ -48,6 +48,9 @@ export function TestReadinessScreen({
   const [practicalTestTime, setPracticalTestTime] = useState("");
   const [testCentre, setTestCentre] = useState("");
   const [testBookingFee, setTestBookingFee] = useState("");
+  const [testBookingRef, setTestBookingRef] = useState("");
+  const [testCandidateNumber, setTestCandidateNumber] = useState("");
+  const [testBookingPaid, setTestBookingPaid] = useState(false);
   const [testResult, setTestResult] = useState<TestResult>(null);
   const [testFaultsMinor, setTestFaultsMinor] = useState("0");
   const [testFaultsSerious, setTestFaultsSerious] = useState("0");
@@ -76,6 +79,9 @@ export function TestReadinessScreen({
           setPracticalTestTime(s.practicalTestTime || "");
           setTestCentre(s.testCentre || "");
           setTestBookingFee(s.testBookingFee != null ? String(s.testBookingFee) : "");
+          setTestBookingRef(s.testBookingRef || "");
+          setTestCandidateNumber(s.testCandidateNumber || "");
+          setTestBookingPaid(Boolean(s.testBookingPaid));
           setTestResult(s.testResult || null);
           setTestFaultsMinor(String(s.testFaults?.minor ?? 0));
           setTestFaultsSerious(String(s.testFaults?.serious ?? 0));
@@ -105,6 +111,9 @@ export function TestReadinessScreen({
         practicalTestTime,
         testCentre,
         testBookingFee: testBookingFee ? Number(testBookingFee) : null,
+        testBookingRef,
+        testCandidateNumber,
+        testBookingPaid,
         testResult,
         testFaults:
           testResult === "pass" || testResult === "fail"
@@ -236,6 +245,25 @@ export function TestReadinessScreen({
           placeholder="e.g. 23"
           keyboardType="number-pad"
         />
+        <Field
+          label="Booking reference"
+          value={testBookingRef}
+          onChangeText={setTestBookingRef}
+          placeholder="DVSA booking ref, e.g. 12345678"
+          autoCapitalize="characters"
+        />
+        <Field
+          label="Candidate licence number"
+          value={testCandidateNumber}
+          onChangeText={setTestCandidateNumber}
+          placeholder="e.g. SINGH906132AS9XX"
+          autoCapitalize="characters"
+        />
+        <ToggleRow
+          label="Booking fee paid by student"
+          value={testBookingPaid}
+          onChange={setTestBookingPaid}
+        />
       </Card>
 
       <Card style={styles.section}>
@@ -358,12 +386,14 @@ function Field({
   onChangeText,
   placeholder,
   keyboardType,
+  autoCapitalize,
 }: {
   label: string;
   value: string;
   onChangeText: (t: string) => void;
   placeholder?: string;
   keyboardType?: "default" | "numbers-and-punctuation" | "number-pad";
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 }) {
   const styles = useThemedStyles(makeStyles);
   const c = useColors();
@@ -377,6 +407,8 @@ function Field({
         placeholderTextColor={c.slate500}
         style={styles.input}
         keyboardType={keyboardType || "default"}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCapitalize === "characters" ? false : undefined}
       />
     </View>
   );
