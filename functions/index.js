@@ -931,6 +931,45 @@ async function notifyLessonBooked(lessonId, lesson) {
   const lessonDate = formatLessonDate(lesson.date);
   const lessonTime = formatLessonTime(lesson.time);
 
+  // Weekly series: every occurrence is its own doc, so per-lesson triggers
+  // would fire N near-identical notifications the moment a series is booked.
+  // Dedupe on the shared group id instead — the first trigger to land wins
+  // and describes the whole series; the rest are swallowed by the dispatch
+  // transaction. Every doc in the group shares the weekday and time.
+  const seriesId = lesson.recurringGroupId || null;
+  const seriesCount = Number(lesson.recurringWeeks) || 0;
+  if (seriesId && seriesCount > 1) {
+    const weekday = new Date(`${lesson.date}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long" });
+    const seriesNotifications = [
+      {
+        title: "Weekly lessons booked",
+        message: `${studentName} is booked for ${seriesCount} weekly lessons — ${weekday}s at ${lessonTime}.`,
+        type: "lesson_booked",
+        recipientUid: instructorUid,
+        recipientRole: "instructor",
+        instructorId: instructorUid,
+        lessonId,
+        url: "/notifications",
+        dedupeKey: `lesson_booked:group:${seriesId}:instructor`
+      }
+    ];
+    if (learnerUid) {
+      seriesNotifications.push({
+        title: "Weekly lessons confirmed",
+        message: `${seriesCount} weekly lessons with ${instructorName} — ${weekday}s at ${lessonTime}.`,
+        type: "lesson_booked",
+        recipientUid: learnerUid,
+        recipientRole: "learner",
+        instructorId: instructorUid,
+        lessonId,
+        url: "/notifications",
+        dedupeKey: `lesson_booked:group:${seriesId}:learner`
+      });
+    }
+    await Promise.all(seriesNotifications.map((item) => createNotificationIfNeeded(item)));
+    return;
+  }
+
   const notifications = [
     {
       title: "Lesson booked",

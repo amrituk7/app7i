@@ -343,6 +343,8 @@ export async function loadOrCreateUserDoc(
       onboardingComplete?: boolean;
       subscriptionStatus?: AppUser["subscriptionStatus"];
       trialEnd?: number | { toMillis?: () => number };
+      displayName?: string;
+      username?: string;
     };
     const trialEndMs =
       typeof data.trialEnd === "number"
@@ -350,11 +352,19 @@ export async function loadOrCreateUserDoc(
         : typeof data.trialEnd?.toMillis === "function"
           ? data.trialEnd.toMillis()
           : undefined;
+    // Profile name from the users doc wins — it's what the user maintains in
+    // My Profile (saveInstructorProfile mirrors it here). Auth displayName is
+    // only set by Google/Apple providers and goes stale after profile edits.
+    const docName = typeof data.displayName === "string" && data.displayName.trim()
+      ? data.displayName.trim()
+      : typeof data.username === "string" && data.username.trim()
+        ? data.username.trim()
+        : undefined;
     return {
       uid: user.uid,
       email: user.email || "",
       emailVerified: user.emailVerified,
-      displayName: user.displayName || undefined,
+      displayName: docName || user.displayName || undefined,
       role: data.role || defaultRole,
       onboardingComplete:
         data.onboardingComplete ?? (data.role === "student"),

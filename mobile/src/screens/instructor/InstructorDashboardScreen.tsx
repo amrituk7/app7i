@@ -111,12 +111,10 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
     .filter((l) => l.paymentStatus === "paid")
     .reduce((sum, l) => sum + l.price, 0);
   const nextLesson = todayLessons[0];
-  // Friendly first name with sensible fallback chain — never the awkward "there".
-  // Order: displayName first word → email local part → "Instructor".
-  const firstName =
-    user?.displayName?.split(" ")[0]
-    || (user?.email ? user.email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "")
-    || "Instructor";
+  // Friendly first name — displayName now resolves from the users doc
+  // (profile name / username) before the auth provider name. Never show the
+  // email id under the greeting; a plain "Instructor" beats a raw mail id.
+  const firstName = user?.displayName?.split(" ")[0] || "Instructor";
 
   if (loading) {
     return (
