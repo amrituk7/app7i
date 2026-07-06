@@ -14,6 +14,7 @@ import { Card } from "../../components/ui/Card";
 import { FadeInView } from "../../components/ui/FadeInView";
 import { ListRow } from "../../components/ui/ListRow";
 import { MetricCard } from "../../components/ui/MetricCard";
+import { NotificationBell } from "../../components/ui/NotificationBell";
 import { Pill } from "../../components/ui/Pill";
 import { Screen } from "../../components/ui/Screen";
 import { SectionHeader } from "../../components/ui/SectionHeader";
@@ -141,12 +142,15 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
           <Text style={styles.greeting}>{greeting()}</Text>
           <Text style={styles.name}>{firstName}</Text>
         </View>
-        <Pressable
-          onPress={() => navigation.navigate("Settings")}
-          style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}
-        >
-          <Text style={styles.avatarText}>{initials(user?.displayName || user?.email)}</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <NotificationBell onPress={() => navigation.navigate("Notifications")} />
+          <Pressable
+            onPress={() => navigation.navigate("Settings")}
+            style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}
+          >
+            <Text style={styles.avatarText}>{initials(user?.displayName || user?.email)}</Text>
+          </Pressable>
+        </View>
       </View>
 
       {error && (
@@ -497,6 +501,11 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   },
   headerText: {
     flex: 1,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   greeting: {
     color: c.slate500,

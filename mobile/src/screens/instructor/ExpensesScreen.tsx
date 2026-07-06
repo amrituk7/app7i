@@ -29,6 +29,7 @@ import { useThemedStyles } from "../../theme/useThemedStyles";
 import { spacing } from "../../theme/spacing";
 import type { Expense, ExpenseCategory } from "../../types";
 import { formatGBP } from "../../utils/currency";
+import { describeFirestoreError } from "../../utils/firestoreError";
 import { hapticTap, hapticWarning } from "../../utils/haptics";
 
 type Nav = { goBack: () => void };
@@ -81,7 +82,7 @@ export function ExpensesScreen({ navigation }: { navigation: Nav }) {
     try {
       setExpenses(await getExpenses(user.uid, { max: 200 }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't load expenses.");
+      setError(describeFirestoreError(err, { action: "getExpenses" }));
     }
   }, [user?.uid]);
 
@@ -120,7 +121,7 @@ export function ExpensesScreen({ navigation }: { navigation: Nav }) {
               await deleteExpense(expense.id);
               setExpenses((prev) => prev.filter((e) => e.id !== expense.id));
             } catch (err) {
-              Alert.alert("Couldn't delete", err instanceof Error ? err.message : "Try again.");
+              Alert.alert("Couldn't delete", describeFirestoreError(err, { action: "deleteExpense" }));
             }
           },
         },
@@ -283,7 +284,7 @@ function AddExpenseSheet({
         createdAt: Date.now(),
       });
     } catch (err) {
-      Alert.alert("Couldn't save", err instanceof Error ? err.message : "Try again.");
+      Alert.alert("Couldn't save", describeFirestoreError(err, { action: "addExpense" }));
     } finally {
       setSubmitting(false);
     }

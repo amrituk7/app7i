@@ -62,6 +62,7 @@ import { TipsScreen } from "../screens/instructor/TipsScreen";
 import { StudentTipsScreen } from "../screens/student/StudentTipsScreen";
 import { ExpensesScreen } from "../screens/instructor/ExpensesScreen";
 import { MileageScreen } from "../screens/instructor/MileageScreen";
+import { NotificationsScreen } from "../screens/shared/NotificationsScreen";
 import { PrivacyPolicyScreen } from "../screens/shared/PrivacyPolicyScreen";
 import { TermsScreen } from "../screens/shared/TermsScreen";
 
@@ -140,6 +141,7 @@ function safeScreen(
 
 // Cache wrapped components at module scope so React Navigation gets stable refs.
 const SafeInstructorDashboard = safeScreen(InstructorDashboardScreen, "Dashboard");
+const SafeNotifications = safeScreen(NotificationsScreen, "Notifications");
 const SafeTodayLessons = safeScreen(TodayLessonsScreen, "Lessons");
 const SafeLessonsCalendar = safeScreen(LessonsCalendarScreen, "Calendar");
 const SafeStudents = safeScreen(StudentsScreen, "Students");
@@ -420,6 +422,7 @@ export function AppNavigator() {
               <Stack.Screen name="TestReadiness" component={SafeTestReadiness} options={{ title: "Test readiness" }} />
               <Stack.Screen name="InstructorMessages" component={SafeMessages} options={{ headerShown: false }} />
               <Stack.Screen name="Tips" component={SafeTips} options={{ headerShown: false }} />
+              <Stack.Screen name="Notifications" component={SafeNotifications} options={{ headerShown: false }} />
             </>
           ) : (
             <>
@@ -433,6 +436,7 @@ export function AppNavigator() {
               <Stack.Screen name="StudentTips" component={SafeStudentTips} options={{ title: "Tips from instructor" }} />
               <Stack.Screen name="PrivacyPolicy" component={SafePrivacy} options={{ headerShown: false }} />
               <Stack.Screen name="Terms" component={SafeTerms} options={{ headerShown: false }} />
+              <Stack.Screen name="Notifications" component={SafeNotifications} options={{ headerShown: false }} />
             </>
           )}
         </Stack.Navigator>

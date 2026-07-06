@@ -12,6 +12,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { ListRow } from "../../components/ui/ListRow";
 import { MetricCard } from "../../components/ui/MetricCard";
 import { NextLessonCard } from "../../components/student/NextLessonCard";
+import { NotificationBell } from "../../components/ui/NotificationBell";
 import { TestReadinessCard } from "../../components/TestReadinessCard";
 import { computeTestReadiness } from "../../utils/testReadiness";
 import { Screen } from "../../components/ui/Screen";
@@ -134,8 +135,13 @@ export function StudentDashboardScreen({ navigation }: { navigation: MobileNavig
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emerald} />
       }
     >
-      <Text style={styles.kicker}>{timeOfDayGreeting()}</Text>
-      <Text style={styles.title}>{student ? student.name.split(" ")[0] : "Your driving progress"}</Text>
+      <View style={styles.headerRow}>
+        <View style={styles.headerTextWrap}>
+          <Text style={styles.kicker}>{timeOfDayGreeting()}</Text>
+          <Text style={styles.title}>{student ? student.name.split(" ")[0] : "Your driving progress"}</Text>
+        </View>
+        <NotificationBell onPress={() => navigation.navigate("Notifications")} />
+      </View>
       <Text style={styles.copy}>Lessons, notes, progress and invoices from your instructor.</Text>
 
       {error ? (
@@ -275,6 +281,15 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: 240,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+  headerTextWrap: {
+    flex: 1,
   },
   kicker: {
     color: c.emerald,

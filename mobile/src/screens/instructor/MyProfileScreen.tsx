@@ -15,6 +15,7 @@ import { AppTextInput } from "../../components/ui/AppTextInput";
 import { Card } from "../../components/ui/Card";
 import { Screen } from "../../components/ui/Screen";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { SubscriptionStatusCard } from "../../components/ui/SubscriptionStatusCard";
 import { useAuth } from "../../context/AuthContext";
 import {
   checkUsernameAvailable,
@@ -168,6 +169,8 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
       </View>
 
       {error ? <Notice icon="warning-outline" message={error} /> : null}
+
+      <SubscriptionStatusCard user={user} />
 
       <Card style={styles.formCard}>
         <View>

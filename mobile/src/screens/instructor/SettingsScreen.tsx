@@ -25,8 +25,6 @@ import { useThemedStyles } from "../../theme/useThemedStyles";
 import { formatGBP } from "../../utils/currency";
 
 const SUPPORT_EMAIL = "support@app7i.com";
-const PRIVACY_URL = "https://app7i.com/privacy";
-const TERMS_URL = "https://app7i.com/terms";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -89,12 +87,6 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
     await load();
     setRefreshing(false);
   }, [load]);
-
-  function openLink(url: string) {
-    Linking.openURL(url).catch(() =>
-      Alert.alert("Link did not open", "Check your connection and try again."),
-    );
-  }
 
   function emailSupport() {
     Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=App7i%20support`).catch(() =>
@@ -225,6 +217,14 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
           </SettingsSection>
 
           <AppearanceSection />
+
+          <SettingsSection title="Billing">
+            <SettingsRow
+              icon="card-outline"
+              title="Subscription billing"
+              subtitle="Instructor subscriptions are managed on the secure App7i web portal. This Android app does not sell subscriptions in-app."
+            />
+          </SettingsSection>
 
           <SettingsSection title="Support">
             <SettingsRow

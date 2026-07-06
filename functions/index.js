@@ -820,9 +820,40 @@ async function maybeSendPushNotification(recipientUid, payload) {
   return { attempted: true, anyDelivered };
 }
 
+// Per-type mute switches, stored on users/{uid}.notificationPrefs by the
+// mobile/web notification settings. Types not listed here (reminders, account
+// security, test pushes) can't be muted this way — reminders have their own
+// reminderPrefs, and the rest are too important to silence.
+const NOTIFICATION_PREF_KEYS = {
+  message_received: "messages",
+  lesson_booked: "lessonActivity",
+  lesson_updated: "lessonActivity",
+  lesson_cancelled: "lessonActivity",
+  lesson_payment_review: "paymentPrompts",
+  instructor_morning_summary: "dailySummary",
+  instructor_day_complete: "dailySummary",
+  lesson_feedback_prompt: "feedbackPrompts",
+  instructor_feedback_summary: "feedbackSummaries"
+};
+
+async function isNotificationTypeMuted(recipientUid, type) {
+  const prefKey = NOTIFICATION_PREF_KEYS[type];
+  if (!prefKey) return false;
+  try {
+    const snap = await db.collection("users").doc(recipientUid).get();
+    const prefs = snap.exists ? snap.data().notificationPrefs : null;
+    return !!prefs && prefs[prefKey] === false;
+  } catch (error) {
+    // Fail open — a prefs read hiccup must never swallow a notification.
+    console.warn("notificationPrefs read failed", recipientUid, error.message);
+    return false;
+  }
+}
+
 async function createNotificationIfNeeded(payload) {
   const dedupeKey = payload.dedupeKey;
   if (!dedupeKey || !payload.recipientUid) return null;
+  if (await isNotificationTypeMuted(payload.recipientUid, payload.type || "general")) return null;
   const storeInCenter = payload.storeInCenter !== false;
 
   const dispatchRef = db.collection("notificationDispatches").doc(toDispatchDocId(dedupeKey));
@@ -1000,7 +1031,17 @@ async function processNewMessageNotification(messageId, message) {
 }
 
 async function notifyLessonUpdated(lessonId, before, after, eventId) {
-  if (!after?.instructorId || isLessonCancelled(after)) return;
+  if (!after?.instructorId) return;
+
+  // A lesson transitioning to cancelled notifies both parties — previously
+  // cancellations were silently swallowed and students never found out.
+  const becameCancelled = !isLessonCancelled(before) && isLessonCancelled(after);
+  if (becameCancelled) {
+    await notifyLessonCancelled(lessonId, after, eventId);
+    return;
+  }
+  if (isLessonCancelled(after)) return;
+
   const watchedFields = ["date", "time", "duration", "notes"];
   const changed = watchedFields.some((field) => (before?.[field] || null) !== (after?.[field] || null));
   if (!changed) return;
@@ -1035,6 +1076,43 @@ async function notifyLessonUpdated(lessonId, before, after, eventId) {
       lessonId,
       url: "/notifications",
       dedupeKey: `lesson_updated:${lessonId}:learner:${eventId}`
+    });
+  }
+
+  await Promise.all(notifications.map((item) => createNotificationIfNeeded(item)));
+}
+
+async function notifyLessonCancelled(lessonId, lesson, eventId) {
+  const { instructorUid, instructorName, studentData, learnerUid } = await resolveLessonParticipants(lesson);
+  const studentName = lesson.studentName || studentData?.name || "your student";
+  const lessonDate = formatLessonDate(lesson.date);
+  const lessonTime = formatLessonTime(lesson.time);
+
+  const notifications = [
+    {
+      title: "Lesson cancelled",
+      message: `${studentName}'s lesson on ${lessonDate} at ${lessonTime} has been cancelled.`,
+      type: "lesson_cancelled",
+      recipientUid: instructorUid,
+      recipientRole: "instructor",
+      instructorId: instructorUid,
+      lessonId,
+      url: "/notifications",
+      dedupeKey: `lesson_cancelled:${lessonId}:instructor:${eventId}`
+    }
+  ];
+
+  if (learnerUid) {
+    notifications.push({
+      title: "Lesson cancelled",
+      message: `Your lesson with ${instructorName} on ${lessonDate} at ${lessonTime} has been cancelled.`,
+      type: "lesson_cancelled",
+      recipientUid: learnerUid,
+      recipientRole: "learner",
+      instructorId: instructorUid,
+      lessonId,
+      url: "/notifications",
+      dedupeKey: `lesson_cancelled:${lessonId}:learner:${eventId}`
     });
   }
 

@@ -47,6 +47,11 @@ export function describeFirestoreError(
     return "Too many tries. Wait a moment and try again.";
   }
   if (code === "failed-precondition") {
+    // Missing composite index — the raw message is a wall of console URLs.
+    // Never show that to users; it reads like something is broken or fake.
+    if (/index/i.test(msg)) {
+      return "This feature is still being set up on the server. Try again in a few minutes.";
+    }
     return "Some preconditions weren't met. Refresh and try again.";
   }
   if (code === "cancelled" || code === "aborted") {

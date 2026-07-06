@@ -20,6 +20,12 @@ import {
   getReminderPrefs,
   saveReminderPrefs,
 } from "../../services/reminderPrefs";
+import {
+  type NotificationPrefs,
+  defaultNotificationPrefs,
+  getNotificationPrefs,
+  saveNotificationPrefs,
+} from "../../services/notificationsService";
 import type { ColorPalette } from "../../theme/colors";
 import { useColors } from "../../theme/ThemeContext";
 import { useThemedStyles } from "../../theme/useThemedStyles";
@@ -32,10 +38,12 @@ export function RemindersSettingsScreen({ navigation }: Props) {
   const c = useColors();
   const { user } = useAuth();
   const [prefs, setPrefs] = useState<ReminderPrefs>(defaultReminderPrefs());
+  const [typePrefs, setTypePrefs] = useState<NotificationPrefs>(defaultNotificationPrefs());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const isInstructor = user?.role === "instructor";
 
   useEffect(() => {
     let cancelled = false;
@@ -44,9 +52,14 @@ export function RemindersSettingsScreen({ navigation }: Props) {
       return;
     }
     setLoading(true);
-    getReminderPrefs(user.uid)
-      .then((value) => {
-        if (!cancelled) setPrefs(value);
+    Promise.all([
+      getReminderPrefs(user.uid),
+      getNotificationPrefs(user.uid).catch(() => defaultNotificationPrefs()),
+    ])
+      .then(([reminderValue, typeValue]) => {
+        if (cancelled) return;
+        setPrefs(reminderValue);
+        setTypePrefs(typeValue);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -78,7 +91,10 @@ export function RemindersSettingsScreen({ navigation }: Props) {
     setSaving(true);
     setError(null);
     try {
-      const saved = await saveReminderPrefs(user.uid, prefs);
+      const [saved] = await Promise.all([
+        saveReminderPrefs(user.uid, prefs),
+        saveNotificationPrefs(user.uid, typePrefs),
+      ]);
       setPrefs(saved);
       setSavedAt(Date.now());
     } catch (err) {
@@ -179,11 +195,57 @@ export function RemindersSettingsScreen({ navigation }: Props) {
         />
         <ChannelRow
           title="Push notifications"
-          subtitle="Available once mobile push is fully wired up."
+          subtitle="Sends lesson reminders to this device when notification permission is enabled."
           value={prefs.pushEnabled}
           disabled={!prefs.enabled}
           onChange={(value) => setPrefs({ ...prefs, pushEnabled: value })}
         />
+      </Card>
+
+      <Card style={styles.card}>
+        <Text style={styles.sectionTitle}>Other notifications</Text>
+
+        <ChannelRow
+          title="Messages"
+          subtitle={isInstructor ? "New message alerts from your students." : "New message alerts from your instructor."}
+          value={typePrefs.messages}
+          onChange={(value) => setTypePrefs({ ...typePrefs, messages: value })}
+        />
+        <ChannelRow
+          title="Lesson changes"
+          subtitle="Booked, updated and cancelled lessons."
+          value={typePrefs.lessonActivity}
+          onChange={(value) => setTypePrefs({ ...typePrefs, lessonActivity: value })}
+        />
+        {isInstructor ? (
+          <>
+            <ChannelRow
+              title="Payment prompts"
+              subtitle="Reminders to mark lesson payments after each lesson."
+              value={typePrefs.paymentPrompts}
+              onChange={(value) => setTypePrefs({ ...typePrefs, paymentPrompts: value })}
+            />
+            <ChannelRow
+              title="Daily summaries"
+              subtitle="Morning teaching overview and end-of-day wrap-up."
+              value={typePrefs.dailySummary}
+              onChange={(value) => setTypePrefs({ ...typePrefs, dailySummary: value })}
+            />
+            <ChannelRow
+              title="Feedback summaries"
+              subtitle="Anonymous student feedback digests."
+              value={typePrefs.feedbackSummaries}
+              onChange={(value) => setTypePrefs({ ...typePrefs, feedbackSummaries: value })}
+            />
+          </>
+        ) : (
+          <ChannelRow
+            title="Feedback prompts"
+            subtitle="A quick 'how was your lesson?' after each lesson."
+            value={typePrefs.feedbackPrompts}
+            onChange={(value) => setTypePrefs({ ...typePrefs, feedbackPrompts: value })}
+          />
+        )}
       </Card>
 
       {error ? (

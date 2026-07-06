@@ -28,6 +28,7 @@ import { useThemedStyles } from "../../theme/useThemedStyles";
 import { spacing } from "../../theme/spacing";
 import type { MileageEntry } from "../../types";
 import { formatGBP } from "../../utils/currency";
+import { describeFirestoreError } from "../../utils/firestoreError";
 import { hapticTap, hapticWarning } from "../../utils/haptics";
 
 type Nav = { goBack: () => void };
@@ -53,7 +54,7 @@ export function MileageScreen({ navigation }: { navigation: Nav }) {
     try {
       setEntries(await getMileageEntries(user.uid, { max: 200 }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't load mileage.");
+      setError(describeFirestoreError(err, { action: "getMileageEntries" }));
     }
   }, [user?.uid]);
 
@@ -95,7 +96,7 @@ export function MileageScreen({ navigation }: { navigation: Nav }) {
               await deleteMileageEntry(entry.id);
               setEntries((prev) => prev.filter((e) => e.id !== entry.id));
             } catch (err) {
-              Alert.alert("Couldn't delete", err instanceof Error ? err.message : "Try again.");
+              Alert.alert("Couldn't delete", describeFirestoreError(err, { action: "deleteMileageEntry" }));
             }
           },
         },
@@ -262,7 +263,7 @@ function AddMileageSheet({
         createdAt: Date.now(),
       });
     } catch (err) {
-      Alert.alert("Couldn't save", err instanceof Error ? err.message : "Try again.");
+      Alert.alert("Couldn't save", describeFirestoreError(err, { action: "addMileageEntry" }));
     } finally {
       setSubmitting(false);
     }
