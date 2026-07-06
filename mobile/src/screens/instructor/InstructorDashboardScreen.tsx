@@ -190,18 +190,39 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
       {nextLesson ? (
         <FadeInView delay={200}>
           <Card style={styles.nextCard}>
-            <View style={styles.rowBetween}>
-              <Text style={styles.sectionTitle}>Next up</Text>
+            <View style={styles.nextHeader}>
+              <View style={styles.nextIconWrap}>
+                <Ionicons name="navigate-outline" size={21} color={c.emeraldDark} />
+              </View>
+              <View style={styles.nextHeaderCopy}>
+                <Text style={styles.kickerLabel}>Next lesson</Text>
+                <Text style={styles.bigName} numberOfLines={1}>{nextLesson.studentName}</Text>
+              </View>
               <Pill
                 label={nextLesson.paymentStatus}
                 tone={nextLesson.paymentStatus === "paid" ? "success" : "warning"}
               />
             </View>
-            <Text style={styles.bigName}>{nextLesson.studentName}</Text>
-            <Text style={styles.meta}>
-              {nextLesson.time} · {nextLesson.durationMinutes} mins
-            </Text>
-            {!!nextLesson.pickup && <Text style={styles.meta}>{nextLesson.pickup}</Text>}
+            <View style={styles.lessonMetaGrid}>
+              <View style={styles.metaTile}>
+                <Text style={styles.metaLabel}>Time</Text>
+                <Text style={styles.metaValue}>{nextLesson.time}</Text>
+              </View>
+              <View style={styles.metaTile}>
+                <Text style={styles.metaLabel}>Duration</Text>
+                <Text style={styles.metaValue}>{nextLesson.durationMinutes} mins</Text>
+              </View>
+              <View style={styles.metaTile}>
+                <Text style={styles.metaLabel}>Fee</Text>
+                <Text style={styles.metaValue}>£{nextLesson.price}</Text>
+              </View>
+            </View>
+            {!!nextLesson.pickup && (
+              <View style={styles.pickupRow}>
+                <Ionicons name="location-outline" size={17} color={c.slate600} />
+                <Text style={styles.pickupText} numberOfLines={2}>{nextLesson.pickup}</Text>
+              </View>
+            )}
             <View style={styles.actionRow}>
               <AppButton
                 label="Open"
@@ -244,17 +265,17 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
       <SectionHeader title="Quick actions" />
       <View style={styles.quickGrid}>
         <QuickAction
-          icon="calendar"
+          icon="calendar-outline"
           label="Book lesson"
           onPress={() => navigation.navigate("BookLesson")}
         />
         <QuickAction
-          icon="person-add"
+          icon="person-add-outline"
           label="Add student"
           onPress={() => navigation.navigate("AddStudent")}
         />
         <QuickAction
-          icon="receipt"
+          icon="receipt-outline"
           label="Invoices"
           onPress={() => navigation.navigate("Invoices")}
         />
@@ -264,17 +285,17 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
           onPress={() => setInviteOpen(true)}
         />
         <QuickAction
-          icon="chatbubble-ellipses"
+          icon="chatbubble-ellipses-outline"
           label="Feedback"
           onPress={() => navigation.navigate("FeedbackSummary")}
         />
         <QuickAction
-          icon="chatbubbles"
+          icon="chatbubbles-outline"
           label="Messages"
           onPress={() => navigation.navigate("InstructorMessages")}
         />
         <QuickAction
-          icon="library"
+          icon="library-outline"
           label="Tips"
           onPress={() => navigation.navigate("Tips")}
         />
@@ -395,7 +416,7 @@ function QuickAction({
       ]}
     >
       <View style={styles.quickIconWrap}>
-        <Ionicons name={icon} size={22} color={c.white} />
+        <Ionicons name={icon} size={22} color={c.emeraldDark} />
       </View>
       <Text style={styles.quickLabel}>{label}</Text>
     </Pressable>
@@ -488,7 +509,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   skeletonList: {
     borderRadius: 24,
     overflow: "hidden",
-    backgroundColor: c.surface,
+    backgroundColor: c.surfaceRaised,
   },
   header: {
     flexDirection: "row",
@@ -515,8 +536,8 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     color: c.slate900,
     fontSize: 28,
     lineHeight: 34,
-    fontWeight: "600",
-    letterSpacing: -0.6,
+    fontWeight: "700",
+    letterSpacing: 0,
   },
   avatar: {
     width: 38,
@@ -551,7 +572,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     paddingBottom: spacing.lg,
   },
   nextCard: {
-    gap: spacing.md,
+    gap: spacing.lg,
     marginBottom: spacing.lg,
   },
   rowBetween: {
@@ -565,9 +586,77 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     lineHeight: 21,
     fontWeight: "700",
   },
+  nextHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  nextIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: c.surfaceMuted,
+  },
+  nextHeaderCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  kickerLabel: {
+    color: c.slate500,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0,
+  },
   bigName: {
     ...typography.title2,
     color: c.slate900,
+    letterSpacing: 0,
+  },
+  lessonMetaGrid: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  metaTile: {
+    flex: 1,
+    minHeight: 64,
+    borderRadius: 14,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    justifyContent: "center",
+    backgroundColor: c.surfaceMuted,
+  },
+  metaLabel: {
+    color: c.slate500,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "700",
+  },
+  metaValue: {
+    color: c.slate900,
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: "700",
+  },
+  pickupRow: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    borderRadius: 14,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: c.surfaceMuted,
+  },
+  pickupText: {
+    flex: 1,
+    color: c.slate700,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "600",
   },
   meta: {
     color: c.slate500,
@@ -589,10 +678,12 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     marginVertical: spacing.md,
   },
   quickCard: {
-    width: "48%",
-    backgroundColor: c.surface,
-    borderRadius: 14,
-    padding: spacing.md,
+    width: "47.8%",
+    backgroundColor: c.surfaceRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
+    borderRadius: 18,
+    padding: spacing.lg,
     gap: spacing.sm,
     flexDirection: "row",
     alignItems: "center",
@@ -600,8 +691,8 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   quickIconWrap: {
     width: 38,
     height: 38,
-    borderRadius: 12,
-    backgroundColor: c.emerald,
+    borderRadius: 14,
+    backgroundColor: c.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -696,4 +787,3 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontWeight: "400",
   },
 });
-

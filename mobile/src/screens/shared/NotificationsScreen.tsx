@@ -13,8 +13,10 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { FadeInView } from "../../components/ui/FadeInView";
 import { Screen } from "../../components/ui/Screen";
 import { SkeletonRow } from "../../components/ui/Skeleton";
+import { SwipeableRow } from "../../components/ui/SwipeableRow";
 import { useAuth } from "../../context/AuthContext";
 import {
+  deleteNotification,
   getNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -127,6 +129,17 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
     }
   }
 
+  async function onDelete(item: AppNotification) {
+    hapticTap();
+    // Optimistic — drop the row immediately; restore via reload on failure.
+    setItems((prev) => prev.filter((n) => n.id !== item.id));
+    try {
+      await deleteNotification(item.id);
+    } catch {
+      await load();
+    }
+  }
+
   return (
     <Screen
       refreshControl={
@@ -147,7 +160,11 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
 
       <View style={styles.subHeaderRow}>
         <Text style={styles.subHeaderText}>
-          {unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up"}
+          {unreadCount > 0
+            ? `${unreadCount} unread · swipe left to delete`
+            : items.length > 0
+              ? "All caught up · swipe left to delete"
+              : "You're all caught up"}
         </Text>
         {unreadCount > 0 ? (
           <Pressable onPress={onMarkAllRead} style={({ pressed }) => pressed && styles.pressed}>
@@ -178,34 +195,36 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
         <View style={styles.list}>
           {items.map((item, index) => (
             <FadeInView key={item.id} delay={Math.min(index, 10) * 40}>
-              <Pressable
-                onPress={() => onItemPress(item)}
-                style={({ pressed }) => [
-                  styles.row,
-                  !item.read && styles.rowUnread,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <View style={[styles.rowIcon, !item.read && styles.rowIconUnread]}>
-                  <Ionicons
-                    name={typeIcon(item.type)}
-                    size={18}
-                    color={item.read ? c.slate500 : c.emerald}
-                  />
-                </View>
-                <View style={styles.rowBody}>
-                  <View style={styles.rowTitleLine}>
-                    <Text style={[styles.rowTitle, !item.read && styles.rowTitleUnread]} numberOfLines={1}>
-                      {item.title}
-                    </Text>
-                    <Text style={styles.rowTime}>{relativeTime(item.timestamp)}</Text>
+              <SwipeableRow radius={16} onAction={() => onDelete(item)}>
+                <Pressable
+                  onPress={() => onItemPress(item)}
+                  style={({ pressed }) => [
+                    styles.row,
+                    !item.read && styles.rowUnread,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <View style={[styles.rowIcon, !item.read && styles.rowIconUnread]}>
+                    <Ionicons
+                      name={typeIcon(item.type)}
+                      size={18}
+                      color={item.read ? c.slate500 : c.emerald}
+                    />
                   </View>
-                  <Text style={styles.rowMessage} numberOfLines={3}>
-                    {item.message}
-                  </Text>
-                </View>
-                {!item.read ? <View style={styles.unreadDot} /> : null}
-              </Pressable>
+                  <View style={styles.rowBody}>
+                    <View style={styles.rowTitleLine}>
+                      <Text style={[styles.rowTitle, !item.read && styles.rowTitleUnread]} numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                      <Text style={styles.rowTime}>{relativeTime(item.timestamp)}</Text>
+                    </View>
+                    <Text style={styles.rowMessage} numberOfLines={3}>
+                      {item.message}
+                    </Text>
+                  </View>
+                  {!item.read ? <View style={styles.unreadDot} /> : null}
+                </Pressable>
+              </SwipeableRow>
             </FadeInView>
           ))}
         </View>

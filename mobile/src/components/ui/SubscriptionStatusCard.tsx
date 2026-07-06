@@ -8,9 +8,10 @@ import { spacing } from "../../theme/spacing";
 import type { AppUser } from "../../types";
 import { Card } from "./Card";
 
-// Play-policy note: this card must stay read-only. No price, no purchase
-// button, no tappable link to an external checkout — the Android app does
-// not sell subscriptions and must not steer users to buy elsewhere.
+// This card is read-only status. The tappable "Manage subscription" entry
+// point lives in Settings → Billing (owner-approved external web link,
+// Netflix-style). If Play review ever objects to external steering, remove
+// that Settings link via OTA — this card needs no change.
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 

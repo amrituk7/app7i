@@ -59,7 +59,9 @@ const makeStyles = (c: ColorPalette) =>
       borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: c.surface,
+      backgroundColor: c.surfaceRaised,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
     },
     badge: {
       position: "absolute",

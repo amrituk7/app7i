@@ -7,6 +7,7 @@
 
 import {
   collection,
+  deleteDoc,
   doc,
   getCountFromServer,
   getDoc,
@@ -98,6 +99,10 @@ export async function getUnreadNotificationCount(uid: string): Promise<number> {
 
 export async function markNotificationRead(notificationId: string): Promise<void> {
   await updateDoc(doc(db(), "notifications", notificationId), { read: true });
+}
+
+export async function deleteNotification(notificationId: string): Promise<void> {
+  await deleteDoc(doc(db(), "notifications", notificationId));
 }
 
 export async function markAllNotificationsRead(uid: string): Promise<number> {

@@ -23,7 +23,10 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    // Bottom edge is intentionally excluded: the bottom tab bar already sizes
+    // itself with insets.bottom (useTabBarStyle), so padding it here too left
+    // an empty strip between the content and the top of the tab bar.
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       {scroll ? (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -53,6 +56,8 @@ const makeStyles = (c: ColorPalette) =>
       flex: 1,
     },
     padded: {
-      padding: spacing.md,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.md,
+      paddingBottom: spacing.xl,
     },
   });

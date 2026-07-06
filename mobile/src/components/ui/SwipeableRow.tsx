@@ -27,6 +27,8 @@ type Props = {
   onAction: () => void;
   /** Disable swipe (loading state). */
   disabled?: boolean;
+  /** Corner radius of the masked row (match the child card's radius). */
+  radius?: number;
   children: React.ReactNode;
 };
 
@@ -40,6 +42,7 @@ export function SwipeableRow({
   actionLabel = "Delete",
   onAction,
   disabled,
+  radius,
   children,
 }: Props) {
   const styles = useThemedStyles(makeStyles);
@@ -116,7 +119,7 @@ export function SwipeableRow({
   }
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, radius != null && { borderRadius: radius }]}>
       <View style={[styles.actionLayer, { backgroundColor: resolvedActionColor, width: actionWidth }]}>
         <Pressable
           onPress={handleActionTap}
