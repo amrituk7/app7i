@@ -63,6 +63,52 @@ export function ConversationHeader({
     }
   }
 
+  async function openSms() {
+    if (!studentPhone) return;
+    const digits = digitsOnly(studentPhone);
+    if (!digits) {
+      Alert.alert("Text message", "Couldn't read this student's phone number.");
+      return;
+    }
+    try {
+      await Linking.openURL(`sms:+${digits}`);
+    } catch {
+      Alert.alert("Couldn't open messages", "Try texting manually.");
+    }
+  }
+
+  async function openTelegram() {
+    if (!studentPhone) return;
+    const digits = digitsOnly(studentPhone);
+    if (!digits) {
+      Alert.alert("Telegram", "Couldn't read this student's phone number.");
+      return;
+    }
+    const appUrl = `tg://resolve?phone=${digits}`;
+    const webFallback = `https://t.me/+${digits}`;
+    try {
+      const supported = await Linking.canOpenURL(appUrl);
+      await Linking.openURL(supported ? appUrl : webFallback);
+    } catch {
+      Alert.alert("Telegram not installed", "Install Telegram to message this student there.");
+    }
+  }
+
+  function openMoreMenu() {
+    const buttons = [];
+    if (hasPhone) {
+      buttons.push(
+        { text: "Send SMS text", onPress: openSms },
+        { text: "Message on Telegram", onPress: openTelegram },
+      );
+    }
+    if (onDelete) {
+      buttons.push({ text: "Delete chat", style: "destructive" as const, onPress: onDelete });
+    }
+    buttons.push({ text: "Cancel", style: "cancel" as const });
+    Alert.alert(studentName, "Contact options", buttons);
+  }
+
   return (
     <View style={styles.header}>
       <Pressable
@@ -111,10 +157,10 @@ export function ConversationHeader({
             </Pressable>
           </>
         ) : null}
-        {onDelete ? (
+        {onDelete || hasPhone ? (
           <Pressable
-            onPress={onDelete}
-            accessibilityLabel="Delete chat"
+            onPress={openMoreMenu}
+            accessibilityLabel="More contact options"
             style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
             hitSlop={6}
           >

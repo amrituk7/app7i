@@ -88,8 +88,8 @@ export function ProgressTrackerScreen({ route }: { route: Route }) {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emerald} />
       }
     >
-      <Text style={styles.title}>{student ? student.name : "Progress"}</Text>
-      <Text style={styles.copy}>Skill ratings across this learner's lessons.</Text>
+      <Text style={styles.title}>{student ? student.name : "Student performance"}</Text>
+      <Text style={styles.copy}>Progress and skill ratings across this learner's lessons.</Text>
 
       {error ? (
         <EmptyState

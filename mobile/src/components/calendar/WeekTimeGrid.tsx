@@ -53,7 +53,8 @@ function formatHourLabel(hour: number): string {
 
 function paymentDot(status: Lesson["paymentStatus"], c: ColorPalette): string {
   if (status === "paid") return c.green;
-  if (status === "not_paid" || status === "unpaid") return c.amber;
+  if (status === "unpaid") return c.amber;
+  if (status === "waived") return c.slate300;
   return c.slate300;
 }
 

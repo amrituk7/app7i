@@ -33,11 +33,11 @@ export function ListRow({ title, subtitle, right, onPress, showChevron }: ListRo
 const makeStyles = (c: ColorPalette) =>
   StyleSheet.create({
     row: {
-      minHeight: 44,
+      minHeight: 56,
       flexDirection: "row",
       alignItems: "center",
       gap: spacing.sm,
-      paddingVertical: 11,
+      paddingVertical: 14,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.border,
     },
@@ -51,7 +51,7 @@ const makeStyles = (c: ColorPalette) =>
     title: {
       color: c.slate900,
       fontSize: 17,
-      fontWeight: "400",
+      fontWeight: "600",
     },
     subtitle: {
       color: c.slate500,
@@ -61,5 +61,6 @@ const makeStyles = (c: ColorPalette) =>
     right: {
       color: c.slate500,
       fontSize: 17,
+      fontWeight: "600",
     },
   });

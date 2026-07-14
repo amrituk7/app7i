@@ -344,7 +344,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     marginLeft: 6,
   },
   ghostLabelText: {
-    color: c.white,
+    color: c.onAccent,
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 0.3,

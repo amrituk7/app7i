@@ -119,7 +119,7 @@ export function StudentDashboardScreen({ navigation }: { navigation: MobileNavig
   const upcomingLessons = useMemo(() => lessons.filter(isUpcomingLesson), [lessons]);
   const nextLesson = upcomingLessons[0] || lessons[0] || null;
   const paidLessons = lessons.filter((lesson) => lesson.paymentStatus === "paid").length;
-  const unpaidLessons = lessons.filter((lesson) => lesson.paymentStatus !== "paid").length;
+  const unpaidLessons = lessons.filter((lesson) => lesson.paymentStatus === "unpaid").length;
 
   if (loading) {
     return (
@@ -142,7 +142,7 @@ export function StudentDashboardScreen({ navigation }: { navigation: MobileNavig
         </View>
         <NotificationBell onPress={() => navigation.navigate("Notifications")} />
       </View>
-      <Text style={styles.copy}>Lessons, notes, progress and invoices from your instructor.</Text>
+      <Text style={styles.copy}>Lessons, notes, progress and learning resources from your instructor.</Text>
 
       {error ? (
         <Card style={styles.errorCard}>
@@ -210,7 +210,7 @@ export function StudentDashboardScreen({ navigation }: { navigation: MobileNavig
             )}
             {student.practiceTips ? (
               <View style={styles.tipBlock}>
-                <Text style={styles.tipLabel}>Tips before next lesson</Text>
+                <Text style={styles.tipLabel}>Before your next lesson</Text>
                 <Text style={styles.tipText}>{student.practiceTips}</Text>
               </View>
             ) : (

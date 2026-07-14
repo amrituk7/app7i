@@ -17,7 +17,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { Screen } from "../../components/ui/Screen";
 import { Share } from "react-native";
 import {
-  getPaidInvoices,
+  getPaidLessonPayments,
   getStudent,
   getStudentLessons,
   getStudentSkillsAggregate,
@@ -262,7 +262,17 @@ export function StudentProfileScreen({
 
       <View style={styles.actions}>
         <AppButton
+          label="Student performance"
+          onPress={() => navigation.navigate("ProgressTracker", { studentId })}
+        />
+        <AppButton
+          label="Open Learning Hub"
+          variant="secondary"
+          onPress={() => navigation.navigate("StudentLearningHub", { studentId, studentName: student.name })}
+        />
+        <AppButton
           label="Edit profile and tips"
+          variant="secondary"
           onPress={() => navigation.navigate("EditStudent", { studentId })}
         />
         <AppButton
@@ -314,7 +324,7 @@ export function StudentProfileScreen({
             if (!user?.uid) return;
             setDownloadingStatement(true);
             try {
-              const paid = await getPaidInvoices(user.uid, 500);
+              const paid = await getPaidLessonPayments(user.uid, 500);
               const statement = buildRangeStatement(paid, {
                 label: `${student.name} — Payment statement`,
                 shortLabel: student.name,
@@ -511,7 +521,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     gap: spacing.sm,
   },
   kicker: {
-    color: c.emeraldSoft,
+    color: "rgba(255,255,255,0.75)",
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 0.8,

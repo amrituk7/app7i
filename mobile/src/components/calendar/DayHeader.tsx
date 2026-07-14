@@ -407,7 +407,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontWeight: "500",
     letterSpacing: 0.4,
   },
-  dayWeekdaySelected: { color: c.white },
+  dayWeekdaySelected: { color: c.onAccent },
   dayWeekdayToday: { color: c.emerald },
   dayWeekend: { color: c.slate300 },
   dayNumber: {
@@ -416,7 +416,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontWeight: "600",
     letterSpacing: -0.3,
   },
-  dayNumberSelected: { color: c.white, fontWeight: "700" },
+  dayNumberSelected: { color: c.onAccent, fontWeight: "700" },
   monthAbbr: {
     position: "absolute",
     top: -8,

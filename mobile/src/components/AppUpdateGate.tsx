@@ -6,6 +6,8 @@ import * as Updates from "expo-updates";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
 
+const UPDATE_CHECK_DELAY_MS = 10_000;
+
 type Stage =
   | "idle"          // initial; nothing to show
   | "checking"      // checkForUpdateAsync in flight
@@ -22,6 +24,7 @@ export function AppUpdateGate() {
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     async function checkAndFetch() {
       // expo-updates is disabled in dev (Updates.isEnabled is false in Expo Go
@@ -58,9 +61,12 @@ export function AppUpdateGate() {
       }
     }
 
-    void checkAndFetch();
+    timer = setTimeout(() => {
+      void checkAndFetch();
+    }, UPDATE_CHECK_DELAY_MS);
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, []);
 
@@ -79,16 +85,17 @@ export function AppUpdateGate() {
   // only at the top, never blocking interaction.
   if (stage === "idle" || dismissed) return null;
   if (stage === "failed") return null; // fail silently per spec
+  if (stage === "checking") return null;
 
   const top = insets.top + spacing.sm;
 
-  if (stage === "checking" || stage === "downloading") {
+  if (stage === "downloading") {
     return (
       <View style={[styles.statusBanner, { top }]} pointerEvents="none">
         <View style={styles.statusCard}>
           <ActivityIndicator size="small" color={colors.white} />
           <Text style={styles.statusText} numberOfLines={1}>
-            {stage === "checking" ? "Checking for updates..." : "Downloading update..."}
+            Downloading update...
           </Text>
         </View>
       </View>

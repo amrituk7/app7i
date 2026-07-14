@@ -14,7 +14,7 @@ export function AuthNavigator() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerShadowVisible: false,
-        headerTintColor: colors.emerald,
+        headerTintColor: colors.emeraldDark,
         headerTitleStyle: { color: colors.slate900, fontWeight: "900" },
       }}
     >

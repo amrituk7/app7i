@@ -79,7 +79,7 @@ async function ensureAndroidChannels(): Promise<void> {
         name: channel.name,
         importance: channel.importance,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#1a2f23",
+        lightColor: "#0B0B0C",
       });
     } catch (err) {
       console.warn("[push] channel setup failed", channel.id, err);

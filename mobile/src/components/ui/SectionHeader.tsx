@@ -1,14 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { useThemedStyles } from "../../theme/useThemedStyles";
 
-export function SectionHeader({ title, action }: { title: string; action?: string }) {
+export function SectionHeader({ title, action, actionLabel, onAction }: { title: string; action?: string; actionLabel?: string; onAction?: () => void }) {
   const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.row}>
-      <Text style={styles.title}>{title.toUpperCase()}</Text>
-      {action ? <Text style={styles.action}>{action}</Text> : null}
+      <Text style={styles.title}>{title}</Text>
+      {onAction && actionLabel ? (
+        <Pressable onPress={onAction} accessibilityRole="button"><Text style={styles.action}>{actionLabel}</Text></Pressable>
+      ) : action ? <Text style={styles.action}>{action}</Text> : null}
     </View>
   );
 }
@@ -19,19 +21,19 @@ const makeStyles = (c: ColorPalette) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingHorizontal: spacing.md,
-      paddingTop: spacing.lg,
+      paddingHorizontal: 0,
+      paddingTop: spacing.xl,
       paddingBottom: spacing.sm,
     },
     title: {
-      color: c.slate500,
-      fontSize: 13,
-      fontWeight: "400",
-      letterSpacing: 0.6,
+      color: c.slate900,
+      fontSize: 17,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     action: {
-      color: c.emerald,
+      color: c.slate700,
       fontSize: 15,
-      fontWeight: "400",
+      fontWeight: "700",
     },
   });

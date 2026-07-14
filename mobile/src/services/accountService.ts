@@ -19,7 +19,7 @@ import { firebaseAuth, firestore, functions, isFirebaseConfigured } from "./fire
  * auth/requires-recent-login, the caller should prompt the user to sign in
  * again, then retry.
  */
-export async function deleteCurrentAccount(): Promise<void> {
+export async function deleteCurrentAccount(feedback?: { reason?: string; detail?: string }): Promise<void> {
   if (!isFirebaseConfigured || !firebaseAuth || !firestore) {
     throw new Error("Connection issue. Please restart the app or try again.");
   }
@@ -28,7 +28,7 @@ export async function deleteCurrentAccount(): Promise<void> {
 
   if (functions) {
     try {
-      await httpsCallable(functions, "deleteAccount")({});
+      await httpsCallable(functions, "deleteAccount")({ feedback });
       // Auth account is already gone server-side; drop the local session.
       try {
         await firebaseAuth.signOut();

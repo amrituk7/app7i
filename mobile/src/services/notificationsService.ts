@@ -35,6 +35,7 @@ export type AppNotification = {
   read: boolean;
   timestamp: number;
   lessonId?: string;
+  url?: string;
 };
 
 // Keys mirror NOTIFICATION_PREF_KEYS in functions/index.js — a `false` here
@@ -68,6 +69,7 @@ function asNotification(id: string, data: DocumentData): AppNotification {
     read: data.read === true,
     timestamp: typeof data.timestamp === "number" ? data.timestamp : 0,
     lessonId: typeof data.lessonId === "string" ? data.lessonId : undefined,
+    url: typeof data.url === "string" ? data.url : undefined,
   };
 }
 

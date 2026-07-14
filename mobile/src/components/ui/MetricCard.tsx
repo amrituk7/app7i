@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Card } from "./Card";
 import { AnimatedNumber } from "./AnimatedNumber";
 import type { ColorPalette } from "../../theme/colors";
@@ -11,22 +11,26 @@ export function MetricCard({
   helper,
   prefix,
   suffix,
+  compact = false,
+  style,
 }: {
   label: string;
   value: string | number;
   helper?: string;
   prefix?: string;
   suffix?: string;
+  compact?: boolean;
+  style?: StyleProp<ViewStyle>;
 }) {
   const styles = useThemedStyles(makeStyles);
   return (
-    <Card style={styles.card}>
+    <Card style={[styles.card, compact && styles.cardCompact, style]}>
       <View style={styles.accent} />
       <Text style={styles.label}>{label.toUpperCase()}</Text>
       {typeof value === "number" ? (
-        <AnimatedNumber value={value} prefix={prefix} suffix={suffix} style={styles.value} />
+        <AnimatedNumber value={value} prefix={prefix} suffix={suffix} style={[styles.value, compact && styles.valueCompact]} />
       ) : (
-        <Text style={styles.value}>{value}</Text>
+        <Text style={[styles.value, compact && styles.valueCompact]}>{value}</Text>
       )}
       {helper ? <Text style={styles.helper}>{helper}</Text> : null}
     </Card>
@@ -38,45 +42,42 @@ const makeStyles = (c: ColorPalette) =>
     card: {
       flex: 1,
       minWidth: 120,
-      minHeight: 88,
-      gap: 3,
-      borderRadius: 14,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.md,
-      paddingLeft: spacing.md + 8,
+      minHeight: 96,
+      gap: 5,
+      borderRadius: 18,
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing.lg,
       overflow: "hidden",
-      ...Platform.select({
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.06,
-          shadowRadius: 4,
-        },
-        android: { elevation: 2 },
-      }),
+    },
+    cardCompact: {
+      minWidth: 0,
+      minHeight: 90,
+      paddingVertical: spacing.md,
+      paddingHorizontal: 10,
     },
     accent: {
-      position: "absolute",
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 4,
-      backgroundColor: c.emerald,
-      borderTopLeftRadius: 14,
-      borderBottomLeftRadius: 14,
+      width: 28,
+      height: 4,
+      borderRadius: 999,
+      backgroundColor: c.emeraldLight,
+      marginBottom: spacing.xs,
     },
     label: {
       color: c.slate500,
       fontSize: 11,
-      fontWeight: "600",
-      letterSpacing: 0.6,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     value: {
       color: c.slate900,
       fontSize: 26,
       fontWeight: "700",
-      letterSpacing: -0.5,
+      letterSpacing: 0,
       lineHeight: 30,
+    },
+    valueCompact: {
+      fontSize: 22,
+      lineHeight: 26,
     },
     helper: {
       color: c.slate500,

@@ -1,4 +1,4 @@
-// ─── Light palette — Apple HIG systemGroupedBackground family ────────────────
+// Light palette - Apple HIG systemGroupedBackground family.
 export const lightColors = {
   // Surfaces
   background:    "#F2F2F7",   // iOS systemGroupedBackground
@@ -6,37 +6,42 @@ export const lightColors = {
   surfaceRaised: "#FFFFFF",   // elevated card
   surfaceMuted:  "#F2F2F7",   // muted / inset area
 
-  // Borders & separators
+  // Borders and separators
   border:        "#E5E5EA",   // iOS separator
   borderStrong:  "#C7C7CC",
 
   // Text hierarchy
-  slate900:      "#1C1C1E",   // iOS label — primary text
+  slate900:      "#1C1C1E",   // iOS label / primary text
   slate700:      "#3A3A3C",   // iOS secondaryLabel
   slate600:      "#48484A",   // iOS tertiaryLabel
   slate500:      "#6C6C70",   // iOS quaternaryLabel / metadata
   slate300:      "#AEAEB2",   // placeholder / disabled
   slate100:      "#E5E5EA",   // hairline separators
 
-  // Brand — emerald green
-  emerald:       "#1a7a4a",   // primary action / accent
-  emeraldLight:  "#34C77A",   // success / active indicator
-  emeraldDark:   "#115c37",   // pressed / deep accent
-  emeraldSoft:   "#E8F5EE",   // tinted chip background
+  // Brand — App7i signature indigo, used with RESTRAINT: reserved for genuine
+  // accents (primary fills, send bubbles, "today", progress, links, active tab).
+  // Utility icons/chips deliberately stay NEUTRAL via emeraldDark/emeraldSoft so
+  // the colour reads as intentional, not noisy. Core surfaces/text neutral below.
+  emerald:       "#464CA3",   // brand accent — deep muted indigo (fills, bubbles, today, progress, links)
+  emeraldLight:  "#565CB5",   // active accent
+  emeraldDark:   "#1C1C1E",   // neutral icon/text (utility) — intentionally NOT indigo
+  emeraldSoft:   "#F2F2F7",   // neutral chip / badge bg — intentionally NOT indigo
+  onAccent:      "#FFFFFF",   // text/icons placed on emerald or emeraldLight fills
+  onInverted:    "#FFFFFF",   // text/icons placed on slate900 fills
 
   // Semantic
   red:           "#FF3B30",   // iOS destructive
   redSoft:       "#FFF2F1",
   amber:         "#FF9500",   // iOS orange / warning
   amberSoft:     "#FFF5E6",
-  green:         "#34C759",   // iOS green / success alias
-  greenSoft:     "#E8F5EE",
+  green:         "#1C1C1E",   // success alias, neutralised for brand consistency
+  greenSoft:     "#F2F2F7",
   blue:          "#007AFF",   // iOS blue / info
   blueSoft:      "#EBF4FF",
 
   // Navigation
   navBg:         "#FFFFFF",
-  navActive:     "#1a7a4a",
+  navActive:     "#3F4499",   // active tab tint (deep indigo, AA-safe)
   navBorder:     "#E5E5EA",
 
   // Misc
@@ -44,46 +49,51 @@ export const lightColors = {
   black:         "#000000",
 };
 
-// ─── Dark palette — deep green surface family ─────────────────────────────────
+// Dark palette - neutral native-app dark mode.
+//
+// Dark mode intentionally removes the green-heavy surface treatment. Primary
+// controls stay charcoal; active states and icon accents resolve to white.
 export const darkColors = {
   // Surfaces
-  background:    "#000000",   // iOS dark systemGroupedBackground
-  surface:       "#1C1C1E",   // iOS dark secondarySystemGroupedBackground
-  surfaceRaised: "#2C2C2E",   // elevated card
-  surfaceMuted:  "#1C1C1E",
+  background:    "#08090A",
+  surface:       "#0D0F10",
+  surfaceRaised: "#111315",
+  surfaceMuted:  "#171A1D",
 
-  // Borders & separators
-  border:        "#38383A",
-  borderStrong:  "#48484A",
+  // Borders and separators
+  border:        "#24272B",
+  borderStrong:  "#3B4045",
 
   // Text hierarchy
-  slate900:      "#FFFFFF",
-  slate700:      "#EBEBF5CC",
-  slate600:      "#EBEBF5B3",
-  slate500:      "#EBEBF599",
-  slate300:      "#EBEBF566",
-  slate100:      "#38383A",
+  slate900:      "#F2F3F5",
+  slate700:      "#D0D3D6",
+  slate600:      "#A1A6AB",
+  slate500:      "#7D838A",
+  slate300:      "#50565C",
+  slate100:      "#24272B",
 
-  // Brand
-  emerald:       "#34C77A",   // brighter in dark for accessibility
-  emeraldLight:  "#30DB5B",
-  emeraldDark:   "#248A57",
-  emeraldSoft:   "#0D2419",
+  // Brand — same App7i signature indigo (restrained; see light-palette note).
+  emerald:       "#666DAE",   // muted indigo for genuine progress and selection states
+  emeraldLight:  "#7B82BF",
+  emeraldDark:   "#E8EAED",   // neutral utility icons and text
+  emeraldSoft:   "#171A1D",
+  onAccent:      "#FAFAFA",
+  onInverted:    "#0B0C0D",
 
   // Semantic
-  red:           "#FF453A",
-  redSoft:       "#2D0B09",
-  amber:         "#FF9F0A",
-  amberSoft:     "#2D1B00",
-  green:         "#30DB5B",
-  greenSoft:     "#0D2419",
-  blue:          "#0A84FF",
-  blueSoft:      "#001A33",
+  red:           "#F0645C",
+  redSoft:       "#251313",
+  amber:         "#D99A58",
+  amberSoft:     "#241B12",
+  green:         "#D7DBDF",
+  greenSoft:     "#171A1D",
+  blue:          "#68A9D4",
+  blueSoft:      "#101B23",
 
   // Navigation
-  navBg:         "#1C1C1E",
-  navActive:     "#34C77A",
-  navBorder:     "#38383A",
+  navBg:         "#090A0B",
+  navActive:     "#F2F3F5",
+  navBorder:     "#202327",
 
   // Misc
   white:         "#FFFFFF",
@@ -92,12 +102,11 @@ export const darkColors = {
 
 export type ColorPalette = typeof lightColors;
 
-// Default export = light palette for backward-compat (StyleSheet.create calls
-// in components that haven't been migrated to useThemedStyles yet).
-// Migrated components should pull `useColors` from ./ThemeContext for live
-// theme switching.
+// Default export = light palette for backward-compat StyleSheet.create calls
+// in components that have not migrated to useThemedStyles yet. Migrated
+// components should pull useColors from ThemeContext for live theme switching.
 export const colors: ColorPalette = lightColors;
 
-// Matches app.json splash backgroundColor — used in App.tsx boot gate which
-// renders before ThemeProvider mounts and can't access the live palette.
-export const SPLASH_BG = "#1a2f23";
+// Matches app.json splash backgroundColor. This is used in App.tsx before the
+// ThemeProvider mounts and cannot access the live palette.
+export const SPLASH_BG = "#0B0B0C";

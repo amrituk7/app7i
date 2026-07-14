@@ -345,6 +345,7 @@ export async function loadOrCreateUserDoc(
       trialEnd?: number | { toMillis?: () => number };
       displayName?: string;
       username?: string;
+      isDeveloper?: boolean;
     };
     const trialEndMs =
       typeof data.trialEnd === "number"
@@ -368,8 +369,14 @@ export async function loadOrCreateUserDoc(
       role: data.role || defaultRole,
       onboardingComplete:
         data.onboardingComplete ?? (data.role === "student"),
-      subscriptionStatus: data.subscriptionStatus,
+      // Trim so a stray space in a manually-set value ("unpaid ") doesn't
+      // slip past the exact-match billing checks.
+      subscriptionStatus:
+        typeof data.subscriptionStatus === "string"
+          ? (data.subscriptionStatus.trim() as AppUser["subscriptionStatus"])
+          : data.subscriptionStatus,
       trialEnd: trialEndMs,
+      isDeveloper: data.isDeveloper === true,
     };
   }
 
@@ -378,6 +385,9 @@ export async function loadOrCreateUserDoc(
     email: (user.email || "").toLowerCase(),
     role: defaultRole,
     onboardingComplete: defaultRole === "student",
+    // Instructors start unpaid — no free trial. They must subscribe
+    // through the Stripe checkout to get access.
+    ...(defaultRole === "instructor" ? { subscriptionStatus: "unpaid" as const } : {}),
     createdAt: serverTimestamp(),
   });
 
@@ -388,6 +398,7 @@ export async function loadOrCreateUserDoc(
     displayName: user.displayName || undefined,
     role: defaultRole,
     onboardingComplete: defaultRole === "student",
+    ...(defaultRole === "instructor" ? { subscriptionStatus: "unpaid" as const } : {}),
   };
 }
 

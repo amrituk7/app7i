@@ -17,7 +17,18 @@ import {
   type QueryConstraint,
 } from "firebase/firestore";
 import { firebaseAuth, firebaseFunctions, firestore } from "./firebase";
-import type { CarDetails, Lesson, Student, Invoice, MockTest, TestResult, Tip, TipType } from "../types";
+import type {
+  CarDetails,
+  Lesson,
+  LessonPayment,
+  MockTest,
+  PaymentMethod,
+  PaymentStatus,
+  Student,
+  TestResult,
+  Tip,
+  TipType,
+} from "../types";
 
 export type StudentSkillAggregate = {
   key: string;
@@ -34,6 +45,11 @@ export type InstructorPublicProfile = {
   transmission: string;
   email: string;
   phone: string;
+  yearsQualified: number;
+  adiApproved: boolean;
+  weekdayRate: number;
+  sundayRate: number;
+  testDayFee: number;
 };
 
 export type InstructorProfileTransmission = "manual" | "automatic" | "both";
@@ -46,6 +62,13 @@ export type InstructorProfile = {
   transmissions: InstructorProfileTransmission;
   rating: number | string;
   hourlyRate: number | string;
+  // Credentials
+  yearsQualified?: number | string;
+  adiApproved?: boolean;
+  // Real rates (weekdayRate is the primary/flat rate; mirrors hourlyRate)
+  weekdayRate?: number | string;
+  sundayRate?: number | string;
+  testDayFee?: number | string;
 };
 
 export type StudentWriteData = {
@@ -251,6 +274,7 @@ function lessonNotes(data: DocumentData) {
 }
 
 function asInstructorProfile(uid: string, data: DocumentData): InstructorPublicProfile {
+  const num = (value: unknown) => (Number(value) > 0 ? Number(value) : 0);
   return {
     uid,
     name: textField(data, "name", "displayName", "businessName", "schoolName") || "Your instructor",
@@ -258,7 +282,26 @@ function asInstructorProfile(uid: string, data: DocumentData): InstructorPublicP
     transmission: textField(data, "transmissions", "transmission") || "Transmission to confirm",
     email: textField(data, "contactEmail", "email"),
     phone: textField(data, "contactPhone", "phone"),
+    yearsQualified: num(data.yearsQualified),
+    adiApproved: data.adiApproved === true,
+    weekdayRate: num(data.weekdayRate ?? data.hourlyRate),
+    sundayRate: num(data.sundayRate),
+    testDayFee: num(data.testDayFee),
   };
+}
+
+function normalizePaymentStatus(value: unknown): PaymentStatus {
+  if (["paid", "cash", "card", "bank", "package"].includes(String(value))) return "paid";
+  if (value === "waived") return "waived";
+  if (value === "unpaid" || value === "not_paid" || value === "overdue") return "unpaid";
+  return "pending";
+}
+
+function normalizePaymentMethod(value: unknown, statusValue?: unknown): PaymentMethod {
+  const candidate = value || statusValue;
+  return candidate === "cash" || candidate === "card" || candidate === "bank" || candidate === "package"
+    ? candidate
+    : null;
 }
 
 function asLesson(id: string, data: DocumentData): Lesson {
@@ -272,18 +315,8 @@ function asLesson(id: string, data: DocumentData): Lesson {
     durationMinutes: Math.round((Number(data.duration) || 1) * 60),
     pickup: data.pickup || data.location || "",
     status: (data.review?.status as Lesson["status"]) || "scheduled",
-    paymentStatus:
-      data.review?.paymentStatus === "paid" ||
-      data.review?.paymentStatus === "cash" ||
-      data.review?.paymentStatus === "card" ||
-      data.review?.paymentStatus === "bank" ||
-      data.review?.paymentStatus === "package"
-        ? "paid"
-        : data.review?.paymentStatus === "not_paid"
-          ? "not_paid"
-          : data.review?.paymentStatus === "pending"
-            ? "pending"
-            : "unpaid",
+    paymentStatus: normalizePaymentStatus(data.review?.paymentStatus),
+    paymentMethod: normalizePaymentMethod(data.review?.paymentMethod, data.review?.paymentStatus),
     price: Number(data.price || data.rateApplied) || 0,
     notes: lessonNotes(data),
     skillRatings: readReviewSkillRatings(data.review),
@@ -319,6 +352,16 @@ function asStudent(id: string, data: DocumentData): Student {
     practicalTestTime: textField(data, "practicalTestTime") || undefined,
     testCentre: textField(data, "testCentre") || undefined,
     testBookingFee: typeof data.testBookingFee === "number" ? data.testBookingFee : undefined,
+    testBookingRef: textField(data, "testBookingRef") || undefined,
+    testCandidateNumber: textField(data, "testCandidateNumber") || undefined,
+    testBookingPaid: typeof data.testBookingPaid === "boolean" ? data.testBookingPaid : undefined,
+    practicalTestStatus:
+      data.practicalTestStatus === "completed" || data.practicalTestStatus === "cancelled"
+        ? data.practicalTestStatus
+        : "upcoming",
+    testMeetingLocation: textField(data, "testMeetingLocation") || undefined,
+    testVehicle: textField(data, "testVehicle") || undefined,
+    practicalTestNotes: textField(data, "practicalTestNotes") || undefined,
     testResult:
       data.testResult === "pass" || data.testResult === "fail" ? data.testResult : null,
     testFaults: isRecord(data.testFaults)
@@ -352,19 +395,24 @@ function asStudent(id: string, data: DocumentData): Student {
   };
 }
 
-function asInvoice(id: string, lesson: DocumentData): Invoice {
-  const status = lesson.review?.paymentStatus;
-  // Full paid-status coverage incl. package + waived. Without these, a lesson
-  // marked "covered by package" silently shows as Unpaid.
-  const paidStatuses = ["paid", "cash", "card", "bank", "package", "waived"];
-  const paid = paidStatuses.includes(status);
+function asLessonPayment(id: string, lesson: DocumentData): LessonPayment {
+  const rawStatus = lesson.review?.paymentStatus;
   return {
     id,
     studentName: lesson.studentName || "Student",
     studentId: typeof lesson.studentId === "string" ? lesson.studentId : undefined,
     amount: Number(lesson.price || lesson.rateApplied) || 0,
-    status: paid ? "paid" : (status === "overdue" ? "overdue" : "unpaid"),
-    dueDate: lesson.date || "",
+    status: normalizePaymentStatus(rawStatus),
+    method: normalizePaymentMethod(lesson.review?.paymentMethod, rawStatus),
+    lessonDate: lesson.date || "",
+    lessonTime: typeof lesson.time === "string" ? lesson.time : undefined,
+    lessonStatus: lesson.review?.status === "completed" || lesson.review?.status === "cancelled"
+      ? lesson.review.status
+      : "scheduled",
+    reminderSentAt: typeof lesson.review?.paymentReminderLastSentAt === "number"
+      ? lesson.review.paymentReminderLastSentAt
+      : undefined,
+    reminderCount: Number(lesson.review?.paymentReminderCount) || 0,
   };
 }
 
@@ -436,6 +484,18 @@ export async function getUpcomingLessons(instructorUid: string, max = 20): Promi
   );
 }
 
+export async function getInstructorLessons(instructorUid: string, max = 500): Promise<Lesson[]> {
+  return runQuery(
+    "lessons",
+    [
+      where("instructorId", "==", instructorUid),
+      orderBy("date", "desc"),
+      fsLimit(max),
+    ],
+    asLesson,
+  );
+}
+
 export async function getStudents(instructorUid: string, max = 100): Promise<Student[]> {
   return runQuery(
     "students",
@@ -452,7 +512,13 @@ export async function getUpcomingTests(instructorUid: string): Promise<Student[]
   const today = todayStr();
   const all = await getStudents(instructorUid, 200);
   return all
-    .filter((s) => !!s.practicalTestDate && s.practicalTestDate >= today && s.testResult === null)
+    .filter((s) =>
+      !!s.practicalTestDate &&
+      s.practicalTestDate >= today &&
+      s.testResult === null &&
+      s.practicalTestStatus !== "cancelled" &&
+      s.practicalTestStatus !== "completed"
+    )
     .sort((a, b) => (a.practicalTestDate ?? "").localeCompare(b.practicalTestDate ?? ""));
 }
 
@@ -538,6 +604,10 @@ export type TestReadinessUpdate = Partial<{
   testBookingRef: string;
   testCandidateNumber: string;
   testBookingPaid: boolean;
+  practicalTestStatus: "upcoming" | "completed" | "cancelled";
+  testMeetingLocation: string;
+  testVehicle: string;
+  practicalTestNotes: string;
   testResult: TestResult;
   testFaults: { minor: number; serious: number; dangerous: number };
   readinessScore: number;
@@ -564,6 +634,10 @@ export async function updateStudentTestReadiness(
     payload.testCandidateNumber = (update.testCandidateNumber || "").trim().toUpperCase() || null;
   }
   if ("testBookingPaid" in update) payload.testBookingPaid = Boolean(update.testBookingPaid);
+  if ("practicalTestStatus" in update) payload.practicalTestStatus = update.practicalTestStatus || "upcoming";
+  if ("testMeetingLocation" in update) payload.testMeetingLocation = (update.testMeetingLocation || "").trim() || null;
+  if ("testVehicle" in update) payload.testVehicle = (update.testVehicle || "").trim() || null;
+  if ("practicalTestNotes" in update) payload.practicalTestNotes = (update.practicalTestNotes || "").trim() || null;
   if ("testResult" in update) payload.testResult = update.testResult || null;
   if ("testFaults" in update) {
     payload.testFaults = update.testFaults
@@ -645,7 +719,7 @@ export async function createLesson(data: LessonWriteData): Promise<string> {
     lessonType: data.lessonType || "normal",
     instructorId,
     timestamp: serverTimestamp(),
-    review: { status: "scheduled", paymentStatus: "unpaid" },
+    review: { status: "scheduled", paymentStatus: "pending" },
   });
   return ref.id;
 }
@@ -717,7 +791,7 @@ export async function createRecurringLessons(
       lessonType: seed.lessonType || "normal",
       instructorId,
       timestamp: serverTimestamp(),
-      review: { status: "scheduled", paymentStatus: "unpaid" },
+      review: { status: "scheduled", paymentStatus: "pending" },
       recurringGroupId: groupId,
       recurringIndex: i + 1,
       recurringWeeks: totalWeeks,
@@ -838,7 +912,8 @@ export async function deleteLesson(lessonId: string): Promise<void> {
   await deleteDoc(doc(db(), "lessons", lessonId));
 }
 
-export async function getUnpaidInvoices(instructorUid: string, max = 50): Promise<Invoice[]> {
+export async function getOpenLessonPayments(instructorUid: string, max = 50): Promise<LessonPayment[]> {
+  const todayIso = todayStr();
   const lessons = await runQuery(
     "lessons",
     [
@@ -849,12 +924,16 @@ export async function getUnpaidInvoices(instructorUid: string, max = 50): Promis
     (id, data) => ({ id, data }),
   );
   return lessons
-    .map(({ id, data }) => asInvoice(id, data))
-    .filter((inv) => inv.status !== "paid")
+    .map(({ id, data }) => asLessonPayment(id, data))
+    .filter((payment) =>
+      payment.lessonDate <= todayIso
+      && payment.lessonStatus !== "cancelled"
+      && (payment.status === "pending" || payment.status === "unpaid"),
+    )
     .slice(0, max);
 }
 
-export async function getPaidInvoices(instructorUid: string, max = 50): Promise<Invoice[]> {
+export async function getPaidLessonPayments(instructorUid: string, max = 50): Promise<LessonPayment[]> {
   const lessons = await runQuery(
     "lessons",
     [
@@ -865,16 +944,16 @@ export async function getPaidInvoices(instructorUid: string, max = 50): Promise<
     (id, data) => ({ id, data }),
   );
   return lessons
-    .map(({ id, data }) => asInvoice(id, data))
-    .filter((inv) => inv.status === "paid")
+    .map(({ id, data }) => asLessonPayment(id, data))
+    .filter((payment) => payment.lessonStatus !== "cancelled" && payment.status === "paid")
     .slice(0, max);
 }
 
-export async function getLessonInvoices(instructorUid: string, max = 100): Promise<Invoice[]> {
-  // Invoices represent post-lesson billing. Future-dated lessons live in the
-  // Calendar; once a lesson reaches its date it becomes an invoice line.
+export async function getLessonPayments(instructorUid: string, max = 100): Promise<LessonPayment[]> {
+  // Payment records are derived from lessons. Future bookings remain in the
+  // calendar until their lesson date is ready for payment review.
   // (We use the lesson's own `date` field — instructor-local YYYY-MM-DD.)
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = todayStr();
   return runQuery(
     "lessons",
     [
@@ -883,8 +962,8 @@ export async function getLessonInvoices(instructorUid: string, max = 100): Promi
       orderBy("date", "desc"),
       fsLimit(max),
     ],
-    asInvoice,
-  );
+    asLessonPayment,
+  ).then((payments) => payments.filter((payment) => payment.lessonStatus !== "cancelled"));
 }
 
 /** For the student portal, read the student doc by uid or claim an unlinked email match. */
@@ -1035,31 +1114,28 @@ export async function markLessonPaid(
   lessonId: string,
   method: "cash" | "card" | "bank" = "cash",
 ): Promise<void> {
-  return setLessonPaymentStatus(lessonId, method);
+  return setLessonPaymentStatus(lessonId, "paid", method);
 }
 
-export type PaymentStatusValue = "cash" | "card" | "bank" | "package" | "not_paid";
-
 /**
- * Single entry point for the post-lesson payment buttons (Cash / Card /
- * Bank / Package / Not paid). Persists who marked it and when so the
- * scheduled +10-minute reminder knows to stop nudging.
+ * Single entry point for the post-lesson payment review. Payment status and
+ * method are stored separately so reports remain consistent.
  */
 export async function setLessonPaymentStatus(
   lessonId: string,
-  status: PaymentStatusValue,
+  status: PaymentStatus,
+  method: PaymentMethod = null,
 ): Promise<void> {
   const ref = doc(db(), "lessons", lessonId);
-  const isPaidMethod = status === "cash" || status === "card" || status === "bank" || status === "package";
+  const paidMethod = status === "paid" ? method : null;
   const update: Record<string, unknown> = {
     "review.paymentStatus": status,
-    "review.paymentMethod": isPaidMethod ? status : null,
+    "review.paymentMethod": paidMethod,
     "review.paymentMarkedBy": firebaseAuth?.currentUser?.uid || null,
     "review.paymentMarkedAt": Date.now(),
+    "review.paidAt": status === "paid" ? serverTimestamp() : null,
+    "review.waivedAt": status === "waived" ? serverTimestamp() : null,
   };
-  if (isPaidMethod) {
-    update["review.paidAt"] = serverTimestamp();
-  }
   await updateDoc(ref, update);
 }
 
@@ -1243,36 +1319,65 @@ export async function getStudentSkillsAggregate(
     .sort((a, b) => b.lessonsRated - a.lessonsRated || b.percent - a.percent || a.label.localeCompare(b.label));
 }
 
-export async function saveInstructorProfile(profile: InstructorProfile): Promise<void> {
+export async function saveInstructorProfile(
+  profile: InstructorProfile,
+  opts?: { previousUsername?: string },
+): Promise<void> {
   const uid = currentUid();
   const username = normalizeUsername(profile.username);
   if (!username) throw new Error("Username is required.");
 
   const profileRef = doc(db(), "settings", `${uid}-profile`);
-  const existing = await getDoc(profileRef).catch(() => null);
-  const oldUsername = existing?.exists()
-    ? normalizeUsername(String(existing.data().username || ""))
-    : "";
+  const directoryRef = doc(db(), "instructorDirectory", username);
 
-  const directorySnap = await getDoc(doc(db(), "instructorDirectory", username));
-  if (directorySnap.exists() && directorySnap.data().uid !== uid) {
-    throw new Error("username-taken");
+  // Fast path: when the caller tells us the username hasn't changed, the
+  // directory doc is already ours — skip every pre-read and go straight to the
+  // batched write (a single network round-trip).
+  const prevUsername = normalizeUsername(opts?.previousUsername || "");
+  let oldUsername = prevUsername;
+
+  if (prevUsername !== username) {
+    // Username is new or changed: check uniqueness, and (only when the caller
+    // couldn't tell us the previous name) read it for rename cleanup.
+    const [existing, directorySnap] = await Promise.all([
+      prevUsername ? Promise.resolve(null) : getDoc(profileRef).catch(() => null),
+      getDoc(directoryRef),
+    ]);
+    if (!prevUsername) {
+      oldUsername = existing?.exists()
+        ? normalizeUsername(String(existing.data().username || ""))
+        : "";
+    }
+    if (directorySnap.exists() && directorySnap.data().uid !== uid) {
+      throw new Error("username-taken");
+    }
   }
 
   const ratingNumber = Math.min(5, Math.max(1, Number(profile.rating) || 5));
-  const hourlyRateNumber = Math.max(0, Number(profile.hourlyRate) || 0);
+  const weekdayRateNumber = Math.max(0, Number(profile.weekdayRate ?? profile.hourlyRate) || 0);
+  const sundayRateNumber = Math.max(0, Number(profile.sundayRate) || 0);
+  const testDayFeeNumber = Math.max(0, Number(profile.testDayFee) || 0);
+  const yearsQualifiedNumber = Math.max(0, Math.min(70, Math.round(Number(profile.yearsQualified) || 0)));
+  const adiApproved = profile.adiApproved === true;
   const cleanProfile = {
     username,
     name: profile.name.trim(),
     location: profile.location.trim(),
     transmissions: normalizeProfileTransmission(profile.transmissions),
     rating: ratingNumber,
-    hourlyRate: hourlyRateNumber,
+    hourlyRate: weekdayRateNumber, // backward-compat: flat rate mirrors weekday rate
+    weekdayRate: weekdayRateNumber,
+    sundayRate: sundayRateNumber,
+    testDayFee: testDayFeeNumber,
+    yearsQualified: yearsQualifiedNumber,
+    adiApproved,
     updatedAt: serverTimestamp(),
   };
 
-  await setDoc(profileRef, cleanProfile, { merge: true });
-  await setDoc(
+  // All writes go out in a single atomic batch = one network round-trip.
+  const batch = writeBatch(db());
+  batch.set(profileRef, cleanProfile, { merge: true });
+  batch.set(
     doc(db(), "users", uid),
     {
       username,
@@ -1281,13 +1386,8 @@ export async function saveInstructorProfile(profile: InstructorProfile): Promise
     },
     { merge: true },
   );
-
-  if (oldUsername && oldUsername !== username) {
-    await deleteDoc(doc(db(), "instructorDirectory", oldUsername));
-  }
-
-  await setDoc(
-    doc(db(), "instructorDirectory", username),
+  batch.set(
+    directoryRef,
     {
       uid,
       username,
@@ -1295,9 +1395,21 @@ export async function saveInstructorProfile(profile: InstructorProfile): Promise
       location: cleanProfile.location,
       rating: cleanProfile.rating,
       transmissions: cleanProfile.transmissions,
+      yearsQualified: yearsQualifiedNumber,
+      adiApproved,
+      weekdayRate: weekdayRateNumber,
+      sundayRate: sundayRateNumber,
+      testDayFee: testDayFeeNumber,
     },
     { merge: true },
   );
+  await batch.commit();
+
+  // Rare: username changed. Best-effort cleanup of the old directory entry —
+  // kept outside the batch so a denied/failed delete can't fail the whole save.
+  if (oldUsername && oldUsername !== username) {
+    await deleteDoc(doc(db(), "instructorDirectory", oldUsername)).catch(() => {});
+  }
 }
 
 export async function checkUsernameAvailable(username: string): Promise<boolean> {
@@ -1362,6 +1474,7 @@ export async function getMyInstructorProfile(): Promise<InstructorProfile | null
   if (!profileSnap.exists()) return null;
 
   const data = profileSnap.data();
+  const num = (value: unknown) => (Number(value) > 0 ? Number(value) : 0);
   return {
     uid,
     username: textField(data, "username"),
@@ -1371,6 +1484,11 @@ export async function getMyInstructorProfile(): Promise<InstructorProfile | null
     rating: typeof data.rating === "number" || typeof data.rating === "string" ? data.rating : 5,
     hourlyRate:
       typeof data.hourlyRate === "number" || typeof data.hourlyRate === "string" ? data.hourlyRate : 0,
+    weekdayRate: num(data.weekdayRate ?? data.hourlyRate),
+    sundayRate: num(data.sundayRate),
+    testDayFee: num(data.testDayFee),
+    yearsQualified: num(data.yearsQualified),
+    adiApproved: data.adiApproved === true,
   };
 }
 
@@ -1388,9 +1506,24 @@ export async function getCarDetails(uid: string): Promise<CarDetails | null> {
     insuranceExpiry: d.insuranceExpiry ?? "",
     motExpiry: d.motExpiry ?? "",
     taxExpiry: d.taxExpiry ?? "",
+    adiBadgeExpiry: d.adiBadgeExpiry ?? "",
     lastServiceDate: d.lastServiceDate ?? "",
+    nextServiceDate: d.nextServiceDate ?? "",
+    tyreCheckDate: d.tyreCheckDate ?? "",
+    brakeCheckDate: d.brakeCheckDate ?? "",
+    oilCheckDate: d.oilCheckDate ?? "",
     mileage: d.mileage ?? "",
     notes: d.notes ?? "",
+    serviceLog: Array.isArray(d.serviceLog)
+      ? d.serviceLog
+          .filter((e: unknown): e is Record<string, unknown> => !!e && typeof e === "object")
+          .map((e) => ({
+            id: String(e.id ?? ""),
+            date: typeof e.date === "string" ? e.date : "",
+            text: typeof e.text === "string" ? e.text : "",
+          }))
+          .filter((e) => e.text.trim().length > 0)
+      : [],
   };
 }
 

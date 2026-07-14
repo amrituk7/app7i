@@ -73,10 +73,10 @@ function deriveSubscription(user: AppUser | null): Derived | null {
   }
   // Never subscribed — early access period, everything is free.
   return {
-    tone: "ok",
-    icon: "gift-outline",
-    label: "Early access",
-    detail: "You have full access free of charge during early access.",
+    tone: "warning",
+    icon: "lock-closed-outline",
+    label: "No subscription",
+    detail: "Start your App7i subscription on the web to keep full instructor access.",
   };
 }
 

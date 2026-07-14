@@ -18,17 +18,16 @@ import { NotificationBell } from "../../components/ui/NotificationBell";
 import { Pill } from "../../components/ui/Pill";
 import { Screen } from "../../components/ui/Screen";
 import { SectionHeader } from "../../components/ui/SectionHeader";
-import { EmptyState } from "../../components/ui/EmptyState";
 import { InviteSheet } from "../../components/ui/InviteSheet";
 import { Skeleton, SkeletonRow } from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
 import {
   getStudents,
   getTodayLessons,
-  getUnpaidInvoices,
+  getOpenLessonPayments,
   getUpcomingTests,
 } from "../../services/dataService";
-import type { Lesson, Student, Invoice } from "../../types";
+import type { Lesson, LessonPayment, Student } from "../../types";
 import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -69,7 +68,7 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
   const { user } = useAuth();
   const [todayLessons, setTodayLessons] = useState<Lesson[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [openPayments, setOpenPayments] = useState<LessonPayment[]>([]);
   const [upcomingTests, setUpcomingTests] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,12 +82,12 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
       const [l, s, inv, tests] = await Promise.all([
         getTodayLessons(user.uid),
         getStudents(user.uid, 100),
-        getUnpaidInvoices(user.uid, 50),
+        getOpenLessonPayments(user.uid, 50),
         getUpcomingTests(user.uid),
       ]);
       setTodayLessons(l);
       setStudents(s);
-      setInvoices(inv);
+      setOpenPayments(inv);
       setUpcomingTests(tests.slice(0, 5));
     } catch (e) {
       setError(toFriendlyError(e, "We're having trouble loading this. Pull down to retry."));
@@ -106,11 +105,12 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
     setRefreshing(false);
   }, [load]);
 
-  const unpaidTotal = invoices.reduce((sum, i) => sum + i.amount, 0);
+  const unpaidTotal = openPayments.reduce((sum, payment) => sum + payment.amount, 0);
   const paidToday = todayLessons
     .filter((l) => l.paymentStatus === "paid")
     .reduce((sum, l) => sum + l.price, 0);
   const nextLesson = todayLessons[0];
+  const isNewInstructor = students.length === 0 && openPayments.length === 0 && upcomingTests.length === 0;
   // Friendly first name — displayName now resolves from the users doc
   // (profile name / username) before the auth provider name. Never show the
   // email id under the greeting; a plain "Instructor" beats a raw mail id.
@@ -131,23 +131,33 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={c.emerald}
+          tintColor={c.emeraldDark}
         />
       }
     >
       <View style={styles.header}>
+        <Pressable
+          onPress={() => navigation.navigate("MyProfile")}
+          style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Open profile"
+        >
+          <Text style={styles.avatarText}>{initials(user?.displayName || user?.email)}</Text>
+        </Pressable>
         <View style={styles.headerText}>
           <Text style={styles.greeting}>{greeting()}</Text>
           <Text style={styles.name}>{firstName}</Text>
         </View>
         <View style={styles.headerActions}>
-          <NotificationBell onPress={() => navigation.navigate("Notifications")} />
           <Pressable
             onPress={() => navigation.navigate("Settings")}
-            style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.headerIconButton, pressed && styles.pressed]}
+            accessibilityRole="button"
+            accessibilityLabel="Open settings"
           >
-            <Text style={styles.avatarText}>{initials(user?.displayName || user?.email)}</Text>
+            <Ionicons name="settings-outline" size={20} color={c.slate900} />
           </Pressable>
+          <NotificationBell onPress={() => navigation.navigate("Notifications")} />
         </View>
       </View>
 
@@ -157,35 +167,20 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
         </Card>
       )}
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.metrics}
-      >
+      <View style={styles.metrics}>
         {(() => {
-          const tested = students.filter((s) => s.testResult === "pass" || s.testResult === "fail");
-          const passes = students.filter((s) => s.testResult === "pass").length;
-          const passRate = tested.length > 0 ? Math.round((passes / tested.length) * 100) : null;
           const metrics: Array<{ label: string; value: string | number; helper: string; prefix?: string }> = [
             { label: "Today", value: todayLessons.length, helper: "Lessons" },
             { label: "Earned", value: paidToday, helper: "today", prefix: "£" },
             { label: "Owed", value: unpaidTotal, helper: "outstanding", prefix: "£" },
-            { label: "Students", value: students.length, helper: "Active" },
           ];
-          if (passRate !== null) {
-            metrics.push({
-              label: "Pass rate",
-              value: `${passRate}%`,
-              helper: `${passes} of ${tested.length} passed`,
-            });
-          }
           return metrics.map((metric, index) => (
-            <FadeInView key={metric.label} delay={index * 60}>
-              <MetricCard {...metric} />
+            <FadeInView key={metric.label} delay={index * 60} style={styles.metricItem}>
+              <MetricCard {...metric} compact />
             </FadeInView>
           ));
         })()}
-      </ScrollView>
+      </View>
 
       {nextLesson ? (
         <FadeInView delay={200}>
@@ -246,38 +241,43 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
         </FadeInView>
       ) : (
         <FadeInView delay={200}>
-          <Card style={styles.nextCard}>
-            <EmptyState
-              iconName="calendar-clear-outline"
-              title="No lessons today"
-              description="Tap below to add one."
-              actionLabel="Book a lesson"
-              onAction={() => navigation.navigate("BookLesson")}
-            />
-            <AppButton
-              label="Book a lesson"
-              onPress={() => navigation.navigate("BookLesson")}
-            />
+          <Card style={styles.welcomeCard}>
+            <View style={styles.welcomeIcon}><Ionicons name="calendar-outline" size={20} color={c.emeraldDark} /></View>
+            <View style={styles.welcomeCopy}>
+              <Text style={styles.welcomeTitle}>
+                {isNewInstructor ? "Welcome to App7i" : "No lessons today"}
+              </Text>
+              <Text style={styles.welcomeText}>
+                {isNewInstructor
+                  ? "Today's lessons, practical tests and earnings will appear here after your first booking."
+                  : "Your day is clear. Upcoming tests, payments and recent activity remain visible below."}
+              </Text>
+            </View>
+            {isNewInstructor ? (
+              <AppButton label="Create your first booking" onPress={() => navigation.navigate("BookLesson")} />
+            ) : null}
           </Card>
         </FadeInView>
       )}
 
       <SectionHeader title="Quick actions" />
       <View style={styles.quickGrid}>
-        <QuickAction
-          icon="calendar-outline"
-          label="Book lesson"
-          onPress={() => navigation.navigate("BookLesson")}
-        />
+        {!isNewInstructor ? (
+          <QuickAction
+            icon="calendar-outline"
+            label="Book lesson"
+            onPress={() => navigation.navigate("BookLesson")}
+          />
+        ) : null}
         <QuickAction
           icon="person-add-outline"
           label="Add student"
           onPress={() => navigation.navigate("AddStudent")}
         />
         <QuickAction
-          icon="receipt-outline"
-          label="Invoices"
-          onPress={() => navigation.navigate("Invoices")}
+          icon="checkmark-done-outline"
+          label="Payments"
+          onPress={() => navigation.navigate("Payments")}
         />
         <QuickAction
           icon="qr-code"
@@ -290,24 +290,24 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
           onPress={() => navigation.navigate("FeedbackSummary")}
         />
         <QuickAction
-          icon="chatbubbles-outline"
-          label="Messages"
-          onPress={() => navigation.navigate("InstructorMessages")}
+          icon="ribbon-outline"
+          label="Practical tests"
+          onPress={() => navigation.navigate("PracticalTests")}
         />
         <QuickAction
           icon="library-outline"
-          label="Tips"
-          onPress={() => navigation.navigate("Tips")}
+          label="Learning Hub"
+          onPress={() => navigation.navigate("ResourceLibrary")}
         />
       </View>
 
-      <SectionHeader title="Upcoming tests" />
+      <SectionHeader title="Upcoming practical tests" actionLabel="View all" onAction={() => navigation.navigate("PracticalTests")} />
       <Card style={styles.testsCard}>
         {upcomingTests.length === 0 ? (
           <View style={styles.testsEmpty}>
             <Ionicons name="ribbon-outline" size={24} color={c.slate300} />
             <Text style={styles.testsEmptyText}>
-              No tests booked yet. Add a test date from a student's profile.
+              No tests booked yet. Book and manage practical tests from the test register.
             </Text>
           </View>
         ) : (
@@ -325,14 +325,11 @@ export function InstructorDashboardScreen({ navigation }: { navigation: any }) {
 
       <SectionHeader title="Today's timeline" />
       {todayLessons.length === 0 ? (
-        <Card>
-          <EmptyState
-            iconName="calendar-clear-outline"
-            title="Nothing booked here"
-            description="Tap + to slot in a lesson on this day."
-            actionLabel="Book lesson"
-            onAction={() => navigation.navigate("BookLesson")}
-          />
+        <Card style={styles.overviewCard}>
+          <OverviewRow icon="calendar-outline" title="Today's lessons" value="No lessons scheduled" />
+          <OverviewRow icon="ribbon-outline" title="Upcoming practical tests" value={upcomingTests.length ? `${upcomingTests.length} booked` : "No practical tests booked"} />
+          <OverviewRow icon="card-outline" title="Pending payments" value={openPayments.length ? `${openPayments.length} awaiting review` : "No payments to review"} />
+          <OverviewRow icon="pulse-outline" title="Recent activity" value="Activity will appear after your first booking" last />
         </Card>
       ) : (
         <Card>
@@ -423,6 +420,20 @@ function QuickAction({
   );
 }
 
+function OverviewRow({ icon, title, value, last }: { icon: IoniconName; title: string; value: string; last?: boolean }) {
+  const styles = useThemedStyles(makeStyles);
+  const c = useColors();
+  return (
+    <View style={[styles.overviewRow, last && styles.overviewRowLast]}>
+      <View style={styles.overviewIcon}><Ionicons name={icon} size={17} color={c.slate600} /></View>
+      <View style={styles.overviewCopy}>
+        <Text style={styles.overviewTitle}>{title}</Text>
+        <Text style={styles.overviewValue}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
 function todayStr(): string {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/London" }).format(new Date());
 }
@@ -434,11 +445,11 @@ function daysUntilTest(dateStr: string): number {
   return Math.round((t.getTime() - b.getTime()) / 86_400_000);
 }
 
-function testDaysBadge(days: number): { label: string; bg: string; text: string } {
-  if (days === 0) return { label: "TODAY", bg: "#FFF2F1", text: "#FF3B30" };
-  if (days === 1) return { label: "Tomorrow", bg: "#FFF5E6", text: "#FF9500" };
-  if (days <= 7) return { label: `in ${days}d`, bg: "#FFF5E6", text: "#FF9500" };
-  return { label: `in ${days}d`, bg: "#E8F5EE", text: "#115c37" };
+function testDaysBadge(days: number, c: ColorPalette): { label: string; bg: string; text: string } {
+  if (days === 0) return { label: "TODAY", bg: c.redSoft, text: c.red };
+  if (days === 1) return { label: "Tomorrow", bg: c.amberSoft, text: c.amber };
+  if (days <= 7) return { label: `in ${days}d`, bg: c.amberSoft, text: c.amber };
+  return { label: `in ${days}d`, bg: c.emeraldSoft, text: c.emeraldDark };
 }
 
 function TestRow({
@@ -453,7 +464,7 @@ function TestRow({
   const styles = useThemedStyles(makeStyles);
   const c = useColors();
   const days = student.practicalTestDate ? daysUntilTest(student.practicalTestDate) : null;
-  const badge = days !== null ? testDaysBadge(days) : null;
+  const badge = days !== null ? testDaysBadge(days, c) : null;
 
   const meta = [
     student.testCentre,
@@ -526,6 +537,16 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
   },
+  headerIconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: c.surfaceRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
+  },
   greeting: {
     color: c.slate500,
     fontSize: 13,
@@ -540,15 +561,17 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     letterSpacing: 0,
   },
   avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: c.emerald,
+    width: 42,
+    height: 42,
+    borderRadius: 16,
+    backgroundColor: c.surfaceRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
-    color: c.white,
+    color: c.slate900,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: "700",
@@ -568,9 +591,12 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontWeight: "700",
   },
   metrics: {
-    gap: spacing.md,
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: spacing.sm,
     paddingBottom: spacing.lg,
   },
+  metricItem: { flex: 1, minWidth: 0 },
   nextCard: {
     gap: spacing.lg,
     marginBottom: spacing.lg,
@@ -671,6 +697,18 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   flexButton: {
     flex: 1,
   },
+  welcomeCard: { gap: spacing.md, marginTop: spacing.md, padding: spacing.lg },
+  welcomeIcon: { width: 40, height: 40, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: c.emeraldSoft },
+  welcomeCopy: { gap: 4 },
+  welcomeTitle: { color: c.slate900, fontSize: 18, lineHeight: 24, fontWeight: "800" },
+  welcomeText: { color: c.slate500, fontSize: 13, lineHeight: 19 },
+  overviewCard: { padding: 0, overflow: "hidden" },
+  overviewRow: { flexDirection: "row", alignItems: "center", gap: spacing.md, minHeight: 64, paddingHorizontal: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.border },
+  overviewRowLast: { borderBottomWidth: 0 },
+  overviewIcon: { width: 34, height: 34, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: c.surfaceMuted },
+  overviewCopy: { flex: 1, gap: 2 },
+  overviewTitle: { color: c.slate900, fontSize: 13, fontWeight: "700" },
+  overviewValue: { color: c.slate500, fontSize: 12, lineHeight: 16 },
   quickGrid: {
     flexDirection: "row",
     flexWrap: "wrap",

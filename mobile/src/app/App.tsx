@@ -14,6 +14,7 @@ import {
 import { rngh } from "../utils/rngh";
 import { ThemeProvider, useTheme } from "../theme/ThemeContext";
 import { SPLASH_BG } from "../theme/colors";
+import { NavigationPreferencesProvider } from "../navigation/NavigationPreferencesContext";
 
 // react-native-gesture-handler requires its root view at the absolute top of
 // the tree. We fall back to a plain View on APKs that don't have the native
@@ -99,9 +100,11 @@ function App() {
       <SafeAreaProvider>
         <ThemeProvider>
           <AuthProvider>
-            <AdaptiveStatusBar />
-            <AppNavigator />
-            <AppUpdateGate />
+            <NavigationPreferencesProvider>
+              <AdaptiveStatusBar />
+              <AppNavigator />
+              <AppUpdateGate />
+            </NavigationPreferencesProvider>
           </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>

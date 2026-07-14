@@ -13,6 +13,12 @@ export type Tip = {
 
 export type CarFuelType = "petrol" | "diesel" | "electric" | "hybrid";
 
+export type CarServiceEntry = {
+  id: string;
+  date: string; // ISO YYYY-MM-DD, or "" for migrated legacy notes
+  text: string;
+};
+
 export type CarDetails = {
   make: string;
   model: string;
@@ -23,14 +29,30 @@ export type CarDetails = {
   insuranceExpiry: string;
   motExpiry: string;
   taxExpiry: string;
+  adiBadgeExpiry: string;
   lastServiceDate: string;
+  nextServiceDate: string;
+  tyreCheckDate: string;
+  brakeCheckDate: string;
+  oilCheckDate: string;
   mileage: string;
   notes: string;
+  serviceLog: CarServiceEntry[];
 };
 
 export type UserRole = "instructor" | "student";
 
-export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "none";
+// Values the web/backend actually write to users.subscriptionStatus. Kept wide
+// so the mobile billing gate can read every real state (incl. "unpaid").
+export type SubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "cancelled"
+  | "trial_expired"
+  | "unpaid"
+  | "none";
 
 export type AppUser = {
   uid: string;
@@ -43,6 +65,8 @@ export type AppUser = {
   subscriptionStatus?: SubscriptionStatus;
   /** Unix ms timestamp for when the trial ends. */
   trialEnd?: number;
+  /** Internal/admin marker. This does not grant billing access. */
+  isDeveloper?: boolean;
 };
 
 export type MockTest = {
@@ -96,6 +120,10 @@ export type Student = {
   testCandidateNumber?: string;
   /** Whether the student has paid / reimbursed the booking fee. */
   testBookingPaid?: boolean;
+  practicalTestStatus?: "upcoming" | "completed" | "cancelled";
+  testMeetingLocation?: string;
+  testVehicle?: string;
+  practicalTestNotes?: string;
   /** Set after the practical test happens. */
   testResult?: TestResult;
   /** DVSA fault counts on the actual test. Useful for retake planning. */
@@ -116,7 +144,8 @@ export type Lesson = {
   durationMinutes: number;
   pickup: string;
   status: "scheduled" | "completed" | "cancelled";
-  paymentStatus: "paid" | "unpaid" | "pending" | "not_paid";
+  paymentStatus: PaymentStatus;
+  paymentMethod?: PaymentMethod;
   price: number;
   notes?: string;
   skillRatings?: Record<string, number>;
@@ -134,14 +163,117 @@ export type Lesson = {
   recurringWeeks?: number;
 };
 
-export type Invoice = {
+export type PaymentStatus = "pending" | "paid" | "unpaid" | "waived";
+
+export type PaymentMethod = "cash" | "card" | "bank" | "package" | null;
+
+/** A lesson payment record. App7i records payment; it does not collect it. */
+export type LessonPayment = {
   id: string;
   studentName: string;
   /** Firestore student doc id, when known — lets us filter per-student. */
   studentId?: string;
   amount: number;
-  status: "paid" | "unpaid" | "overdue";
-  dueDate: string;
+  status: PaymentStatus;
+  method: PaymentMethod;
+  lessonDate: string;
+  lessonTime?: string;
+  lessonStatus: Lesson["status"];
+  reminderSentAt?: number;
+  reminderCount: number;
+};
+
+export type LearningResourceType =
+  | "note"
+  | "pdf"
+  | "image"
+  | "video"
+  | "audio"
+  | "document"
+  | "link"
+  | "youtube"
+  | "mock_test"
+  | "lesson_plan"
+  | "checklist";
+
+export type LearningResource = {
+  id: string;
+  instructorId: string;
+  title: string;
+  description: string;
+  type: LearningResourceType;
+  category: string;
+  folder: string;
+  url?: string;
+  storagePath?: string;
+  fileName?: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  pinned: boolean;
+  archived: boolean;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type ResourceAssignment = {
+  id: string;
+  instructorId: string;
+  studentId: string;
+  resourceId: string;
+  title: string;
+  description: string;
+  type: LearningResourceType;
+  category: string;
+  folder: string;
+  url?: string;
+  storagePath?: string;
+  fileName?: string;
+  mimeType?: string;
+  required: boolean;
+  pinned: boolean;
+  completed: boolean;
+  completedAt?: number;
+  assignedAt: number;
+  updatedAt: number;
+};
+
+export type LearningEntryKind = "lesson_summary" | "manual_note" | "homework";
+
+export type LearningEntry = {
+  id: string;
+  instructorId: string;
+  studentId: string;
+  lessonId?: string;
+  kind: LearningEntryKind;
+  title: string;
+  body: string;
+  topicsCovered: string[];
+  areasToImprove: string;
+  homework: string;
+  skillsAchieved: string[];
+  instructorComments: string;
+  confidenceLevel?: number;
+  nextObjectives: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type LearningTopicStatus = "not_started" | "in_progress" | "completed";
+
+export type LearningTopic = {
+  id: string;
+  label: string;
+  status: LearningTopicStatus;
+  updatedAt?: number;
+};
+
+export type StudentLearningProgress = {
+  id: string;
+  instructorId: string;
+  studentId: string;
+  topics: LearningTopic[];
+  overallPercent: number;
+  updatedAt: number;
 };
 
 // ─── Business records: expenses + mileage ─────────────────────────────────────

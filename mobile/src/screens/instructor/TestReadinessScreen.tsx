@@ -51,6 +51,10 @@ export function TestReadinessScreen({
   const [testBookingRef, setTestBookingRef] = useState("");
   const [testCandidateNumber, setTestCandidateNumber] = useState("");
   const [testBookingPaid, setTestBookingPaid] = useState(false);
+  const [practicalTestStatus, setPracticalTestStatus] = useState<"upcoming" | "completed" | "cancelled">("upcoming");
+  const [testMeetingLocation, setTestMeetingLocation] = useState("");
+  const [testVehicle, setTestVehicle] = useState("");
+  const [practicalTestNotes, setPracticalTestNotes] = useState("");
   const [testResult, setTestResult] = useState<TestResult>(null);
   const [testFaultsMinor, setTestFaultsMinor] = useState("0");
   const [testFaultsSerious, setTestFaultsSerious] = useState("0");
@@ -82,6 +86,10 @@ export function TestReadinessScreen({
           setTestBookingRef(s.testBookingRef || "");
           setTestCandidateNumber(s.testCandidateNumber || "");
           setTestBookingPaid(Boolean(s.testBookingPaid));
+          setPracticalTestStatus(s.practicalTestStatus || "upcoming");
+          setTestMeetingLocation(s.testMeetingLocation || "");
+          setTestVehicle(s.testVehicle || "");
+          setPracticalTestNotes(s.practicalTestNotes || "");
           setTestResult(s.testResult || null);
           setTestFaultsMinor(String(s.testFaults?.minor ?? 0));
           setTestFaultsSerious(String(s.testFaults?.serious ?? 0));
@@ -114,6 +122,10 @@ export function TestReadinessScreen({
         testBookingRef,
         testCandidateNumber,
         testBookingPaid,
+        practicalTestStatus,
+        testMeetingLocation,
+        testVehicle,
+        practicalTestNotes,
         testResult,
         testFaults:
           testResult === "pass" || testResult === "fail"
@@ -264,6 +276,23 @@ export function TestReadinessScreen({
           value={testBookingPaid}
           onChange={setTestBookingPaid}
         />
+        <Text style={styles.fieldLabel}>Test status</Text>
+        <View style={styles.chipsRow}>
+          {(["upcoming", "completed", "cancelled"] as const).map((status) => (
+            <Pressable
+              key={status}
+              onPress={() => setPracticalTestStatus(status)}
+              style={({ pressed }) => [styles.chip, practicalTestStatus === status && styles.chipActive, pressed && { opacity: 0.7 }]}
+            >
+              <Text style={[styles.chipText, practicalTestStatus === status && styles.chipTextActive]}>
+                {status[0].toUpperCase() + status.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Field label="Meeting location" value={testMeetingLocation} onChangeText={setTestMeetingLocation} placeholder="Where the student should meet you" />
+        <Field label="Vehicle" value={testVehicle} onChangeText={setTestVehicle} placeholder="e.g. Instructor car - AB12 CDE" />
+        <Field label="Notes" value={practicalTestNotes} onChangeText={setPracticalTestNotes} placeholder="Preparation, documents or arrival instructions" />
       </Card>
 
       <Card style={styles.section}>

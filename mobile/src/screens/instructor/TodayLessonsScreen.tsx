@@ -8,18 +8,21 @@ import {
   Text,
   View,
 } from "react-native";
-import { EmptyState } from "../../components/ui/EmptyState";
+import { AppButton } from "../../components/ui/AppButton";
+import { Card } from "../../components/ui/Card";
 import { FadeInView } from "../../components/ui/FadeInView";
+import { ListRow } from "../../components/ui/ListRow";
 import { Screen } from "../../components/ui/Screen";
+import { SectionHeader } from "../../components/ui/SectionHeader";
 import { SkeletonRow } from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
-import { getTodayLessons } from "../../services/dataService";
+import { getTodayLessons, getUpcomingLessons, getUpcomingTests } from "../../services/dataService";
 import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useColors } from "../../theme/ThemeContext";
 import { useThemedStyles } from "../../theme/useThemedStyles";
-import type { Lesson } from "../../types";
+import type { Lesson, Student } from "../../types";
 import { formatGBP } from "../../utils/currency";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
@@ -39,6 +42,8 @@ export function TodayLessonsScreen({ navigation }: { navigation: MobileNavigatio
   const c = useColors();
   const { user } = useAuth();
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [upcomingLessons, setUpcomingLessons] = useState<Lesson[]>([]);
+  const [upcomingTests, setUpcomingTests] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +52,16 @@ export function TodayLessonsScreen({ navigation }: { navigation: MobileNavigatio
     if (!user?.uid) return;
     setError(null);
     try {
-      setLessons(await getTodayLessons(user.uid));
+      const [today, upcoming, tests] = await Promise.all([
+        getTodayLessons(user.uid),
+        getUpcomingLessons(user.uid, 20),
+        getUpcomingTests(user.uid),
+      ]);
+      setLessons(today);
+      setUpcomingLessons(
+        upcoming.filter((lesson) => lesson.date > todayISO() && lesson.status !== "cancelled").slice(0, 3),
+      );
+      setUpcomingTests(tests.slice(0, 3));
     } catch (err) {
       setError(toFriendlyError(err, "We're having trouble loading today's lessons. Pull down to retry."));
     }
@@ -89,7 +103,9 @@ export function TodayLessonsScreen({ navigation }: { navigation: MobileNavigatio
         </View>
         <Pressable
           style={({ pressed }) => [styles.calendarButton, pressed && styles.pressed]}
-          onPress={() => navigation.navigate("Calendar")}
+          onPress={() => navigation.navigate("ModuleCalendar")}
+          accessibilityRole="button"
+          accessibilityLabel="Open schedule calendar"
         >
           <Ionicons name="calendar-outline" size={20} color={c.emeraldDark} />
         </Pressable>
@@ -98,13 +114,18 @@ export function TodayLessonsScreen({ navigation }: { navigation: MobileNavigatio
       {error ? <NativeNotice icon="warning-outline" message={error} /> : null}
 
       {lessons.length === 0 ? (
-        <EmptyState
-          iconName="sunny-outline"
-          title="No lessons today"
-          message="Tap below to add one."
-          actionLabel="Book lesson"
-          onAction={() => navigation.navigate("BookLesson")}
-        />
+        <Card style={styles.emptyTodayCard}>
+          <View style={styles.emptyTodayIcon}>
+            <Ionicons name="calendar-outline" size={20} color={c.emeraldDark} />
+          </View>
+          <View style={styles.emptyTodayCopy}>
+            <Text style={styles.emptyTodayTitle}>No lessons today</Text>
+            <Text style={styles.emptyTodayText}>
+              Your next bookings and practical tests are still visible below.
+            </Text>
+          </View>
+          <AppButton label="Book a lesson" onPress={() => navigation.navigate("BookLesson")} />
+        </Card>
       ) : (
         <View style={styles.list}>
           {lessons.map((lesson, index) => (
@@ -118,8 +139,70 @@ export function TodayLessonsScreen({ navigation }: { navigation: MobileNavigatio
           ))}
         </View>
       )}
+
+      <SectionHeader title="Coming up" />
+      <Card style={styles.upcomingCard}>
+        {upcomingLessons.length === 0 ? (
+          <View style={styles.compactEmpty}>
+            <Ionicons name="time-outline" size={20} color={c.slate300} />
+            <View style={styles.compactEmptyCopy}>
+              <Text style={styles.compactEmptyTitle}>No upcoming lessons</Text>
+              <Text style={styles.compactEmptyText}>New bookings will appear here.</Text>
+            </View>
+          </View>
+        ) : (
+          upcomingLessons.map((lesson) => (
+            <ListRow
+              key={lesson.id}
+              title={lesson.studentName}
+              subtitle={`${formatLessonDate(lesson.date)} at ${lesson.time || "Time TBC"}`}
+              right={formatGBP(lesson.price)}
+              onPress={() => navigation.navigate("LessonDetail", { lessonId: lesson.id })}
+            />
+          ))
+        )}
+      </Card>
+
+      <SectionHeader
+        title="Practical tests"
+        actionLabel="View all"
+        onAction={() => navigation.navigate("PracticalTests")}
+      />
+      <Pressable
+        onPress={() => navigation.navigate("PracticalTests")}
+        style={({ pressed }) => [styles.testSummary, pressed && styles.pressed]}
+        accessibilityRole="button"
+      >
+        <View style={styles.testSummaryIcon}>
+          <Ionicons name="ribbon-outline" size={20} color={c.emeraldDark} />
+        </View>
+        <View style={styles.testSummaryCopy}>
+          <Text style={styles.testSummaryTitle}>
+            {upcomingTests.length > 0
+              ? `${upcomingTests.length} upcoming ${upcomingTests.length === 1 ? "test" : "tests"}`
+              : "No practical tests booked"}
+          </Text>
+          <Text style={styles.testSummaryText} numberOfLines={1}>
+            {upcomingTests[0]?.practicalTestDate
+              ? `${upcomingTests[0].name} - ${formatLessonDate(upcomingTests[0].practicalTestDate)}`
+              : "Add a test date from a student's profile."}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={c.slate300} />
+      </Pressable>
     </Screen>
   );
+}
+
+function todayISO(): string {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatLessonDate(iso: string): string {
+  const value = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(value.getTime())) return iso || "Date TBC";
+  return value.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 }
 
 function toFriendlyError(error: unknown, fallback: string) {
@@ -242,6 +325,86 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: c.surface,
+  },
+  emptyTodayCard: {
+    gap: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  emptyTodayIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: c.surfaceMuted,
+  },
+  emptyTodayCopy: {
+    gap: 4,
+  },
+  emptyTodayTitle: {
+    color: c.slate900,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  emptyTodayText: {
+    color: c.slate500,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  upcomingCard: {
+    paddingVertical: 0,
+  },
+  compactEmpty: {
+    minHeight: 72,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  compactEmptyCopy: {
+    flex: 1,
+    gap: 3,
+  },
+  compactEmptyTitle: {
+    color: c.slate900,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  compactEmptyText: {
+    color: c.slate500,
+    fontSize: 12,
+  },
+  testSummary: {
+    minHeight: 76,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: 16,
+    backgroundColor: c.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
+  },
+  testSummaryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: c.surfaceMuted,
+  },
+  testSummaryCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 3,
+  },
+  testSummaryTitle: {
+    color: c.slate900,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  testSummaryText: {
+    color: c.slate500,
+    fontSize: 12,
   },
   list: {
     borderRadius: 16,
@@ -377,4 +540,3 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     transform: [{ scale: 0.99 }],
   },
 });
-

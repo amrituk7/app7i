@@ -105,7 +105,7 @@ export function InstructorOnboardingScreen() {
       <View style={styles.header}>
         <Text style={styles.kicker}>Instructor setup</Text>
         <Text style={styles.title}>Set up your driving school workspace.</Text>
-        <Text style={styles.copy}>This creates the mobile profile used for bookings, student portal access and invoices.</Text>
+        <Text style={styles.copy}>This creates the mobile profile used for bookings, student access and lesson payment records.</Text>
       </View>
 
       <Card style={styles.card}>

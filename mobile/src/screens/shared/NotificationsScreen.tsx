@@ -29,8 +29,12 @@ import { useThemedStyles } from "../../theme/useThemedStyles";
 import { spacing } from "../../theme/spacing";
 import { describeFirestoreError } from "../../utils/firestoreError";
 import { hapticTap } from "../../utils/haptics";
+import { urlToNavigationTarget } from "../../navigation/notificationRouting";
 
-type Nav = { goBack: () => void };
+type Nav = {
+  goBack: () => void;
+  navigate: (screen: string, params?: Record<string, unknown>) => void;
+};
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
 function typeIcon(type: string): IoniconName {
@@ -45,6 +49,8 @@ function typeIcon(type: string): IoniconName {
     case "message_received":
       return "chatbubble-ellipses-outline";
     case "lesson_payment_review":
+    case "daily_payment_review":
+    case "student_payment_reminder":
       return "cash-outline";
     case "lesson_feedback_prompt":
       return "star-outline";
@@ -110,14 +116,18 @@ export function NotificationsScreen({ navigation }: { navigation: Nav }) {
   const unreadCount = items.filter((n) => !n.read).length;
 
   async function onItemPress(item: AppNotification) {
-    if (item.read) return;
     hapticTap();
-    // Optimistic — flip locally first so the row responds instantly.
-    setItems((prev) => prev.map((n) => (n.id === item.id ? { ...n, read: true } : n)));
-    try {
-      await markNotificationRead(item.id);
-    } catch {
-      // Non-fatal; it'll show unread again on next load.
+    if (!item.read) {
+      setItems((prev) => prev.map((n) => (n.id === item.id ? { ...n, read: true } : n)));
+      try {
+        await markNotificationRead(item.id);
+      } catch {
+        // Non-fatal; it'll show unread again on next load.
+      }
+    }
+    const target = item.url ? urlToNavigationTarget(item.url) : null;
+    if (target) {
+      navigation.navigate(target.screen, target.params);
     }
   }
 

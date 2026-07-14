@@ -53,8 +53,9 @@ function formatTimeRange(start: string, durationMinutes: number): string {
 
 function paymentTone(status: Lesson["paymentStatus"], c: ColorPalette): { bg: string; fg: string; label: string } {
   if (status === "paid") return { bg: c.greenSoft, fg: c.green, label: "Paid" };
-  if (status === "not_paid" || status === "unpaid")
+  if (status === "unpaid")
     return { bg: c.amberSoft, fg: c.amber, label: "Unpaid" };
+  if (status === "waived") return { bg: c.surfaceMuted, fg: c.slate500, label: "Waived" };
   return { bg: c.slate100, fg: c.slate500, label: "Pending" };
 }
 

@@ -333,6 +333,8 @@ export function LessonsCalendarScreen({ navigation }: { navigation: Nav }) {
           iconName="calendar-outline"
           title="Nothing scheduled"
           message="Tap the date strip above to scan other days, or book a lesson from the Students tab."
+          actionLabel="Book a lesson"
+          onAction={() => navigation.navigate("BookLesson")}
         />
       ) : (
         <DayTimeGrid
@@ -407,5 +409,5 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  summaryText: { color: c.white, fontSize: 12, fontWeight: "600", letterSpacing: 0.1 },
+  summaryText: { color: c.onInverted, fontSize: 12, fontWeight: "600", letterSpacing: 0.1 },
 });

@@ -45,14 +45,55 @@ const EMPTY_CAR: CarDetails = {
   insuranceExpiry: "",
   motExpiry: "",
   taxExpiry: "",
+  adiBadgeExpiry: "",
   lastServiceDate: "",
+  nextServiceDate: "",
+  tyreCheckDate: "",
+  brakeCheckDate: "",
+  oilCheckDate: "",
   mileage: "",
   notes: "",
+  serviceLog: [],
 };
 
+// Accepts the ways people actually type dates — 14/08/2026, 14-08-2026,
+// 14.08.26, or ISO 2026-08-14 — and returns ISO YYYY-MM-DD ("" if unreadable).
+// The status cards AND the backend MOT/insurance reminders both need ISO, but
+// the edit form is free text, so UK-style input used to save fine and then
+// silently show as "not set".
+function parseFlexibleDate(input: string): string {
+  const raw = (input || "").trim();
+  if (!raw) return "";
+
+  let year = 0;
+  let month = 0;
+  let day = 0;
+
+  const iso = raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+  const uk = raw.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2}|\d{4})$/);
+  if (iso) {
+    year = Number(iso[1]);
+    month = Number(iso[2]);
+    day = Number(iso[3]);
+  } else if (uk) {
+    day = Number(uk[1]);
+    month = Number(uk[2]);
+    year = Number(uk[3]);
+    if (year < 100) year += 2000;
+  } else {
+    return "";
+  }
+
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1990 || year > 2100) return "";
+  const check = new Date(Date.UTC(year, month - 1, day));
+  if (check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) return "";
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 function daysUntil(dateStr: string): number | null {
-  if (!dateStr) return null;
-  const target = new Date(`${dateStr}T12:00:00Z`);
+  const isoStr = parseFlexibleDate(dateStr);
+  if (!isoStr) return null;
+  const target = new Date(`${isoStr}T12:00:00Z`);
   if (Number.isNaN(target.getTime())) return null;
   const today = new Date();
   const base = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 12));
@@ -81,11 +122,16 @@ function statusCaption(days: number | null): string {
 }
 
 function formatDate(dateStr: string): string {
-  if (!dateStr) return "—";
-  const parts = dateStr.split("-");
-  if (parts.length !== 3) return dateStr;
+  const isoStr = parseFlexibleDate(dateStr);
+  if (!isoStr) return dateStr || "—";
+  const parts = isoStr.split("-");
   const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function initials(car: CarDetails | null): string {
@@ -204,12 +250,45 @@ export function CarHealthScreen() {
   const [draft, setDraft] = useState<CarDetails>(EMPTY_CAR);
   const [saving, setSaving] = useState(false);
 
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteText, setNoteText] = useState("");
+  const [noteSaving, setNoteSaving] = useState(false);
+
   const load = useCallback(async () => {
     if (!user?.uid) return;
     setError(null);
     try {
       const details = await getCarDetails(user.uid);
-      setCar(details);
+      if (details) {
+        // Auto-heal dates saved in UK format by older app versions: normalise
+        // to ISO so the status cards AND backend reminders read them again.
+        const healed = {
+          insuranceExpiry: parseFlexibleDate(details.insuranceExpiry) || details.insuranceExpiry,
+          motExpiry: parseFlexibleDate(details.motExpiry) || details.motExpiry,
+          taxExpiry: parseFlexibleDate(details.taxExpiry) || details.taxExpiry,
+          adiBadgeExpiry: parseFlexibleDate(details.adiBadgeExpiry) || details.adiBadgeExpiry,
+          lastServiceDate: parseFlexibleDate(details.lastServiceDate) || details.lastServiceDate,
+          nextServiceDate: parseFlexibleDate(details.nextServiceDate) || details.nextServiceDate,
+          tyreCheckDate: parseFlexibleDate(details.tyreCheckDate) || details.tyreCheckDate,
+          brakeCheckDate: parseFlexibleDate(details.brakeCheckDate) || details.brakeCheckDate,
+          oilCheckDate: parseFlexibleDate(details.oilCheckDate) || details.oilCheckDate,
+        };
+        const changed =
+          healed.insuranceExpiry !== details.insuranceExpiry ||
+          healed.motExpiry !== details.motExpiry ||
+          healed.taxExpiry !== details.taxExpiry ||
+          healed.adiBadgeExpiry !== details.adiBadgeExpiry ||
+          healed.lastServiceDate !== details.lastServiceDate ||
+          healed.nextServiceDate !== details.nextServiceDate ||
+          healed.tyreCheckDate !== details.tyreCheckDate ||
+          healed.brakeCheckDate !== details.brakeCheckDate ||
+          healed.oilCheckDate !== details.oilCheckDate;
+        const next = { ...details, ...healed };
+        setCar(next);
+        if (changed) void saveCarDetails(user.uid, healed).catch(() => {});
+      } else {
+        setCar(details);
+      }
     } catch {
       setError("Couldn't load car details. Pull down to retry.");
     }
@@ -233,10 +312,51 @@ export function CarHealthScreen() {
 
   const save = useCallback(async () => {
     if (!user?.uid) return;
+
+    // Normalise every date to ISO; refuse the save (naming the field) when a
+    // non-empty date can't be understood, instead of silently storing junk.
+    const dateFields: Array<{
+      key:
+        | "motExpiry"
+        | "insuranceExpiry"
+        | "taxExpiry"
+        | "adiBadgeExpiry"
+        | "lastServiceDate"
+        | "nextServiceDate"
+        | "tyreCheckDate"
+        | "brakeCheckDate"
+        | "oilCheckDate";
+      label: string;
+    }> = [
+      { key: "motExpiry", label: "MOT expiry" },
+      { key: "insuranceExpiry", label: "Insurance expiry" },
+      { key: "taxExpiry", label: "Road tax expiry" },
+      { key: "adiBadgeExpiry", label: "ADI badge expiry" },
+      { key: "lastServiceDate", label: "Last service date" },
+      { key: "nextServiceDate", label: "Next service date" },
+      { key: "tyreCheckDate", label: "Next tyre check" },
+      { key: "brakeCheckDate", label: "Next brake check" },
+      { key: "oilCheckDate", label: "Next oil check" },
+    ];
+    const normalized = { ...draft };
+    for (const f of dateFields) {
+      const raw = draft[f.key].trim();
+      if (!raw) continue;
+      const isoDate = parseFlexibleDate(raw);
+      if (!isoDate) {
+        Alert.alert(
+          `Check the ${f.label.toLowerCase()}`,
+          `"${raw}" isn't a date we can read. Try the format 14/08/2026.`,
+        );
+        return;
+      }
+      normalized[f.key] = isoDate;
+    }
+
     setSaving(true);
     try {
-      await saveCarDetails(user.uid, draft);
-      setCar({ ...draft });
+      await saveCarDetails(user.uid, normalized);
+      setCar({ ...normalized });
       setEditing(false);
     } catch {
       Alert.alert("Couldn't save", "Check your connection and try again.");
@@ -244,6 +364,57 @@ export function CarHealthScreen() {
       setSaving(false);
     }
   }, [user?.uid, draft]);
+
+  const addLogEntry = useCallback(async () => {
+    if (!user?.uid || !noteText.trim()) return;
+    setNoteSaving(true);
+    const base = car ?? EMPTY_CAR;
+    const entry = {
+      id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+      date: todayISO(),
+      text: noteText.trim(),
+    };
+    // Fold the legacy free-text blob into the log the first time a real entry
+    // is added, so nothing the instructor wrote before is lost.
+    const legacy =
+      base.serviceLog.length === 0 && base.notes.trim()
+        ? [{ id: "legacy", date: "", text: base.notes.trim() }]
+        : [];
+    const nextLog = [entry, ...base.serviceLog, ...legacy];
+    try {
+      await saveCarDetails(user.uid, { serviceLog: nextLog, notes: "" });
+      setCar({ ...base, serviceLog: nextLog, notes: "" });
+      setNoteText("");
+      setNoteModalOpen(false);
+    } catch {
+      Alert.alert("Couldn't save note", "Check your connection and try again.");
+    } finally {
+      setNoteSaving(false);
+    }
+  }, [user?.uid, noteText, car]);
+
+  const deleteLogEntry = useCallback(
+    (entryId: string) => {
+      if (!user?.uid || !car) return;
+      Alert.alert("Delete this note?", "This can't be undone.", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const nextLog = car.serviceLog.filter((e) => e.id !== entryId);
+            try {
+              await saveCarDetails(user.uid, { serviceLog: nextLog });
+              setCar({ ...car, serviceLog: nextLog });
+            } catch {
+              Alert.alert("Couldn't delete", "Check your connection and try again.");
+            }
+          },
+        },
+      ]);
+    },
+    [user?.uid, car],
+  );
 
   const carName = car?.year && car?.make && car?.model
     ? `${car.year} ${car.make} ${car.model}`
@@ -255,7 +426,7 @@ export function CarHealthScreen() {
     <>
       <Screen
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emerald} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emeraldDark} />
         }
       >
         <Text style={styles.kicker}>Fleet</Text>
@@ -270,7 +441,7 @@ export function CarHealthScreen() {
 
         {loading && !car ? (
           <View style={styles.loadingWrap}>
-            <ActivityIndicator color={c.emerald} />
+            <ActivityIndicator color={c.emeraldDark} />
           </View>
         ) : (
           <>
@@ -305,8 +476,15 @@ export function CarHealthScreen() {
               <StatusCard label="Road tax" icon="receipt-outline" dateStr={car?.taxExpiry ?? ""} />
             </View>
 
+            <Text style={styles.groupLabel}>KEY DATES</Text>
+            <View style={styles.statusRow}>
+              <StatusCard label="ADI badge" icon="id-card-outline" dateStr={car?.adiBadgeExpiry ?? ""} />
+              <StatusCard label="Service" icon="build-outline" dateStr={car?.nextServiceDate ?? ""} />
+              <StatusCard label="Tyres" icon="disc-outline" dateStr={car?.tyreCheckDate ?? ""} />
+            </View>
+
             {/* Car details */}
-            {(car?.mileage || car?.lastServiceDate || car?.colour || car?.fuelType) ? (
+            {(car?.mileage || car?.lastServiceDate || car?.colour || car?.fuelType || car?.brakeCheckDate || car?.oilCheckDate) ? (
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>Details</Text>
                 {car?.mileage ? (
@@ -330,16 +508,73 @@ export function CarHealthScreen() {
                     value={car.fuelType.charAt(0).toUpperCase() + car.fuelType.slice(1)}
                   />
                 ) : null}
+                {car?.brakeCheckDate ? (
+                  <DetailRow
+                    icon="warning-outline"
+                    label="Next brake check"
+                    value={formatDate(car.brakeCheckDate)}
+                  />
+                ) : null}
+                {car?.oilCheckDate ? (
+                  <DetailRow
+                    icon="water-outline"
+                    label="Next oil check"
+                    value={formatDate(car.oilCheckDate)}
+                  />
+                ) : null}
               </View>
             ) : null}
 
-            {/* Notes */}
-            {car?.notes ? (
-              <View style={styles.card}>
+            {/* Service log & notes */}
+            <View style={styles.card}>
+              <View style={styles.logHeaderRow}>
                 <Text style={styles.cardTitle}>Service log & notes</Text>
-                <Text style={styles.notesText}>{car.notes}</Text>
+                <Pressable
+                  onPress={() => {
+                    setNoteText("");
+                    setNoteModalOpen(true);
+                  }}
+                  style={({ pressed }) => [styles.addNoteBtn, pressed && styles.pressed]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Add a note"
+                >
+                  <Ionicons name="add" size={16} color={c.emeraldDark} />
+                  <Text style={styles.addNoteBtnText}>Add note</Text>
+                </Pressable>
               </View>
-            ) : null}
+
+              {car?.serviceLog?.length ? (
+                car.serviceLog.map((entry) => (
+                  <View key={entry.id} style={styles.logRow}>
+                    <View style={styles.logIcon}>
+                      <Ionicons name="build-outline" size={15} color={c.emeraldDark} />
+                    </View>
+                    <View style={styles.logCopy}>
+                      <Text style={styles.logDate}>
+                        {entry.date ? formatDate(entry.date) : "Earlier"}
+                      </Text>
+                      <Text style={styles.logText}>{entry.text}</Text>
+                    </View>
+                    <Pressable
+                      onPress={() => deleteLogEntry(entry.id)}
+                      hitSlop={8}
+                      style={({ pressed }) => [styles.logDelete, pressed && styles.pressed]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Delete note"
+                    >
+                      <Ionicons name="trash-outline" size={16} color={c.slate500} />
+                    </Pressable>
+                  </View>
+                ))
+              ) : car?.notes ? (
+                <Text style={styles.notesText}>{car.notes}</Text>
+              ) : (
+                <Text style={styles.logEmpty}>
+                  Keep a dated record of services, repairs and issues — tap "Add note" after each
+                  garage visit.
+                </Text>
+              )}
+            </View>
 
             {/* Edit button */}
             <Pressable
@@ -383,9 +618,9 @@ export function CarHealthScreen() {
               hitSlop={8}
             >
               {saving ? (
-                <ActivityIndicator size="small" color={c.emerald} />
+                <ActivityIndicator size="small" color={c.emeraldDark} />
               ) : (
-                <Text style={[styles.modalHeaderSave, { color: c.emerald }]}>Save</Text>
+                <Text style={[styles.modalHeaderSave, { color: c.emeraldDark }]}>Save</Text>
               )}
             </Pressable>
           </View>
@@ -468,8 +703,8 @@ export function CarHealthScreen() {
               <View style={[styles.formCard, { backgroundColor: c.surface }]}>
                 <Field
                   label="MOT expiry"
-                  hint="Format: YYYY-MM-DD"
-                  placeholder="e.g. 2025-08-14"
+                  hint="Day/month/year, e.g. 14/08/2026"
+                  placeholder="e.g. 14/08/2026"
                   value={draft.motExpiry}
                   onChangeText={(v) => setDraft((d) => ({ ...d, motExpiry: v }))}
                   autoCapitalize="none"
@@ -477,8 +712,8 @@ export function CarHealthScreen() {
                 <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
                 <Field
                   label="Insurance expiry"
-                  hint="Format: YYYY-MM-DD"
-                  placeholder="e.g. 2025-11-01"
+                  hint="Day/month/year, e.g. 01/11/2026"
+                  placeholder="e.g. 01/11/2026"
                   value={draft.insuranceExpiry}
                   onChangeText={(v) => setDraft((d) => ({ ...d, insuranceExpiry: v }))}
                   autoCapitalize="none"
@@ -486,10 +721,19 @@ export function CarHealthScreen() {
                 <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
                 <Field
                   label="Road tax expiry"
-                  hint="Format: YYYY-MM-DD"
-                  placeholder="e.g. 2025-09-30"
+                  hint="Day/month/year, e.g. 30/09/2026"
+                  placeholder="e.g. 30/09/2026"
                   value={draft.taxExpiry}
                   onChangeText={(v) => setDraft((d) => ({ ...d, taxExpiry: v }))}
+                  autoCapitalize="none"
+                />
+                <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
+                <Field
+                  label="ADI badge expiry"
+                  hint="Day/month/year, e.g. 30/09/2026"
+                  placeholder="e.g. 30/09/2026"
+                  value={draft.adiBadgeExpiry}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, adiBadgeExpiry: v }))}
                   autoCapitalize="none"
                 />
               </View>
@@ -499,10 +743,19 @@ export function CarHealthScreen() {
               <View style={[styles.formCard, { backgroundColor: c.surface }]}>
                 <Field
                   label="Last service date"
-                  hint="Format: YYYY-MM-DD"
-                  placeholder="e.g. 2024-12-15"
+                  hint="Day/month/year, e.g. 15/12/2025"
+                  placeholder="e.g. 15/12/2025"
                   value={draft.lastServiceDate}
                   onChangeText={(v) => setDraft((d) => ({ ...d, lastServiceDate: v }))}
+                  autoCapitalize="none"
+                />
+                <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
+                <Field
+                  label="Next service date"
+                  hint="Day/month/year, e.g. 15/12/2026"
+                  placeholder="e.g. 15/12/2026"
+                  value={draft.nextServiceDate}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, nextServiceDate: v }))}
                   autoCapitalize="none"
                 />
                 <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
@@ -512,6 +765,36 @@ export function CarHealthScreen() {
                   value={draft.mileage}
                   onChangeText={(v) => setDraft((d) => ({ ...d, mileage: v }))}
                   numeric
+                />
+              </View>
+
+              <Text style={[styles.sectionLabel, { color: c.slate500 }]}>VEHICLE CHECKS</Text>
+              <View style={[styles.formCard, { backgroundColor: c.surface }]}>
+                <Field
+                  label="Next tyre check"
+                  hint="Day/month/year"
+                  placeholder="e.g. 15/08/2026"
+                  value={draft.tyreCheckDate}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, tyreCheckDate: v }))}
+                  autoCapitalize="none"
+                />
+                <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
+                <Field
+                  label="Next brake check"
+                  hint="Day/month/year"
+                  placeholder="e.g. 15/08/2026"
+                  value={draft.brakeCheckDate}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, brakeCheckDate: v }))}
+                  autoCapitalize="none"
+                />
+                <View style={[styles.fieldDivider, { backgroundColor: c.border }]} />
+                <Field
+                  label="Next oil check"
+                  hint="Day/month/year"
+                  placeholder="e.g. 15/08/2026"
+                  value={draft.oilCheckDate}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, oilCheckDate: v }))}
+                  autoCapitalize="none"
                 />
               </View>
 
@@ -540,18 +823,18 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   flex: { flex: 1 },
 
   kicker: {
-    color: c.emerald,
+    color: c.slate500,
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   title: {
     color: c.slate900,
     fontSize: 30,
     fontWeight: "700",
-    letterSpacing: -0.5,
+    letterSpacing: 0,
     lineHeight: 35,
     marginBottom: spacing.lg,
   },
@@ -585,7 +868,9 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     borderRadius: 24,
     padding: spacing.lg,
     marginBottom: spacing.md,
-    backgroundColor: c.emerald,
+    backgroundColor: c.surfaceRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
@@ -596,7 +881,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: c.surface,
+    backgroundColor: c.surfaceMuted,
   },
   identityCopy: {
     flex: 1,
@@ -604,14 +889,14 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   },
   identityName: {
     ...typography.headline,
-    color: c.white,
+    color: c.slate900,
   },
   regBadge: {
     alignSelf: "flex-start",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 3,
-    backgroundColor: c.white,
+    backgroundColor: c.surfaceMuted,
   },
   regText: {
     color: c.slate900,
@@ -621,7 +906,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     letterSpacing: 1,
   },
   identityMeta: {
-    color: c.emeraldSoft,
+    color: c.slate500,
     fontSize: 13,
     lineHeight: 18,
     fontWeight: "600",
@@ -633,12 +918,20 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
+  groupLabel: {
+    color: c.slate500,
+    fontSize: 10,
+    fontWeight: "700",
+    marginBottom: spacing.sm,
+  },
   statusCard: {
     flex: 1,
     borderRadius: 20,
     padding: spacing.md,
     gap: 3,
     alignItems: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
   },
   statusIconWrap: {
     width: 34,
@@ -652,7 +945,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontSize: 10,
     lineHeight: 13,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     textTransform: "uppercase",
     textAlign: "center",
   },
@@ -674,7 +967,9 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   card: {
     borderRadius: 24,
     overflow: "hidden",
-    backgroundColor: c.surface,
+    backgroundColor: c.surfaceRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
     marginBottom: spacing.md,
     padding: spacing.md,
     gap: spacing.sm,
@@ -684,7 +979,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     textTransform: "uppercase",
     marginBottom: spacing.xs,
   },
@@ -700,7 +995,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: c.emeraldSoft,
+    backgroundColor: c.surfaceMuted,
   },
   detailCopy: {
     flex: 1,
@@ -711,7 +1006,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     lineHeight: 14,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0,
   },
   detailValue: {
     color: c.slate900,
@@ -720,12 +1015,79 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontWeight: "600",
   },
 
-  // ── Notes ──
+  // ── Notes / service log ──
   notesText: {
     color: c.slate700,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: "400",
+  },
+  logHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  addNoteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: c.emeraldSoft,
+  },
+  addNoteBtnText: {
+    color: c.emeraldDark,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
+  logRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sm,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: c.border,
+  },
+  logIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: c.surfaceMuted,
+    marginTop: 2,
+  },
+  logCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  logDate: {
+    color: c.slate500,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0,
+  },
+  logText: {
+    color: c.slate900,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "400",
+  },
+  logDelete: {
+    padding: 6,
+    borderRadius: 8,
+  },
+  logEmpty: {
+    color: c.slate500,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "400",
+    fontStyle: "italic",
+    paddingVertical: spacing.sm,
   },
 
   // ── Edit button ──
@@ -738,7 +1100,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.sm,
     marginBottom: spacing.xl,
-    backgroundColor: c.emeraldDark,
+    backgroundColor: c.emerald,
   },
   editButtonText: {
     color: c.white,
@@ -790,7 +1152,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
     paddingHorizontal: spacing.xs,
@@ -815,7 +1177,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     lineHeight: 14,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0,
     marginBottom: 2,
   },
   fieldHint: {

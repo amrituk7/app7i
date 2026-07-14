@@ -40,7 +40,7 @@ function buildPaymentTones(c: ColorPalette): Record<Lesson["paymentStatus"], { b
     paid: { bg: c.greenSoft, fg: c.green, label: "Paid" },
     unpaid: { bg: c.amberSoft, fg: c.amber, label: "Unpaid" },
     pending: { bg: c.slate100, fg: c.slate500, label: "Pending" },
-    not_paid: { bg: c.amberSoft, fg: c.amber, label: "Not paid" },
+    waived: { bg: c.slate100, fg: c.slate500, label: "Waived" },
   };
 }
 

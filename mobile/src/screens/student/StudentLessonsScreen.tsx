@@ -158,13 +158,14 @@ function formatTime(time: string): string {
 
 function paymentTone(status: Lesson["paymentStatus"]): "success" | "warning" | "neutral" {
   if (status === "paid") return "success";
-  if (status === "not_paid" || status === "unpaid") return "warning";
+  if (status === "unpaid") return "warning";
+  if (status === "waived") return "neutral";
   return "neutral";
 }
 
 function paymentLabel(status: Lesson["paymentStatus"]): string {
   if (status === "paid") return "Paid";
-  if (status === "not_paid") return "Not paid";
+  if (status === "waived") return "Waived";
   if (status === "pending") return "Pending";
   return "Unpaid";
 }

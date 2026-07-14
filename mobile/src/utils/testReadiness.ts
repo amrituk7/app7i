@@ -59,7 +59,7 @@ export function computeTestReadiness(
   const mocks = student?.mockTests || [];
   const passingMocks = passingMockCount(mocks);
   const unpaidLessons = lessons.filter(
-    (l) => l.paymentStatus === "unpaid" || l.paymentStatus === "not_paid",
+    (l) => l.paymentStatus === "unpaid",
   ).length;
   const readiness = Number(student?.readinessScore || 0);
 

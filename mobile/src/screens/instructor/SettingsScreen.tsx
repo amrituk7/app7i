@@ -12,11 +12,12 @@ import {
   View,
 } from "react-native";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { DeletionFeedbackModal, type DeletionFeedback } from "../../components/ui/DeletionFeedbackModal";
 import { InviteSheet } from "../../components/ui/InviteSheet";
 import { Screen } from "../../components/ui/Screen";
 import { useAuth } from "../../context/AuthContext";
 import { deleteCurrentAccount } from "../../services/accountService";
-import { getStudents, getTodayLessons, getUnpaidInvoices } from "../../services/dataService";
+import { getOpenLessonPayments, getStudents, getTodayLessons } from "../../services/dataService";
 import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { useColors, useTheme } from "../../theme/ThemeContext";
@@ -31,14 +32,14 @@ type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type SettingsSummary = {
   studentsCount: number;
   todayLessonsCount: number;
-  unpaidInvoicesCount: number;
+  openPaymentsCount: number;
   unpaidTotal: number;
 };
 
 const emptySummary: SettingsSummary = {
   studentsCount: 0,
   todayLessonsCount: 0,
-  unpaidInvoicesCount: 0,
+  openPaymentsCount: 0,
   unpaidTotal: 0,
 };
 
@@ -51,6 +52,7 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [deletionFeedbackOpen, setDeletionFeedbackOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!user?.uid) {
@@ -60,17 +62,17 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
 
     setError(null);
     try {
-      const [students, todayLessons, unpaidInvoices] = await Promise.all([
+      const [students, todayLessons, openPayments] = await Promise.all([
         getStudents(user.uid, 100),
         getTodayLessons(user.uid),
-        getUnpaidInvoices(user.uid, 50),
+        getOpenLessonPayments(user.uid, 50),
       ]);
 
       setSummary({
         studentsCount: students.length,
         todayLessonsCount: todayLessons.length,
-        unpaidInvoicesCount: unpaidInvoices.length,
-        unpaidTotal: unpaidInvoices.reduce((total, invoice) => total + invoice.amount, 0),
+        openPaymentsCount: openPayments.length,
+        unpaidTotal: openPayments.reduce((total, payment) => total + payment.amount, 0),
       });
     } catch (err) {
       setError(toFriendlyError(err, "We're having trouble refreshing settings. Pull down to retry."));
@@ -95,6 +97,11 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
   }
 
   function confirmDelete() {
+    setDeletionFeedbackOpen(true);
+  }
+
+  function confirmDeletionAfterFeedback(feedback?: DeletionFeedback) {
+    setDeletionFeedbackOpen(false);
     Alert.alert(
       "Delete your account?",
       "This permanently removes your App7i account, profile and signing data. This cannot be undone.",
@@ -103,15 +110,15 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
         {
           text: "Delete",
           style: "destructive",
-          onPress: runDelete,
+          onPress: () => runDelete(feedback),
         },
       ],
     );
   }
 
-  async function runDelete() {
+  async function runDelete(feedback?: DeletionFeedback) {
     try {
-      await deleteCurrentAccount();
+      await deleteCurrentAccount(feedback);
       Alert.alert("Account deleted", "Your account has been removed.");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Delete did not go through.";
@@ -169,7 +176,7 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
             <SummaryTile
               icon="receipt-outline"
               label="Unpaid"
-              value={String(summary.unpaidInvoicesCount)}
+              value={String(summary.openPaymentsCount)}
             />
             <SummaryTile icon="wallet-outline" label="Due" value={formatGBP(summary.unpaidTotal)} />
           </View>
@@ -214,15 +221,32 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
               subtitle="Email and in-app reminders before each lesson"
               onPress={() => navigation.navigate("RemindersSettings")}
             />
+            <SettingsRow
+              icon="options-outline"
+              title="Navigation tabs"
+              subtitle="Choose and order the three tabs in your workspace"
+              onPress={() => navigation.navigate("NavigationTabs")}
+            />
+            <SettingsRow
+              icon="link-outline"
+              title="DVLA resources"
+              subtitle="Official GOV.UK links — test booking, Highway Code, licences"
+              onPress={() => navigation.navigate("Resources")}
+            />
           </SettingsSection>
 
           <AppearanceSection />
 
           <SettingsSection title="Billing">
+            {/* Owner-approved external link (Netflix-style manage-on-web).
+                Pure JS — if a Play review ever objects, remove via OTA. */}
             <SettingsRow
               icon="card-outline"
-              title="Subscription billing"
-              subtitle="Instructor subscriptions are managed on the secure App7i web portal. This Android app does not sell subscriptions in-app."
+              title="Manage subscription"
+              subtitle="Opens the App7i web portal where you view plans, start or manage your subscription, and update payment details. This app does not take payments."
+              onPress={() => {
+                Linking.openURL("https://app7i.com/pricing").catch(() => {});
+              }}
             />
           </SettingsSection>
 
@@ -273,8 +297,13 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
             />
           </SettingsSection>
 
-          <Text style={styles.footer}>App7i v1.0.0</Text>
+          <Text style={styles.footer}>App7i v1.1.0</Text>
           <InviteSheet open={inviteOpen} onClose={() => setInviteOpen(false)} />
+          <DeletionFeedbackModal
+            visible={deletionFeedbackOpen}
+            onCancel={() => setDeletionFeedbackOpen(false)}
+            onContinue={confirmDeletionAfterFeedback}
+          />
         </>
       )}
     </Screen>

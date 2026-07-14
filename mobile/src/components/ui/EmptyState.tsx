@@ -29,14 +29,14 @@ export function EmptyState({
   return (
     <View style={styles.wrap}>
       <View style={styles.iconWrap}>
-        <Ionicons name={iconName} size={28} color={c.emerald} />
+        <Ionicons name={iconName} size={28} color={c.emeraldDark} />
       </View>
       <Text style={styles.title}>{title}</Text>
       {body ? <Text style={styles.message}>{body}</Text> : null}
       {actionLabel && onAction ? (
         <Pressable onPress={onAction} style={({ pressed }) => [styles.action, pressed && styles.pressed]}>
           <Text style={styles.actionText}>{actionLabel}</Text>
-          <Ionicons name="arrow-forward" size={15} color={c.emerald} />
+          <Ionicons name="arrow-forward" size={15} color={c.emeraldDark} />
         </Pressable>
       ) : null}
     </View>
@@ -57,15 +57,15 @@ const makeStyles = (c: ColorPalette) =>
       borderRadius: 28,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: c.emeraldSoft,
+      backgroundColor: c.surfaceMuted,
       marginBottom: spacing.sm,
     },
     title: {
       color: c.slate900,
       fontSize: 20,
-      fontWeight: "600",
+      fontWeight: "700",
       textAlign: "center",
-      letterSpacing: -0.3,
+      letterSpacing: 0,
     },
     message: {
       color: c.slate500,
@@ -81,10 +81,12 @@ const makeStyles = (c: ColorPalette) =>
       paddingHorizontal: spacing.md,
       paddingVertical: 10,
       borderRadius: 20,
-      backgroundColor: c.emeraldSoft,
+      backgroundColor: c.surfaceRaised,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
     },
     actionText: {
-      color: c.emerald,
+      color: c.slate900,
       fontSize: 15,
       fontWeight: "600",
     },

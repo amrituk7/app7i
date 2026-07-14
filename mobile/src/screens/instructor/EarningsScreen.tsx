@@ -17,12 +17,12 @@ import { FadeInView } from "../../components/ui/FadeInView";
 import { Screen } from "../../components/ui/Screen";
 import { Skeleton, SkeletonRow } from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
-import { getPaidInvoices, getUnpaidInvoices } from "../../services/dataService";
+import { getOpenLessonPayments, getPaidLessonPayments } from "../../services/dataService";
 import type { ColorPalette } from "../../theme/colors";
 import { useColors } from "../../theme/ThemeContext";
 import { useThemedStyles } from "../../theme/useThemedStyles";
 import { spacing } from "../../theme/spacing";
-import type { Invoice } from "../../types";
+import type { LessonPayment } from "../../types";
 import { formatGBP } from "../../utils/currency";
 import {
   buildMonthlyStatements,
@@ -47,6 +47,13 @@ type MobileNavigation = {
   navigate: (screen: string, params?: Record<string, unknown>) => void;
 };
 
+type EarningsTrendPoint = {
+  key: string;
+  label: string;
+  total: number;
+  count: number;
+};
+
 // Months kept fully in-app. Anything older shows in a compact "Archive" stack
 // with a stronger download prompt — once exported, the user has their own copy.
 const RECENT_MONTHS_KEPT = 3;
@@ -55,8 +62,8 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
   const styles = useThemedStyles(makeStyles);
   const c = useColors();
   const { user } = useAuth();
-  const [paidInvoices, setPaidInvoices] = useState<Invoice[]>([]);
-  const [unpaidInvoices, setUnpaidInvoices] = useState<Invoice[]>([]);
+  const [paidPayments, setPaidPayments] = useState<LessonPayment[]>([]);
+  const [openPayments, setOpenPayments] = useState<LessonPayment[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [mileageEntries, setMileageEntries] = useState<MileageEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,13 +76,13 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
     setError(null);
     try {
       const [paid, unpaid, exp, mil] = await Promise.all([
-        getPaidInvoices(user.uid, 200),
-        getUnpaidInvoices(user.uid, 100),
+        getPaidLessonPayments(user.uid, 200),
+        getOpenLessonPayments(user.uid, 100),
         getExpenses(user.uid, { max: 200 }).catch(() => []),
         getMileageEntries(user.uid, { max: 200 }).catch(() => []),
       ]);
-      setPaidInvoices(paid);
-      setUnpaidInvoices(unpaid);
+      setPaidPayments(paid);
+      setOpenPayments(unpaid);
       setExpenses(exp);
       setMileageEntries(mil);
     } catch (err) {
@@ -96,7 +103,7 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
     setRefreshing(false);
   }, [load]);
 
-  const statements = useMemo(() => buildMonthlyStatements(paidInvoices), [paidInvoices]);
+  const statements = useMemo(() => buildMonthlyStatements(paidPayments), [paidPayments]);
 
   const currentMonth = statements.find((s) => s.isCurrent) || null;
   const lastMonth = statements.find((s) => s.monthsAgo === 1) || null;
@@ -104,8 +111,8 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
   const archiveStatements = statements.filter((s) => s.monthsAgo >= RECENT_MONTHS_KEPT);
 
   const unpaidTotal = useMemo(
-    () => unpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0),
-    [unpaidInvoices],
+    () => openPayments.reduce((sum, payment) => sum + payment.amount, 0),
+    [openPayments],
   );
 
   const monthDelta = useMemo(() => {
@@ -117,9 +124,14 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
   }, [currentMonth, lastMonth]);
 
   const allTimeTotal = useMemo(
-    () => paidInvoices.reduce((sum, inv) => sum + inv.amount, 0),
-    [paidInvoices],
+    () => paidPayments.reduce((sum, payment) => sum + payment.amount, 0),
+    [paidPayments],
   );
+
+  const earningsTrend = useMemo(() => buildSixMonthTrend(statements), [statements]);
+  const sixMonthReceived = earningsTrend.reduce((sum, point) => sum + point.total, 0);
+  const sixMonthPaidLessons = earningsTrend.reduce((sum, point) => sum + point.count, 0);
+  const averageLessonValue = sixMonthPaidLessons > 0 ? sixMonthReceived / sixMonthPaidLessons : 0;
 
   // Tax-year-scoped figures for the net profit summary. Mileage allowance is
   // calculated using HMRC's simplified expenses bands (45p / 25p).
@@ -128,7 +140,7 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
     const inYear = <T extends { date: string }>(items: T[]) =>
       items.filter((i) => i.date >= taxYear.startIso && i.date <= taxYear.endIso);
 
-    const yearRevenue = inYear(paidInvoices.map((inv) => ({ ...inv, date: inv.dueDate })))
+    const yearRevenue = inYear(paidPayments.map((payment) => ({ ...payment, date: payment.lessonDate })))
       .reduce((sum, inv) => sum + (inv.amount || 0), 0);
     const yearExpenseTotal = inYear(expenses).reduce((sum, e) => sum + (e.amount || 0), 0);
     const yearMiles = inYear(mileageEntries).reduce((sum, m) => sum + (m.miles || 0), 0);
@@ -142,7 +154,7 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
       mileageAllowance: allowance.total,
       netProfit,
     };
-  }, [paidInvoices, expenses, mileageEntries]);
+  }, [paidPayments, expenses, mileageEntries]);
 
   const handleShareStatement = useCallback(
     async (statement: MonthlyStatement) => {
@@ -201,7 +213,7 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
   return (
     <Screen
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emerald} />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emeraldDark} />
       }
     >
       {/* Bank-style header */}
@@ -211,12 +223,12 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
           <Text style={styles.title}>Earnings</Text>
         </View>
         <Pressable
-          onPress={() => navigation.navigate("Invoices")}
+          onPress={() => navigation.navigate("Payments")}
           style={({ pressed }) => [styles.ledgerBtn, pressed && styles.pressed]}
-          accessibilityLabel="View full invoice ledger"
+          accessibilityLabel="Review lesson payments"
         >
-          <Ionicons name="receipt-outline" size={18} color={c.emerald} />
-          <Text style={styles.ledgerBtnText}>Ledger</Text>
+          <Ionicons name="receipt-outline" size={18} color={c.slate900} />
+          <Text style={styles.ledgerBtnText}>Payments</Text>
         </Pressable>
       </View>
 
@@ -238,6 +250,19 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
         allTimeTotal={allTimeTotal}
       />
 
+      <PaymentReviewPanel
+        payments={openPayments}
+        onOpen={() => navigation.navigate("Payments")}
+      />
+
+      <PerformancePanel
+        points={earningsTrend}
+        averageLessonValue={averageLessonValue}
+        paidLessonCount={sixMonthPaidLessons}
+        received={sixMonthReceived}
+        waiting={unpaidTotal}
+      />
+
       {/* Business ledger — expenses, mileage, net profit */}
       <LedgerPanel
         summary={ledgerSummary}
@@ -248,7 +273,7 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
           setExportingKey("tax-year");
           try {
             const taxYear = ukTaxYearBounds();
-            const statement = buildRangeStatement(paidInvoices, {
+            const statement = buildRangeStatement(paidPayments, {
               label: `${taxYear.label} — Earnings`,
               shortLabel: taxYear.label,
               startIso: taxYear.startIso,
@@ -319,11 +344,11 @@ export function EarningsScreen({ navigation }: { navigation: MobileNavigation })
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.archiveTitle}>
-                {archiveStatements.length} older month
-                {archiveStatements.length === 1 ? "" : "s"} ready to archive
+                {archiveStatements.length} older statement
+                {archiveStatements.length === 1 ? "" : "s"}
               </Text>
               <Text style={styles.archiveCopy}>
-                Download these to keep a permanent copy before they're removed from your phone.
+                These remain available here. Download a PDF when you need a permanent copy.
               </Text>
             </View>
           </View>
@@ -416,6 +441,111 @@ function BalancePanel({
   );
 }
 
+function PaymentReviewPanel({
+  payments,
+  onOpen,
+}: {
+  payments: LessonPayment[];
+  onOpen: () => void;
+}) {
+  const styles = useThemedStyles(makeStyles);
+  const c = useColors();
+  const pending = payments.filter((payment) => payment.status === "pending").length;
+  const unpaid = payments.filter((payment) => payment.status === "unpaid").length;
+
+  return (
+    <Pressable
+      onPress={onOpen}
+      style={({ pressed }) => [styles.paymentReviewCard, pressed && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel="Open lesson payment review"
+    >
+      <View style={styles.paymentReviewIcon}>
+        <Ionicons name="checkmark-done-outline" size={20} color={c.slate900} />
+      </View>
+      <View style={styles.paymentReviewCopy}>
+        <Text style={styles.paymentReviewTitle}>Lesson payments</Text>
+        <Text style={styles.paymentReviewBody}>
+          {payments.length === 0
+            ? "Everything is marked for now"
+            : `${pending} to review · ${unpaid} unpaid`}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={c.slate300} />
+    </Pressable>
+  );
+}
+
+function PerformancePanel({
+  points,
+  averageLessonValue,
+  paidLessonCount,
+  received,
+  waiting,
+}: {
+  points: EarningsTrendPoint[];
+  averageLessonValue: number;
+  paidLessonCount: number;
+  received: number;
+  waiting: number;
+}) {
+  const styles = useThemedStyles(makeStyles);
+  const max = Math.max(...points.map((point) => point.total), 0);
+
+  return (
+    <Card style={styles.performanceCard}>
+      <View style={styles.performanceHeader}>
+        <View>
+          <Text style={styles.performanceKicker}>PERFORMANCE</Text>
+          <Text style={styles.performanceTitle}>Last 6 months</Text>
+        </View>
+        <Text style={styles.performanceMeta}>Paid lessons</Text>
+      </View>
+
+      <View style={styles.chart} accessibilityLabel="Earnings over the last six months">
+        {points.map((point) => {
+          const barHeight = max > 0 ? Math.max(4, Math.round((point.total / max) * 72)) : 3;
+          return (
+            <View key={point.key} style={styles.chartColumn}>
+              <View style={styles.chartBarTrack}>
+                <View style={[styles.chartBar, { height: barHeight }]} />
+              </View>
+              <Text style={styles.chartLabel}>{point.label}</Text>
+            </View>
+          );
+        })}
+      </View>
+
+      <View style={styles.performanceStats}>
+        <PerformanceStat label="Avg lesson" value={formatGBP(averageLessonValue)} />
+        <PerformanceStat label="Paid lessons" value={String(paidLessonCount)} />
+        <PerformanceStat label="Received" value={formatGBP(received)} />
+        <PerformanceStat label="Waiting" value={formatGBP(waiting)} warning={waiting > 0} />
+      </View>
+    </Card>
+  );
+}
+
+function PerformanceStat({
+  label,
+  value,
+  warning,
+}: {
+  label: string;
+  value: string;
+  warning?: boolean;
+}) {
+  const styles = useThemedStyles(makeStyles);
+  return (
+    <View style={styles.performanceStat}>
+      <Text style={styles.performanceStatLabel}>{label}</Text>
+      <Text style={[styles.performanceStatValue, warning && styles.performanceStatWarning]}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 function LedgerPanel({
   summary,
   onOpenExpenses,
@@ -456,29 +586,41 @@ function LedgerPanel({
         </View>
         <View style={styles.ledgerLine}>
           <Text style={styles.ledgerLabel}>Expenses tracked</Text>
-          <Text style={styles.ledgerValueMuted}>−{formatGBP(summary.yearExpenseTotal)}</Text>
+          <Text style={styles.ledgerValueMuted}>{formatDeduction(summary.yearExpenseTotal)}</Text>
         </View>
         <View style={styles.ledgerLine}>
           <Text style={styles.ledgerLabel}>
             Mileage allowance ({summary.yearMiles.toLocaleString()} mi)
           </Text>
-          <Text style={styles.ledgerValueMuted}>−{formatGBP(summary.mileageAllowance)}</Text>
+          <Text style={styles.ledgerValueMuted}>{formatDeduction(summary.mileageAllowance)}</Text>
         </View>
       </View>
       <View style={styles.ledgerActions}>
         <Pressable
           onPress={onOpenExpenses}
           style={({ pressed }) => [styles.ledgerActionBtn, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel="View expenses"
         >
-          <Ionicons name="receipt-outline" size={15} color={c.emerald} />
-          <Text style={styles.ledgerActionBtnText}>Expenses</Text>
+          <View style={styles.ledgerActionIcon}>
+            <Ionicons name="receipt-outline" size={19} color={c.emeraldDark} />
+          </View>
+          <Text style={styles.ledgerActionBtnText} numberOfLines={1}>
+            Expenses
+          </Text>
         </Pressable>
         <Pressable
           onPress={onOpenMileage}
           style={({ pressed }) => [styles.ledgerActionBtn, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel="View mileage"
         >
-          <Ionicons name="speedometer-outline" size={15} color={c.emerald} />
-          <Text style={styles.ledgerActionBtnText}>Mileage</Text>
+          <View style={styles.ledgerActionIcon}>
+            <Ionicons name="speedometer-outline" size={19} color={c.emeraldDark} />
+          </View>
+          <Text style={styles.ledgerActionBtnText} numberOfLines={1}>
+            Mileage
+          </Text>
         </Pressable>
         <Pressable
           onPress={onDownloadTaxYear}
@@ -488,14 +630,18 @@ function LedgerPanel({
             pressed && !exporting && styles.pressed,
             exporting && styles.disabled,
           ]}
+          accessibilityRole="button"
+          accessibilityLabel="Download tax year PDF"
         >
-          <Ionicons
-            name={exporting ? "hourglass-outline" : "download-outline"}
-            size={15}
-            color={c.emerald}
-          />
-          <Text style={styles.ledgerActionBtnText}>
-            {exporting ? "Saving…" : "Tax year PDF"}
+          <View style={styles.ledgerActionIcon}>
+            <Ionicons
+              name={exporting ? "hourglass-outline" : "download-outline"}
+              size={19}
+              color={c.emeraldDark}
+            />
+          </View>
+          <Text style={styles.ledgerActionBtnText} numberOfLines={1}>
+            {exporting ? "Saving…" : "Tax PDF"}
           </Text>
         </Pressable>
       </View>
@@ -549,7 +695,7 @@ function StatementCard({
           <Ionicons
             name={exporting ? "hourglass-outline" : "download-outline"}
             size={16}
-            color={c.emerald}
+            color={c.emeraldDark}
           />
           <Text style={styles.downloadBtnText}>
             {exporting ? "Preparing…" : "Download statement"}
@@ -639,6 +785,24 @@ function lastMonthShortLabel(): string {
   return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
+function buildSixMonthTrend(statements: MonthlyStatement[], now = new Date()): EarningsTrendPoint[] {
+  const byMonth = new Map(statements.map((statement) => [statement.key, statement]));
+  return Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    return {
+      key,
+      label: date.toLocaleDateString("en-GB", { month: "short" }),
+      total: byMonth.get(key)?.total || 0,
+      count: byMonth.get(key)?.count || 0,
+    };
+  });
+}
+
+function formatDeduction(value: number): string {
+  return value > 0 ? `-${formatGBP(value)}` : formatGBP(0);
+}
+
 const makeStyles = (c: ColorPalette) =>
   StyleSheet.create({
     header: {
@@ -651,14 +815,14 @@ const makeStyles = (c: ColorPalette) =>
     kicker: {
       color: c.slate500,
       fontSize: 11,
-      fontWeight: "600",
-      letterSpacing: 0.8,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     title: {
       color: c.slate900,
       fontSize: 30,
       fontWeight: "700",
-      letterSpacing: -0.6,
+      letterSpacing: 0,
       marginTop: 2,
     },
     ledgerBtn: {
@@ -668,12 +832,14 @@ const makeStyles = (c: ColorPalette) =>
       paddingHorizontal: 12,
       height: 36,
       borderRadius: 18,
-      backgroundColor: c.emeraldSoft,
+      backgroundColor: c.surfaceRaised,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
     },
     ledgerBtnText: {
-      color: c.emerald,
+      color: c.slate900,
       fontSize: 14,
-      fontWeight: "600",
+      fontWeight: "700",
     },
     errorCard: {
       backgroundColor: c.redSoft,
@@ -689,7 +855,7 @@ const makeStyles = (c: ColorPalette) =>
     balanceCard: {
       marginBottom: spacing.lg,
       padding: spacing.lg,
-      backgroundColor: c.surface,
+      backgroundColor: c.surfaceRaised,
       borderRadius: 20,
     },
     balanceTopRow: {
@@ -701,19 +867,19 @@ const makeStyles = (c: ColorPalette) =>
     balanceLabel: {
       color: c.slate500,
       fontSize: 11,
-      fontWeight: "600",
-      letterSpacing: 0.6,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     balanceBadge: {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: c.emeraldSoft,
+      backgroundColor: c.surfaceMuted,
       alignItems: "center",
       justifyContent: "center",
     },
     balanceBadgeText: {
-      color: c.emerald,
+      color: c.slate900,
       fontSize: 16,
       fontWeight: "700",
     },
@@ -721,7 +887,7 @@ const makeStyles = (c: ColorPalette) =>
       color: c.slate900,
       fontSize: 40,
       fontWeight: "700",
-      letterSpacing: -1,
+      letterSpacing: 0,
       lineHeight: 46,
     },
     balanceDeltaRow: {
@@ -757,8 +923,8 @@ const makeStyles = (c: ColorPalette) =>
     balanceFooterLabel: {
       color: c.slate500,
       fontSize: 11,
-      fontWeight: "500",
-      letterSpacing: 0.4,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     balanceFooterValue: {
       color: c.slate900,
@@ -766,11 +932,133 @@ const makeStyles = (c: ColorPalette) =>
       fontWeight: "600",
       marginTop: 4,
     },
+    paymentReviewCard: {
+      minHeight: 72,
+      marginBottom: spacing.lg,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
+      borderRadius: 16,
+      backgroundColor: c.surfaceRaised,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.md,
+    },
+    paymentReviewIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: c.surfaceMuted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    paymentReviewCopy: {
+      flex: 1,
+      gap: 3,
+    },
+    paymentReviewTitle: {
+      color: c.slate900,
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    paymentReviewBody: {
+      color: c.slate500,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+
+    // Six-month performance
+    performanceCard: {
+      marginBottom: spacing.lg,
+      padding: spacing.lg,
+      backgroundColor: c.surfaceRaised,
+    },
+    performanceHeader: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
+      gap: spacing.md,
+    },
+    performanceKicker: {
+      color: c.slate500,
+      fontSize: 10,
+      fontWeight: "700",
+    },
+    performanceTitle: {
+      color: c.slate900,
+      fontSize: 18,
+      fontWeight: "700",
+      marginTop: 3,
+    },
+    performanceMeta: {
+      color: c.slate500,
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    chart: {
+      height: 110,
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: spacing.sm,
+      paddingTop: spacing.md,
+      paddingBottom: spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.border,
+    },
+    chartColumn: {
+      flex: 1,
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      gap: 6,
+    },
+    chartBarTrack: {
+      height: 72,
+      width: "100%",
+      justifyContent: "flex-end",
+      alignItems: "center",
+    },
+    chartBar: {
+      width: "58%",
+      minWidth: 8,
+      maxWidth: 24,
+      borderRadius: 4,
+      backgroundColor: c.slate900,
+    },
+    chartLabel: {
+      color: c.slate500,
+      fontSize: 10,
+      fontWeight: "600",
+    },
+    performanceStats: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      marginTop: spacing.md,
+      rowGap: spacing.md,
+    },
+    performanceStat: {
+      width: "50%",
+      gap: 3,
+    },
+    performanceStatLabel: {
+      color: c.slate500,
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    performanceStatValue: {
+      color: c.slate900,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    performanceStatWarning: {
+      color: c.amber,
+    },
     // Ledger panel
     ledgerCard: {
       marginBottom: spacing.lg,
       padding: spacing.lg,
-      backgroundColor: c.surface,
+      backgroundColor: c.surfaceRaised,
       borderRadius: 20,
     },
     ledgerHeader: {
@@ -781,14 +1069,14 @@ const makeStyles = (c: ColorPalette) =>
     ledgerKicker: {
       color: c.slate500,
       fontSize: 10,
-      fontWeight: "600",
-      letterSpacing: 0.6,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     ledgerProfit: {
-      color: c.emerald,
+      color: c.slate900,
       fontSize: 32,
       fontWeight: "700",
-      letterSpacing: -0.6,
+      letterSpacing: 0,
       marginTop: 4,
       lineHeight: 38,
     },
@@ -813,15 +1101,29 @@ const makeStyles = (c: ColorPalette) =>
       marginTop: spacing.md,
     },
     ledgerActionBtn: {
-      flexDirection: "row",
+      flex: 1,
       alignItems: "center",
-      gap: 6,
-      paddingHorizontal: 12,
+      justifyContent: "center",
+      gap: 7,
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      borderRadius: 14,
+      backgroundColor: c.surfaceMuted,
+    },
+    ledgerActionIcon: {
+      width: 34,
       height: 34,
       borderRadius: 17,
-      backgroundColor: c.emeraldSoft,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: c.surface,
     },
-    ledgerActionBtnText: { color: c.emerald, fontSize: 13, fontWeight: "600" },
+    ledgerActionBtnText: {
+      color: c.slate900,
+      fontSize: 12,
+      fontWeight: "700",
+      textAlign: "center",
+    },
     ledgerDisclaimer: {
       color: c.slate500,
       fontSize: 10,
@@ -843,8 +1145,8 @@ const makeStyles = (c: ColorPalette) =>
     sectionLabel: {
       color: c.slate500,
       fontSize: 11,
-      fontWeight: "600",
-      letterSpacing: 0.6,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     sectionMeta: {
       color: c.slate500,
@@ -859,7 +1161,7 @@ const makeStyles = (c: ColorPalette) =>
     },
     statementCard: {
       gap: spacing.sm,
-      backgroundColor: c.surface,
+      backgroundColor: c.surfaceRaised,
       borderRadius: 16,
     },
     statementHeader: {
@@ -871,8 +1173,8 @@ const makeStyles = (c: ColorPalette) =>
     statementMonth: {
       color: c.slate900,
       fontSize: 17,
-      fontWeight: "600",
-      letterSpacing: -0.2,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
     statementMeta: {
       color: c.slate500,
@@ -887,16 +1189,16 @@ const makeStyles = (c: ColorPalette) =>
       backgroundColor: c.emeraldSoft,
     },
     currentBadgeText: {
-      color: c.emerald,
+      color: c.emeraldDark,
       fontSize: 10,
       fontWeight: "700",
-      letterSpacing: 0.4,
+      letterSpacing: 0,
     },
     statementTotal: {
       color: c.slate900,
       fontSize: 26,
       fontWeight: "700",
-      letterSpacing: -0.5,
+      letterSpacing: 0,
       marginTop: 4,
     },
     statementActions: {
@@ -912,12 +1214,12 @@ const makeStyles = (c: ColorPalette) =>
       paddingHorizontal: 12,
       height: 34,
       borderRadius: 17,
-      backgroundColor: c.emeraldSoft,
+      backgroundColor: c.surfaceMuted,
     },
     downloadBtnText: {
-      color: c.emerald,
+      color: c.slate900,
       fontSize: 13,
-      fontWeight: "600",
+      fontWeight: "700",
     },
 
     // Archive

@@ -37,9 +37,9 @@ const SECTIONS: { heading: string; body: string }[] = [
       "You own the records you create in App7i (students, lessons, notes, expenses, mileage). You grant App7i a limited licence to store, process and display that data so the app can function for you. We will not sell or share it (see the Privacy Policy).",
   },
   {
-    heading: "Statements, invoices, tax",
+    heading: "Statements, records and tax",
     body:
-      "PDF statements and reports App7i generates are summaries built from data you entered. They are NOT tax invoices, audited accounts, or documents issued by a financial institution. You remain solely responsible for HMRC self-assessment, VAT (where applicable) and any other tax filings. App7i is not your accountant.",
+      "PDF statements and reports App7i generates are summaries built from data you entered. They are not audited accounts, proof of payment, or documents issued by a financial institution. You remain solely responsible for HMRC self-assessment, VAT (where applicable) and any other tax filings. App7i is not your accountant.",
   },
   {
     heading: "Liability",

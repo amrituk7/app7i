@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
+import { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../components/ui/Screen";
 import { useAuth } from "../../context/AuthContext";
 import { deleteCurrentAccount } from "../../services/accountService";
+import { DeletionFeedbackModal, type DeletionFeedback } from "../../components/ui/DeletionFeedbackModal";
 import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -25,10 +27,10 @@ type LibraryTile = {
 
 const TILES: LibraryTile[] = [
   {
-    key: "tips",
-    title: "Tips from instructor",
-    copy: "Videos, PDFs, and notes shared by your instructor.",
-    icon: "library-outline",
+    key: "learning",
+    title: "Learning Hub",
+    copy: "Lesson notes, videos, files and resources shared by your instructor.",
+    icon: "school-outline",
     screen: "StudentTips",
   },
   {
@@ -79,21 +81,27 @@ export function StudentLibraryScreen({ navigation }: { navigation: Nav }) {
   const c = useColors();
   const { mode, setMode } = useTheme();
   const { logout } = useAuth();
+  const [deletionFeedbackOpen, setDeletionFeedbackOpen] = useState(false);
 
   function confirmDelete() {
+    setDeletionFeedbackOpen(true);
+  }
+
+  function confirmDeletionAfterFeedback(feedback?: DeletionFeedback) {
+    setDeletionFeedbackOpen(false);
     Alert.alert(
       "Delete account?",
       "This permanently removes your App7i account, profile and lesson feedback. It cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: runDelete },
+        { text: "Delete", style: "destructive", onPress: () => runDelete(feedback) },
       ],
     );
   }
 
-  async function runDelete() {
+  async function runDelete(feedback?: DeletionFeedback) {
     try {
-      await deleteCurrentAccount();
+      await deleteCurrentAccount(feedback);
       Alert.alert("Account deleted", "Your account has been removed.");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Delete did not go through.";
@@ -223,6 +231,11 @@ export function StudentLibraryScreen({ navigation }: { navigation: Nav }) {
           <Ionicons name="chevron-forward" size={16} color={c.slate300} />
         </Pressable>
       </View>
+      <DeletionFeedbackModal
+        visible={deletionFeedbackOpen}
+        onCancel={() => setDeletionFeedbackOpen(false)}
+        onContinue={confirmDeletionAfterFeedback}
+      />
     </Screen>
   );
 }

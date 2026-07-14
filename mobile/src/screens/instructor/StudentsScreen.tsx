@@ -16,7 +16,7 @@ import { Screen } from "../../components/ui/Screen";
 import { SkeletonRow } from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
 import { getStudents } from "../../services/dataService";
-import { colors, type ColorPalette } from "../../theme/colors";
+import type { ColorPalette } from "../../theme/colors";
 import { spacing } from "../../theme/spacing";
 import { useColors } from "../../theme/ThemeContext";
 import { useThemedStyles } from "../../theme/useThemedStyles";
@@ -43,9 +43,9 @@ export function StudentsScreen({ navigation }: { navigation: MobileNavigation })
     const q = searchQuery.trim().toLowerCase();
     if (!q) return students;
     return students.filter((s) =>
-      [s.name, s.phone, s.email, s.transmission]
+      [s.name, s.phone, s.email, s.transmission, s.practiceFocus, s.testCentre]
         .filter(Boolean)
-        .some((field) => field.toLowerCase().includes(q)),
+        .some((field) => String(field).toLowerCase().includes(q)),
     );
   }, [students, searchQuery]);
 
@@ -93,7 +93,7 @@ export function StudentsScreen({ navigation }: { navigation: MobileNavigation })
   return (
     <Screen
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emerald} />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.emeraldDark} />
       }
     >
       <View style={styles.header}>
@@ -110,7 +110,7 @@ export function StudentsScreen({ navigation }: { navigation: MobileNavigation })
             style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
             onPress={() => navigation.navigate("AddStudent")}
           >
-            <Ionicons name="add" size={24} color={c.white} />
+            <Ionicons name="add" size={24} color={c.onAccent} />
             <Text style={styles.addButtonText}>Add / invite</Text>
           </Pressable>
         </View>
@@ -126,7 +126,7 @@ export function StudentsScreen({ navigation }: { navigation: MobileNavigation })
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search by name, phone or email"
+            placeholder="Search by name, email or focus"
             placeholderTextColor={c.slate500}
             style={styles.searchInput}
             autoCorrect={false}
@@ -152,7 +152,7 @@ export function StudentsScreen({ navigation }: { navigation: MobileNavigation })
         <EmptyState
           iconName="search-outline"
           title="No matches"
-          message="Try a different name, phone or email."
+          message="Try a different name, email or focus."
         />
       ) : (
         <View style={styles.list}>
@@ -183,7 +183,11 @@ function StudentRow({ student, onPress }: { student: Student; onPress: () => voi
   const c = useColors();
   const balanceLabel = student.outstandingBalance ? "Owed" : "Paid";
   const balanceTone = student.outstandingBalance ? styles.balanceWarning : styles.balanceOk;
-  const avatar = avatarColor(student.name);
+  const avatar = avatarColor(student.name, c);
+  const progress = Math.max(0, Math.min(100, Math.round(student.progress || 0)));
+  const nextDate = student.practicalTestDate || student.nextLesson;
+  const nextLabel = student.practicalTestDate ? "Test" : "Next";
+  const focus = student.practiceFocus || readinessSummary(student);
 
   return (
     <Pressable style={({ pressed }) => [styles.row, pressed && styles.pressed]} onPress={onPress}>
@@ -191,33 +195,67 @@ function StudentRow({ student, onPress }: { student: Student; onPress: () => voi
         <Text style={[styles.avatarText, { color: avatar }]}>{student.name.slice(0, 1).toUpperCase()}</Text>
       </View>
       <View style={styles.rowCopy}>
-        <Text style={styles.rowTitle}>{student.name}</Text>
-        <View style={styles.metaRow}>
-          <Ionicons name="call-outline" size={14} color={c.slate500} />
-          <Text style={styles.metaText}>{student.phone || "No phone"}</Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.rowTitle} numberOfLines={1}>{student.name}</Text>
+          <View style={styles.transmissionChip}>
+            <Ionicons name="car-outline" size={12} color={c.slate600} />
+            <Text style={styles.transmissionText}>{student.transmission}</Text>
+          </View>
+        </View>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
         <View style={styles.metaRow}>
-          <Ionicons name="car-outline" size={14} color={c.slate500} />
-          <Text style={styles.metaText}>{student.transmission}</Text>
+          <Ionicons name="trending-up-outline" size={14} color={c.slate500} />
+          <Text style={styles.metaText}>{progress}% progress</Text>
+          {nextDate ? (
+            <>
+              <Text style={styles.metaDot}>/</Text>
+              <Text style={styles.metaText}>{nextLabel} {formatStudentDate(nextDate)}</Text>
+            </>
+          ) : null}
         </View>
+        <Text style={styles.focusText} numberOfLines={1}>{focus}</Text>
       </View>
       <View style={styles.rowRight}>
         <View style={[styles.balancePill, student.outstandingBalance ? styles.balancePillWarning : styles.balancePillOk]}>
           <Text style={[styles.balance, balanceTone]}>{balanceLabel}</Text>
         </View>
         {student.outstandingBalance ? <Text style={styles.balanceAmount}>{formatGBP(student.outstandingBalance)}</Text> : null}
-        <Text style={[styles.linkStatus, student.uid ? styles.linked : styles.unlinked]}>
-          {student.uid ? "Linked" : "Invite sent"}
-        </Text>
-        <Ionicons name="chevron-forward" size={18} color={c.slate300} />
+        <View style={[styles.linkPill, student.uid ? styles.linkPillOn : styles.linkPillOff]}>
+          <Ionicons
+            name={student.uid ? "checkmark-circle-outline" : "mail-outline"}
+            size={12}
+            color={student.uid ? c.emeraldDark : c.slate500}
+          />
+          <Text style={[styles.linkStatus, student.uid ? styles.linked : styles.unlinked]}>
+            {student.uid ? "Linked" : "Invited"}
+          </Text>
+        </View>
       </View>
+      <Ionicons name="chevron-forward" size={18} color={c.slate300} />
     </Pressable>
   );
 }
 
-function avatarColor(name: string) {
-  const palette = [colors.emeraldDark, colors.blue, colors.red, colors.amber, colors.emerald];
+function avatarColor(name: string, c: ColorPalette) {
+  const palette = [c.emeraldDark, c.blue, c.amber, c.slate700, c.red];
   return palette[(name.charCodeAt(0) || 0) % palette.length];
+}
+
+function readinessSummary(student: Student) {
+  if (typeof student.readinessScore === "number" && student.readinessScore >= 8) {
+    return "Test-ready polish and independent driving";
+  }
+  if (student.theoryPassed) return "Theory passed, building test readiness";
+  return "Building core driving skills";
+}
+
+function formatStudentDate(value: string) {
+  if (!value) return "";
+  const date = new Date(`${value}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 function NativeNotice({
@@ -257,18 +295,18 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     flex: 1,
   },
   kicker: {
-    color: c.emerald,
+    color: c.emeraldDark,
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 0,
   },
   title: {
     color: c.slate900,
     fontSize: 28,
     lineHeight: 34,
     fontWeight: "600",
-    letterSpacing: -0.6,
+    letterSpacing: 0,
   },
   headerActions: {
     flexDirection: "row",
@@ -303,7 +341,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     backgroundColor: c.emerald,
   },
   addButtonText: {
-    color: c.white,
+    color: c.onAccent,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -325,9 +363,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     paddingVertical: 0,
   },
   list: {
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: c.surface,
+    gap: spacing.sm,
   },
   skeletonList: {
     borderRadius: 16,
@@ -335,14 +371,16 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     backgroundColor: c.surface,
   },
   row: {
-    minHeight: 86,
+    minHeight: 106,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.border,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.border,
+    borderRadius: 18,
+    backgroundColor: c.surface,
   },
   pressed: {
     opacity: 0.75,
@@ -357,18 +395,51 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     backgroundColor: c.surface,
   },
   avatarText: {
-    color: c.emerald,
+    color: c.emeraldDark,
     fontSize: 16,
     fontWeight: "700",
   },
   rowCopy: {
     flex: 1,
-    gap: 4,
+    gap: 6,
+    minWidth: 0,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   rowTitle: {
+    flexShrink: 1,
     color: c.slate900,
     fontSize: 16,
     fontWeight: "700",
+  },
+  transmissionChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 999,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    backgroundColor: c.surfaceMuted,
+  },
+  transmissionText: {
+    color: c.slate600,
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "capitalize",
+  },
+  progressTrack: {
+    height: 5,
+    borderRadius: 999,
+    overflow: "hidden",
+    backgroundColor: c.surfaceMuted,
+  },
+  progressFill: {
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: c.emeraldLight,
   },
   metaRow: {
     flexDirection: "row",
@@ -379,16 +450,26 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     color: c.slate500,
     fontSize: 12,
     fontWeight: "600",
-    textTransform: "capitalize",
+  },
+  metaDot: {
+    color: c.slate300,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  focusText: {
+    color: c.slate700,
+    fontSize: 12,
+    fontWeight: "600",
   },
   rowRight: {
     alignItems: "flex-end",
-    gap: spacing.sm,
+    gap: 6,
+    minWidth: 76,
   },
   balance: {
     fontSize: 11,
     fontWeight: "600",
-    letterSpacing: 0.4,
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   balancePill: {
@@ -397,7 +478,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     paddingVertical: 3,
   },
   balancePillOk: {
-    backgroundColor: c.greenSoft,
+    backgroundColor: c.emeraldSoft,
   },
   balancePillWarning: {
     backgroundColor: c.amberSoft,
@@ -408,14 +489,28 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     fontWeight: "600",
   },
   balanceOk: {
-    color: c.green,
+    color: c.emeraldDark,
   },
   balanceWarning: {
     color: c.amber,
   },
   linkStatus: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
+  },
+  linkPill: {
+    minHeight: 24,
+    borderRadius: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 7,
+  },
+  linkPillOn: {
+    backgroundColor: c.emeraldSoft,
+  },
+  linkPillOff: {
+    backgroundColor: c.surfaceMuted,
   },
   linked: {
     color: c.emeraldDark,

@@ -66,7 +66,7 @@ function deriveState(user: AppUser | null): State | null {
   return {
     tone: "info",
     icon: "rocket",
-    title: "Start your 7-day free trial",
+    title: "Start your 5-day free trial",
     subtitle: "Unlock unlimited students, lessons and messages.",
   };
 }

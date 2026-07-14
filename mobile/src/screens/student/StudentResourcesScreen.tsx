@@ -9,14 +9,20 @@ import { spacing } from "../../theme/spacing";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
-type DvlaResource = {
+type OfficialResource = {
   title: string;
   description: string;
   url: string;
   icon: IoniconName;
 };
 
-const DVLA_RESOURCES: DvlaResource[] = [
+const OFFICIAL_RESOURCES: OfficialResource[] = [
+  {
+    title: "Driving tests and learning",
+    description: "Official theory, practical test and learning services.",
+    url: "https://www.gov.uk/browse/driving/learning-to-drive",
+    icon: "school-outline",
+  },
   {
     title: "Book your driving test",
     description: "Schedule your practical driving test with DVSA.",
@@ -36,6 +42,12 @@ const DVLA_RESOURCES: DvlaResource[] = [
     icon: "book-outline",
   },
   {
+    title: "Road signs and safety",
+    description: "Traffic signs, vehicle checks and road safety guidance.",
+    url: "https://www.gov.uk/browse/driving/highway-code-road-safety",
+    icon: "warning-outline",
+  },
+  {
     title: "Theory test practice",
     description: "Practice questions and hazard perception.",
     url: "https://www.gov.uk/theory-test/revision-and-practice",
@@ -53,6 +65,24 @@ const DVLA_RESOURCES: DvlaResource[] = [
     url: "https://www.gov.uk/view-driving-licence",
     icon: "search-outline",
   },
+  {
+    title: "Driving licence services",
+    description: "Apply, renew, replace or update a driving licence.",
+    url: "https://www.gov.uk/browse/driving/driving-licences",
+    icon: "id-card-outline",
+  },
+  {
+    title: "DVSA instructor guidance",
+    description: "ADI registration, standards, training and professional guidance.",
+    url: "https://www.gov.uk/browse/driving/teaching-people-to-drive",
+    icon: "people-outline",
+  },
+  {
+    title: "Driving instructor code",
+    description: "Official professional conduct and business standards.",
+    url: "https://www.gov.uk/government/publications/driving-instructor-code-of-practice",
+    icon: "shield-checkmark-outline",
+  },
 ];
 
 export function StudentResourcesScreen() {
@@ -65,13 +95,13 @@ export function StudentResourcesScreen() {
   return (
     <Screen>
       <Text style={styles.kicker}>Helpful links</Text>
-      <Text style={styles.title}>DVLA resources</Text>
+      <Text style={styles.title}>Official resources</Text>
       <Text style={styles.copy}>
         Quick links to the official UK Government driving services.
       </Text>
 
       <View style={styles.list}>
-        {DVLA_RESOURCES.map((resource) => (
+        {OFFICIAL_RESOURCES.map((resource) => (
           <Pressable
             key={resource.url}
             onPress={() => open(resource.url)}
@@ -99,14 +129,14 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     color: c.emerald,
     fontSize: 12,
     fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   title: {
     color: c.slate900,
     fontSize: 30,
     fontWeight: "700",
-    letterSpacing: -0.5,
+    letterSpacing: 0,
     lineHeight: 35,
   },
   copy: {
@@ -115,7 +145,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     marginBottom: spacing.lg,
   },
   list: {
-    borderRadius: 24,
+    borderRadius: 10,
     overflow: "hidden",
     backgroundColor: c.surface,
   },
@@ -131,7 +161,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   iconWrap: {
     width: 38,
     height: 38,
-    borderRadius: 15,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: c.emeraldSoft,

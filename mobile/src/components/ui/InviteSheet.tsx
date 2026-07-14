@@ -177,7 +177,7 @@ function QrFallback() {
   const c = useColors();
   return (
     <View style={styles.qrFallback}>
-      <Ionicons name="link-outline" size={36} color={c.emerald} />
+      <Ionicons name="link-outline" size={36} color={c.emeraldDark} />
       <Text style={styles.qrFallbackText}>QR needs the latest app build. Share or copy the link below.</Text>
     </View>
   );
@@ -234,7 +234,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     color: c.slate900,
     fontSize: 24,
     fontWeight: "700",
-    letterSpacing: -0.4,
+    letterSpacing: 0,
   },
   subtitle: {
     color: c.slate500,
@@ -285,7 +285,7 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     color: c.slate900,
     fontSize: 24,
     fontWeight: "700",
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   url: {
     color: c.slate500,

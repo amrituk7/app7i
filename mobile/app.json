@@ -2,7 +2,7 @@
   "expo": {
     "name": "App7i",
     "slug": "app7i-mobile",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "app7i",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a2f23"
+      "backgroundColor": "#0B0B0C"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -35,7 +35,7 @@
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1a2f23"
+        "backgroundColor": "#0B0B0C"
       },
       "permissions": [
         "NOTIFICATIONS",
@@ -80,7 +80,7 @@
       [
         "expo-notifications",
         {
-          "color": "#1a2f23",
+          "color": "#0B0B0C",
           "defaultChannel": "app7i-default"
         }
       ],

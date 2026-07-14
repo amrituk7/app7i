@@ -7,7 +7,7 @@ type PillTone = "success" | "warning" | "danger" | "neutral" | "info";
 
 function buildToneMap(c: ColorPalette) {
   return {
-    success: { backgroundColor: c.greenSoft, color: c.green },
+    success: { backgroundColor: c.emeraldSoft, color: c.emeraldDark },
     warning: { backgroundColor: c.amberSoft, color: c.amber },
     danger: { backgroundColor: c.redSoft, color: c.red },
     neutral: { backgroundColor: c.slate100, color: c.slate700 },
@@ -36,7 +36,7 @@ const makeStyles = (_c: ColorPalette) =>
     },
     label: {
       fontSize: 12,
-      fontWeight: "600",
-      letterSpacing: 0.1,
+      fontWeight: "700",
+      letterSpacing: 0,
     },
   });

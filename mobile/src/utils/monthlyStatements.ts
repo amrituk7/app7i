@@ -1,4 +1,4 @@
-import type { Invoice } from "../types";
+import type { LessonPayment } from "../types";
 import { PDFBuilder, estimateTextWidth } from "./pdfBuilder";
 
 export type MonthlyStatement = {
@@ -10,12 +10,12 @@ export type MonthlyStatement = {
   shortLabel: string;
   /** First day of the month, used for sorting. */
   date: Date;
-  /** Total earnings in the month (paid invoices only). */
+  /** Total earnings in the month (paid lesson records only). */
   total: number;
-  /** Number of paid invoices in the month. */
+  /** Number of paid lessons in the month. */
   count: number;
-  /** All paid invoices in the month, newest first. */
-  invoices: Invoice[];
+  /** All paid lesson records in the month, newest first. */
+  payments: LessonPayment[];
   /** Number of unique students who paid in the month. */
   uniqueStudents: number;
   /** Whether this statement is for the current calendar month. */
@@ -24,9 +24,9 @@ export type MonthlyStatement = {
   monthsAgo: number;
 };
 
-function parseInvoiceDate(invoice: Invoice): Date | null {
-  if (!invoice.dueDate) return null;
-  const d = new Date(`${invoice.dueDate}T00:00:00`);
+function parsePaymentDate(payment: LessonPayment): Date | null {
+  if (!payment.lessonDate) return null;
+  const d = new Date(`${payment.lessonDate}T00:00:00`);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
@@ -39,43 +39,43 @@ function monthsBetween(from: Date, to: Date): number {
 }
 
 /**
- * Group paid invoices into monthly statements. Returns newest-first.
+ * Group paid lesson records into monthly statements. Returns newest-first.
  * Only includes months that actually had paid activity — empty months are skipped.
  */
-export function buildMonthlyStatements(paidInvoices: Invoice[], now = new Date()): MonthlyStatement[] {
-  const buckets = new Map<string, { date: Date; invoices: Invoice[] }>();
+export function buildMonthlyStatements(paidPayments: LessonPayment[], now = new Date()): MonthlyStatement[] {
+  const buckets = new Map<string, { date: Date; payments: LessonPayment[] }>();
 
-  for (const invoice of paidInvoices) {
-    const date = parseInvoiceDate(invoice);
+  for (const payment of paidPayments) {
+    const date = parsePaymentDate(payment);
     if (!date) continue;
     const key = monthKey(date);
     let bucket = buckets.get(key);
     if (!bucket) {
-      bucket = { date: new Date(date.getFullYear(), date.getMonth(), 1), invoices: [] };
+      bucket = { date: new Date(date.getFullYear(), date.getMonth(), 1), payments: [] };
       buckets.set(key, bucket);
     }
-    bucket.invoices.push(invoice);
+    bucket.payments.push(payment);
   }
 
   const statements: MonthlyStatement[] = [];
   const todayMonthKey = monthKey(now);
 
   for (const [key, bucket] of buckets) {
-    const sortedInvoices = [...bucket.invoices].sort((a, b) => {
-      const ad = parseInvoiceDate(a)?.getTime() ?? 0;
-      const bd = parseInvoiceDate(b)?.getTime() ?? 0;
+    const sortedPayments = [...bucket.payments].sort((a, b) => {
+      const ad = parsePaymentDate(a)?.getTime() ?? 0;
+      const bd = parsePaymentDate(b)?.getTime() ?? 0;
       return bd - ad;
     });
-    const total = sortedInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
-    const uniqueStudents = new Set(sortedInvoices.map((inv) => inv.studentName || "")).size;
+    const total = sortedPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    const uniqueStudents = new Set(sortedPayments.map((payment) => payment.studentName || "")).size;
     statements.push({
       key,
       label: bucket.date.toLocaleDateString("en-GB", { month: "long", year: "numeric" }),
       shortLabel: bucket.date.toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
       date: bucket.date,
       total,
-      count: sortedInvoices.length,
-      invoices: sortedInvoices,
+      count: sortedPayments.length,
+      payments: sortedPayments,
       uniqueStudents,
       isCurrent: key === todayMonthKey,
       monthsAgo: monthsBetween(bucket.date, new Date(now.getFullYear(), now.getMonth(), 1)),
@@ -90,7 +90,7 @@ export function buildMonthlyStatements(paidInvoices: Invoice[], now = new Date()
  * tax-year summaries (Apr→Apr) and per-student exports.
  */
 export function buildRangeStatement(
-  invoices: Invoice[],
+  payments: LessonPayment[],
   options: {
     label: string;
     shortLabel: string;
@@ -100,20 +100,20 @@ export function buildRangeStatement(
     studentIdFilter?: string;
   },
 ): MonthlyStatement {
-  const filtered = invoices.filter((inv) => {
-    if (options.startIso && (inv.dueDate || "") < options.startIso) return false;
-    if (options.endIso && (inv.dueDate || "") > options.endIso) return false;
-    if (options.studentNameFilter && inv.studentName !== options.studentNameFilter) return false;
-    if (options.studentIdFilter && inv.studentId !== options.studentIdFilter) return false;
+  const filtered = payments.filter((payment) => {
+    if (options.startIso && (payment.lessonDate || "") < options.startIso) return false;
+    if (options.endIso && (payment.lessonDate || "") > options.endIso) return false;
+    if (options.studentNameFilter && payment.studentName !== options.studentNameFilter) return false;
+    if (options.studentIdFilter && payment.studentId !== options.studentIdFilter) return false;
     return true;
   });
   const sorted = [...filtered].sort((a, b) => {
-    const ad = parseInvoiceDate(a)?.getTime() ?? 0;
-    const bd = parseInvoiceDate(b)?.getTime() ?? 0;
+    const ad = parsePaymentDate(a)?.getTime() ?? 0;
+    const bd = parsePaymentDate(b)?.getTime() ?? 0;
     return bd - ad;
   });
-  const total = sorted.reduce((sum, inv) => sum + (inv.amount || 0), 0);
-  const uniqueStudents = new Set(sorted.map((inv) => inv.studentName || "")).size;
+  const total = sorted.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+  const uniqueStudents = new Set(sorted.map((payment) => payment.studentName || "")).size;
   return {
     key: `range-${options.startIso || "all"}-${options.endIso || "all"}-${options.studentIdFilter || ""}`,
     label: options.label,
@@ -121,7 +121,7 @@ export function buildRangeStatement(
     date: options.startIso ? new Date(`${options.startIso}T00:00:00`) : new Date(0),
     total,
     count: sorted.length,
-    invoices: sorted,
+    payments: sorted,
     uniqueStudents,
     isCurrent: false,
     monthsAgo: 0,
@@ -130,7 +130,7 @@ export function buildRangeStatement(
 
 /**
  * Format a statement as plain-text CSV ready to share via the React Native
- * Share API. Includes a header summary and one row per invoice.
+ * Share API. Includes a header summary and one row per paid lesson.
  */
 export function statementToCSV(statement: MonthlyStatement, instructorName?: string): string {
   const lines: string[] = [];
@@ -142,14 +142,14 @@ export function statementToCSV(statement: MonthlyStatement, instructorName?: str
   lines.push(`Unique students,${statement.uniqueStudents}`);
   lines.push("");
   lines.push("Date,Student,Amount,Status,Reference");
-  for (const inv of statement.invoices) {
+  for (const payment of statement.payments) {
     lines.push(
       [
-        escapeCSV(inv.dueDate || ""),
-        escapeCSV(inv.studentName || ""),
-        `£${(inv.amount || 0).toFixed(2)}`,
-        escapeCSV(inv.status || ""),
-        escapeCSV(inv.id || ""),
+        escapeCSV(payment.lessonDate || ""),
+        escapeCSV(payment.studentName || ""),
+        `£${(payment.amount || 0).toFixed(2)}`,
+        escapeCSV(payment.status || ""),
+        escapeCSV(payment.id || ""),
       ].join(","),
     );
   }
@@ -169,9 +169,9 @@ export function statementToPlainText(statement: MonthlyStatement, instructorName
   lines.push(`Unique students: ${statement.uniqueStudents}`);
   lines.push("");
   lines.push("Lessons:");
-  for (const inv of statement.invoices) {
+  for (const payment of statement.payments) {
     lines.push(
-      `• ${inv.dueDate || "—"} ${inv.studentName || "Student"} — £${(inv.amount || 0).toFixed(2)}`,
+      `• ${payment.lessonDate || "—"} ${payment.studentName || "Student"} — £${(payment.amount || 0).toFixed(2)}`,
     );
   }
   return lines.join("\n");
@@ -219,14 +219,14 @@ export function statementToHTML(statement: MonthlyStatement, instructorName?: st
     minute: "2-digit",
   });
 
-  const rows = statement.invoices
-    .map((inv, i) => `
+  const rows = statement.payments
+    .map((payment, i) => `
         <tr>
           <td class="num">${i + 1}</td>
-          <td>${formatDate(inv.dueDate || "")}</td>
-          <td>${escapeHTML(inv.studentName || "Student")}</td>
-          <td>${escapeHTML((inv.status || "paid").toUpperCase())}</td>
-          <td class="amount">${formatGBP(inv.amount || 0)}</td>
+          <td>${formatDate(payment.lessonDate || "")}</td>
+          <td>${escapeHTML(payment.studentName || "Student")}</td>
+          <td>${escapeHTML((payment.status || "paid").toUpperCase())}</td>
+          <td class="amount">${formatGBP(payment.amount || 0)}</td>
         </tr>`)
     .join("");
 
@@ -258,7 +258,7 @@ export function statementToHTML(statement: MonthlyStatement, instructorName?: st
     justify-content: space-between;
     align-items: flex-start;
     padding: 28px 32px 20px;
-    background: linear-gradient(135deg, #115c37 0%, #1a7a4a 100%);
+    background: linear-gradient(135deg, #000000 0%, #1c1c1e 100%);
     color: #fff;
   }
   .brand h1 {
@@ -306,7 +306,7 @@ export function statementToHTML(statement: MonthlyStatement, instructorName?: st
     margin-top: 4px;
     color: #1c1c1e;
   }
-  .summary .value.accent { color: #1a7a4a; }
+  .summary .value.accent { color: #1c1c1e; }
   .period {
     padding: 20px 32px 0;
     font-size: 13px;
@@ -354,7 +354,7 @@ export function statementToHTML(statement: MonthlyStatement, instructorName?: st
   .total-row .value {
     font-weight: 700;
     font-size: 22px;
-    color: #1a7a4a;
+    color: #1c1c1e;
     letter-spacing: -0.3px;
   }
   .footer {
@@ -439,8 +439,8 @@ const PDF_MARGIN_X = 48;
 const COLOR_INK: [number, number, number] = [0.11, 0.11, 0.12];
 const COLOR_MUTED: [number, number, number] = [0.42, 0.42, 0.44];
 const COLOR_FAINT: [number, number, number] = [0.68, 0.68, 0.70];
-const COLOR_EMERALD: [number, number, number] = [0.10, 0.48, 0.29];
-const COLOR_EMERALD_DARK: [number, number, number] = [0.07, 0.36, 0.21];
+const COLOR_ACCENT: [number, number, number] = [0.11, 0.11, 0.12];
+const COLOR_ACCENT_DARK: [number, number, number] = [0, 0, 0];
 const COLOR_SURFACE_TINT: [number, number, number] = [0.95, 0.95, 0.97];
 const COLOR_BORDER: [number, number, number] = [0.89, 0.89, 0.91];
 const COLOR_WHITE: [number, number, number] = [1, 1, 1];
@@ -464,7 +464,7 @@ export function statementToPDF(statement: MonthlyStatement, instructorName?: str
 
   // ─ Header band — emerald rectangle with title + meta ─
   const headerH = 96;
-  pdf.rect(0, 0, W, headerH, COLOR_EMERALD_DARK);
+  pdf.rect(0, 0, W, headerH, COLOR_ACCENT_DARK);
   pdf.text(PDF_MARGIN_X, 32, "YOUR EARNINGS STATEMENT", {
     size: 10,
     font: "bold",
@@ -509,7 +509,7 @@ export function statementToPDF(statement: MonthlyStatement, instructorName?: str
     pdf.text(x + 12, summaryTop + 32, cells[i].value, {
       size: 18,
       font: "bold",
-      color: cells[i].accent ? COLOR_EMERALD : COLOR_INK,
+      color: cells[i].accent ? COLOR_ACCENT : COLOR_INK,
     });
   }
 
@@ -537,30 +537,30 @@ export function statementToPDF(statement: MonthlyStatement, instructorName?: str
   rowY += 22;
 
   // ─ Itemised rows (truncated to fit page) ─
-  const maxRows = Math.min(statement.invoices.length, computeMaxRows(rowY, H));
+  const maxRows = Math.min(statement.payments.length, computeMaxRows(rowY, H));
   for (let i = 0; i < maxRows; i++) {
-    const inv = statement.invoices[i];
+    const payment = statement.payments[i];
     const rowH = 22;
     if (i % 2 === 1) {
       pdf.rect(PDF_MARGIN_X - 12, rowY - 2, W - PDF_MARGIN_X * 2 + 24, rowH, [0.985, 0.985, 0.99]);
     }
     pdf.text(PDF_MARGIN_X, rowY + 9, String(i + 1), { size: 9, font: "regular", color: COLOR_FAINT });
-    pdf.text(PDF_MARGIN_X + 28, rowY + 9, formatPDFDate(parseDate(inv.dueDate || "")), {
+    pdf.text(PDF_MARGIN_X + 28, rowY + 9, formatPDFDate(parseDate(payment.lessonDate || "")), {
       size: 10,
       font: "regular",
       color: COLOR_INK,
     });
-    pdf.text(PDF_MARGIN_X + 110, rowY + 9, truncate(inv.studentName || "Student", 28), {
+    pdf.text(PDF_MARGIN_X + 110, rowY + 9, truncate(payment.studentName || "Student", 28), {
       size: 10,
       font: "regular",
       color: COLOR_INK,
     });
-    pdf.text(W - 180, rowY + 9, (inv.status || "paid").toUpperCase(), {
+    pdf.text(W - 180, rowY + 9, (payment.status || "paid").toUpperCase(), {
       size: 9,
       font: "bold",
-      color: COLOR_EMERALD,
+      color: COLOR_ACCENT,
     });
-    pdf.textRight(W - PDF_MARGIN_X, rowY + 9, formatPDFCurrency(inv.amount || 0), {
+    pdf.textRight(W - PDF_MARGIN_X, rowY + 9, formatPDFCurrency(payment.amount || 0), {
       size: 10,
       font: "bold",
       color: COLOR_INK,
@@ -569,12 +569,12 @@ export function statementToPDF(statement: MonthlyStatement, instructorName?: str
     pdf.hline(PDF_MARGIN_X, rowY, W - PDF_MARGIN_X * 2, { color: COLOR_BORDER });
   }
 
-  if (statement.invoices.length > maxRows) {
+  if (statement.payments.length > maxRows) {
     rowY += 16;
     pdf.text(
       PDF_MARGIN_X,
       rowY,
-      `… and ${statement.invoices.length - maxRows} more lessons (open the CSV for the full list)`,
+      `… and ${statement.payments.length - maxRows} more lessons (open the CSV for the full list)`,
       { size: 9, font: "regular", color: COLOR_MUTED },
     );
     rowY += 14;
@@ -593,7 +593,7 @@ export function statementToPDF(statement: MonthlyStatement, instructorName?: str
   pdf.textRight(W - PDF_MARGIN_X, rowY + 14, formatPDFCurrency(statement.total), {
     size: 18,
     font: "bold",
-    color: COLOR_EMERALD,
+    color: COLOR_ACCENT,
   });
 
   // ─ Disclaimer block + footer ─
@@ -610,7 +610,7 @@ export function statementToPDF(statement: MonthlyStatement, instructorName?: str
 function drawDisclaimer(pdf: PDFBuilder, pageH: number): void {
   const paragraphs = [
     "1. This statement is a personal summary of lesson payments you (the instructor) marked as paid inside the App7i app. It is generated from records you entered yourself.",
-    "2. It is NOT a tax invoice, audited account, or document issued by App7i, a bank, or any financial institution. App7i is not an accountant, tax advisor, or regulated financial service.",
+    "2. It is NOT an audited account or tax document issued by App7i, a bank, or any financial institution. App7i is not an accountant, tax advisor, or regulated financial service.",
     "3. You are solely responsible for the accuracy of your data and for any tax, VAT, or business filings with HMRC (or your local tax authority). Verify totals against your bank statements before filing.",
     "4. App7i accepts no liability for any loss, tax penalty, or dispute arising from use of this statement. It is provided for your personal record-keeping only.",
     "5. Your data: under UK GDPR you have the right to access, export, correct or erase your records at any time via the App7i Settings screen or by emailing support@app7i.com.",

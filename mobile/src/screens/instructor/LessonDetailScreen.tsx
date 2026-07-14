@@ -22,12 +22,10 @@ import {
   getStudent,
   rateLessonSkill,
   setLessonAttendance,
-  setLessonPaymentStatus,
   setLessonSkillNote,
   type LessonAttendance,
-  type PaymentStatusValue,
 } from "../../services/dataService";
-import { hapticConfirm, hapticSuccess, hapticTap } from "../../utils/haptics";
+import { hapticConfirm, hapticSuccess } from "../../utils/haptics";
 import { describeFirestoreError } from "../../utils/firestoreError";
 import { useAuth } from "../../context/AuthContext";
 import type { ColorPalette } from "../../theme/colors";
@@ -86,7 +84,6 @@ export function LessonDetailScreen({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [marking, setMarking] = useState(false);
   const [attendanceSaving, setAttendanceSaving] = useState<LessonAttendance | null>(null);
   const [studentPhone, setStudentPhone] = useState<string>("");
 
@@ -153,24 +150,6 @@ export function LessonDetailScreen({
     );
   }
 
-  function confirmMarkPaid() {
-    if (!lesson) return;
-    hapticTap();
-    // Deliberately no amount in title/body — instructor knows the price.
-    Alert.alert(
-      "Mark payment",
-      `How was payment handled for ${lesson.studentName}'s lesson?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Cash", onPress: () => doMarkPayment("cash") },
-        { text: "Card", onPress: () => doMarkPayment("card") },
-        { text: "Bank", onPress: () => doMarkPayment("bank") },
-        { text: "Package", onPress: () => doMarkPayment("package") },
-        { text: "Not paid", onPress: () => doMarkPayment("not_paid") },
-      ],
-    );
-  }
-
   function isPastLesson(value: Lesson | null): boolean {
     if (!value?.date) return false;
     try {
@@ -195,25 +174,6 @@ export function LessonDetailScreen({
       Alert.alert("Could not update attendance", describeFirestoreError(e, { action: "setAttendance", mayBeUnverified }));
     } finally {
       setAttendanceSaving(null);
-    }
-  }
-
-  async function doMarkPayment(status: PaymentStatusValue) {
-    if (!lesson) return;
-    setMarking(true);
-    try {
-      await setLessonPaymentStatus(lesson.id, status);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      const isPaid = status === "cash" || status === "card" || status === "bank" || status === "package";
-      setLesson({ ...lesson, paymentStatus: isPaid ? "paid" : "not_paid" });
-      hapticSuccess();
-    } catch (e) {
-      Alert.alert(
-        "Payment update did not save",
-        describeFirestoreError(e, { action: "setLessonPaymentStatus", mayBeUnverified }),
-      );
-    } finally {
-      setMarking(false);
     }
   }
 
@@ -312,9 +272,8 @@ export function LessonDetailScreen({
           {!paid && (
             <ActionRow
               icon="cash-outline"
-              label={marking ? "Saving…" : "Mark as paid"}
-              onPress={confirmMarkPaid}
-              disabled={marking}
+              label="Review in Payments"
+              onPress={() => navigation.navigate("Payments", { lessonId: lesson.id })}
               accent
             />
           )}
@@ -416,6 +375,23 @@ export function LessonDetailScreen({
           </View>
         </View>
       )}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Learning record</Text>
+        <View style={styles.card}>
+          <ActionRow
+            icon="document-text-outline"
+            label="Add structured lesson summary"
+            onPress={() => navigation.navigate("StudentLearningHub", {
+              studentId: lesson.studentId,
+              studentName: lesson.studentName,
+              lessonId: lesson.id,
+              openSummary: true,
+            })}
+            accent
+          />
+        </View>
+      </View>
 
       <View style={styles.section}>
         <View style={styles.rowBetween}>

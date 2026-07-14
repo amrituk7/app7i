@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { hapticTap } from "../../utils/haptics";
+import { formatGBP } from "../../utils/currency";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Screen } from "../../components/ui/Screen";
 import { useAuth } from "../../context/AuthContext";
@@ -122,10 +123,23 @@ export function StudentInstructorScreen() {
             <View style={styles.profileCopy}>
               <Text style={styles.name}>{profile.name}</Text>
               <Text style={styles.subtle}>App7i driving instructor</Text>
+              {profile.adiApproved ? (
+                <View style={styles.adiBadge}>
+                  <Ionicons name="shield-checkmark" size={13} color={c.white} />
+                  <Text style={styles.adiBadgeText}>DVSA Approved (ADI)</Text>
+                </View>
+              ) : null}
             </View>
           </View>
 
           <View style={styles.infoList}>
+            {profile.yearsQualified > 0 ? (
+              <InfoRow
+                icon="ribbon-outline"
+                title="Experience"
+                value={`${profile.yearsQualified} ${profile.yearsQualified === 1 ? "year" : "years"} qualified`}
+              />
+            ) : null}
             <InfoRow icon="map-outline" title="Teaching areas" value={profile.areas} />
             <InfoRow icon="car-outline" title="Transmission" value={profile.transmission} />
             <InfoRow
@@ -134,6 +148,35 @@ export function StudentInstructorScreen() {
               value={contact?.label || "Contact details to confirm"}
             />
           </View>
+
+          {profile.weekdayRate > 0 || profile.sundayRate > 0 || profile.testDayFee > 0 ? (
+            <>
+              <Text style={styles.sectionLabel}>Rates</Text>
+              <View style={styles.infoList}>
+                {profile.weekdayRate > 0 ? (
+                  <InfoRow
+                    icon="cash-outline"
+                    title="Weekday lesson"
+                    value={`${formatGBP(profile.weekdayRate)} / hr`}
+                  />
+                ) : null}
+                {profile.sundayRate > 0 ? (
+                  <InfoRow
+                    icon="cash-outline"
+                    title="Sunday lesson"
+                    value={`${formatGBP(profile.sundayRate)} / hr`}
+                  />
+                ) : null}
+                {profile.testDayFee > 0 ? (
+                  <InfoRow
+                    icon="car-sport-outline"
+                    title="Test-day fee"
+                    value={formatGBP(profile.testDayFee)}
+                  />
+                ) : null}
+              </View>
+            </>
+          ) : null}
 
           <View style={styles.contactRow}>
             <Pressable
@@ -316,10 +359,38 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     color: c.white,
   },
   subtle: {
-    color: c.emeraldSoft,
+    color: "rgba(255,255,255,0.8)",
     fontSize: 13,
     lineHeight: 18,
     fontWeight: "700",
+  },
+  adiBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 5,
+    marginTop: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  adiBadgeText: {
+    color: c.white,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+  },
+  sectionLabel: {
+    color: c.slate500,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
   infoList: {
     borderRadius: 24,

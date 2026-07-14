@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -51,12 +51,19 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
   const [location, setLocation] = useState("");
   const [transmissions, setTransmissions] = useState<InstructorProfileTransmission>("both");
   const [rating, setRating] = useState("5");
-  const [hourlyRate, setHourlyRate] = useState("38");
+  const [adiApproved, setAdiApproved] = useState(false);
+  const [yearsQualified, setYearsQualified] = useState("");
+  const [weekdayRate, setWeekdayRate] = useState("38");
+  const [sundayRate, setSundayRate] = useState("");
+  const [testDayFee, setTestDayFee] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [availability, setAvailability] = useState<Availability>("idle");
   const [error, setError] = useState<string | null>(null);
+  // Username as it exists in Firestore right now — lets the save skip the
+  // uniqueness pre-read (one fewer round-trip) when it hasn't changed.
+  const savedUsernameRef = useRef("");
 
   const usernameValid = username.length >= 3;
   const canSave = useMemo(
@@ -74,12 +81,17 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
     try {
       const profile = await getMyInstructorProfile();
       if (profile) {
+        savedUsernameRef.current = cleanUsername(profile.username);
         setUsername(cleanUsername(profile.username));
         setName(profile.name);
         setLocation(profile.location);
         setTransmissions(profile.transmissions);
         setRating(String(profile.rating || 5));
-        setHourlyRate(String(profile.hourlyRate || 0));
+        setAdiApproved(profile.adiApproved === true);
+        setYearsQualified(profile.yearsQualified ? String(profile.yearsQualified) : "");
+        setWeekdayRate(String(profile.weekdayRate || profile.hourlyRate || 0));
+        setSundayRate(profile.sundayRate ? String(profile.sundayRate) : "");
+        setTestDayFee(profile.testDayFee ? String(profile.testDayFee) : "");
       } else {
         setName(user?.displayName || "");
         setUsername(cleanUsername(user?.email?.split("@")[0] || ""));
@@ -120,15 +132,43 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
     if (!canSave) return;
     setSaving(true);
     setError(null);
-    try {
-      await saveInstructorProfile({
+    const savePromise = saveInstructorProfile(
+      {
         username,
         name,
         location,
         transmissions,
         rating,
-        hourlyRate,
-      });
+        hourlyRate: weekdayRate,
+        weekdayRate,
+        sundayRate,
+        testDayFee,
+        yearsQualified,
+        adiApproved,
+      },
+      { previousUsername: savedUsernameRef.current },
+    );
+    let slowTimer: ReturnType<typeof setTimeout> | undefined;
+    const slow = new Promise<"slow">((resolve) => {
+      slowTimer = setTimeout(() => resolve("slow"), 12000);
+    });
+    try {
+      const outcome = await Promise.race([savePromise.then(() => "done" as const), slow]);
+      if (outcome === "slow") {
+        // Weak signal — Firestore keeps retrying the queued write while the app
+        // is open, so free the button instead of hanging on the spinner.
+        savePromise
+          .then(() => {
+            savedUsernameRef.current = username;
+          })
+          .catch(() => {});
+        Alert.alert(
+          "Slow connection",
+          "Your changes will finish saving in the background once your signal improves.",
+        );
+        return;
+      }
+      savedUsernameRef.current = username;
       hapticSuccess();
       Alert.alert("Profile saved", "Your public instructor profile is up to date.");
     } catch (err) {
@@ -139,6 +179,7 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
           : describeFirestoreError(err, { action: "saveInstructorProfile", mayBeUnverified: !user?.emailVerified }),
       );
     } finally {
+      if (slowTimer) clearTimeout(slowTimer);
       setSaving(false);
     }
   }
@@ -162,15 +203,20 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
 
       <View style={styles.hero}>
         <Text style={styles.kicker}>Public profile</Text>
-        <Text style={styles.title}>Help students find the right instructor.</Text>
+        <Text style={styles.title}>This is what students see when you invite them.</Text>
         <Text style={styles.copy}>
-          This profile powers your public invite and student registration flow.
+          Your name, area and rate show on your invite link and sign-up screen. Keep them
+          accurate so new students know they've reached the right instructor.
         </Text>
       </View>
 
       {error ? <Notice icon="warning-outline" message={error} /> : null}
 
       <SubscriptionStatusCard user={user} />
+
+      {user?.subscriptionStatus !== "active" ? (
+        <UpgradeCard onPress={() => navigation.navigate("InstructorPlus")} />
+      ) : null}
 
       <Card style={styles.formCard}>
         <View>
@@ -239,37 +285,65 @@ export function MyProfileScreen({ navigation }: { navigation: any }) {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Rating</Text>
-          <View style={styles.ratingRow}>
-            {[1, 2, 3, 4, 5].map((value) => {
-              const active = Number(rating) === value;
-              return (
-                <Pressable
-                  key={value}
-                  onPress={() => setRating(String(value))}
-                  style={({ pressed }) => [
-                    styles.ratingChip,
-                    active && styles.ratingChipActive,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Ionicons
-                    name={active ? "star" : "star-outline"}
-                    size={17}
-                    color={active ? c.amber : c.slate500}
-                  />
-                  <Text style={[styles.ratingText, active && styles.ratingTextActive]}>{value}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <Text style={styles.label}>Experience & credentials</Text>
+          <Pressable
+            onPress={() => setAdiApproved((v) => !v)}
+            style={({ pressed }) => [
+              styles.toggleRow,
+              adiApproved && styles.toggleRowActive,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: adiApproved }}
+            accessibilityLabel="DVSA Approved Driving Instructor"
+          >
+            <View style={styles.toggleIcon}>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={19}
+                color={adiApproved ? c.emerald : c.slate500}
+              />
+            </View>
+            <View style={styles.toggleCopy}>
+              <Text style={styles.toggleTitle}>DVSA Approved (ADI)</Text>
+              <Text style={styles.toggleHint}>Fully qualified Approved Driving Instructor</Text>
+            </View>
+            <View style={[styles.checkbox, adiApproved && styles.checkboxActive]}>
+              {adiApproved ? <Ionicons name="checkmark" size={15} color={c.white} /> : null}
+            </View>
+          </Pressable>
         </View>
 
         <AppTextInput
-          label="Hourly rate (£/hr)"
-          value={hourlyRate}
-          onChangeText={(value) => setHourlyRate(value.replace(/[^0-9.]/g, ""))}
+          label="Years qualified"
+          value={yearsQualified}
+          onChangeText={(value) => setYearsQualified(value.replace(/[^0-9]/g, ""))}
+          placeholder="e.g. 8"
+          keyboardType="number-pad"
+          returnKeyType="next"
+        />
+
+        <AppTextInput
+          label="Weekday rate (£/hr)"
+          value={weekdayRate}
+          onChangeText={(value) => setWeekdayRate(value.replace(/[^0-9.]/g, ""))}
           placeholder="38"
+          keyboardType="decimal-pad"
+          returnKeyType="next"
+        />
+        <AppTextInput
+          label="Sunday rate (£/hr)"
+          value={sundayRate}
+          onChangeText={(value) => setSundayRate(value.replace(/[^0-9.]/g, ""))}
+          placeholder="Optional"
+          keyboardType="decimal-pad"
+          returnKeyType="next"
+        />
+        <AppTextInput
+          label="Test-day fee (£)"
+          value={testDayFee}
+          onChangeText={(value) => setTestDayFee(value.replace(/[^0-9.]/g, ""))}
+          placeholder="Optional"
           keyboardType="decimal-pad"
           returnKeyType="done"
         />
@@ -302,8 +376,30 @@ function BackHeader({ onBack, title }: { onBack: () => void; title: string }) {
         <Ionicons name="chevron-back" size={22} color={c.slate900} />
       </Pressable>
       <Text style={styles.headerTitle}>{title}</Text>
-      <View style={styles.backButton} />
+      <View style={styles.headerSpacer} />
     </View>
+  );
+}
+
+function UpgradeCard({ onPress }: { onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
+  const c = useColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.upgradeCard, pressed && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel="Upgrade to Instructor Plus"
+    >
+      <View style={styles.upgradeIcon}>
+        <Ionicons name="sparkles" size={20} color={c.white} />
+      </View>
+      <View style={styles.upgradeCopy}>
+        <Text style={styles.upgradeTitle}>Upgrade to Instructor Plus</Text>
+        <Text style={styles.upgradeSub}>See everything included with your plan</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={c.white} />
+    </Pressable>
   );
 }
 
@@ -343,6 +439,10 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: c.surface,
+  },
+  headerSpacer: {
+    width: 40,
+    height: 40,
   },
   headerTitle: {
     color: c.slate900,
@@ -428,34 +528,87 @@ const makeStyles = (c: ColorPalette) => StyleSheet.create({
   chipTextActive: {
     color: c.emeraldDark,
   },
-  ratingRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  ratingChip: {
-    minHeight: 42,
-    minWidth: 50,
-    borderRadius: 15,
+  toggleRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.xs,
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: 16,
     backgroundColor: c.surface,
     borderWidth: 1,
     borderColor: c.slate300,
   },
-  ratingChipActive: {
-    backgroundColor: c.amberSoft,
-    borderColor: c.amber,
+  toggleRowActive: {
+    borderColor: c.emerald,
   },
-  ratingText: {
-    color: c.slate500,
-    fontSize: 13,
+  toggleIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: c.surfaceMuted,
+  },
+  toggleCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  toggleTitle: {
+    color: c.slate900,
+    fontSize: 15,
     fontWeight: "700",
   },
-  ratingTextActive: {
-    color: c.amber,
+  toggleHint: {
+    color: c.slate500,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  checkbox: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: c.slate300,
+    backgroundColor: c.surface,
+  },
+  checkboxActive: {
+    backgroundColor: c.emerald,
+    borderColor: c.emerald,
+  },
+  upgradeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: 20,
+    marginBottom: spacing.lg,
+    backgroundColor: c.emerald,
+  },
+  upgradeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  upgradeCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  upgradeTitle: {
+    color: c.white,
+    fontSize: 15,
+    fontWeight: "800",
+    letterSpacing: -0.2,
+  },
+  upgradeSub: {
+    color: c.white,
+    opacity: 0.85,
+    fontSize: 13,
+    lineHeight: 17,
   },
   notice: {
     minHeight: 48,

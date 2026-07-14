@@ -157,7 +157,7 @@ export function StudentFormFields({
       />
 
       <AppTextInput
-        label="Tips for the student app"
+        label="Next lesson guidance"
         value={values.practiceTips}
         onChangeText={(value) => onChange("practiceTips", value)}
         autoCapitalize="sentences"

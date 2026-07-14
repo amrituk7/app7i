@@ -34,17 +34,19 @@ export function AppButton({ label, onPress, variant = "primary", disabled, style
 const makeStyles = (c: ColorPalette) =>
   StyleSheet.create({
     base: {
-      height: 50,
-      borderRadius: 14,
+      height: 52,
+      borderRadius: 16,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 20,
     },
     primary: {
-      backgroundColor: c.emerald,
+      backgroundColor: c.slate900,
     },
     secondary: {
-      backgroundColor: c.emeraldSoft,
+      backgroundColor: c.surfaceRaised,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
     },
     ghost: {
       backgroundColor: "transparent",
@@ -61,13 +63,13 @@ const makeStyles = (c: ColorPalette) =>
       opacity: 0.4,
     },
     label: {
-      color: c.white,
-      fontWeight: "600",
+      color: c.onInverted,
+      fontWeight: "700",
       fontSize: 17,
-      letterSpacing: -0.2,
+      letterSpacing: 0,
     },
     darkLabel: {
-      color: c.emeraldDark,
+      color: c.slate900,
     },
     dangerLabel: {
       color: c.red,

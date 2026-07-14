@@ -23,6 +23,9 @@ import { AuthNavigator } from "./AuthNavigator";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { InstructorOnboardingScreen } from "../screens/onboarding/InstructorOnboardingScreen";
 import { VerifyEmailScreen } from "../screens/auth/VerifyEmailScreen";
+import { PaywallScreen } from "../screens/PaywallScreen";
+import { InstructorPlusScreen } from "../screens/InstructorPlusScreen";
+import { isInstructorPaywalled } from "../config/billing";
 import { InstructorDashboardScreen } from "../screens/instructor/InstructorDashboardScreen";
 import { TodayLessonsScreen } from "../screens/instructor/TodayLessonsScreen";
 import { LessonsCalendarScreen } from "../screens/instructor/LessonsCalendarScreen";
@@ -35,7 +38,7 @@ import { StudentProfileScreen } from "../screens/instructor/StudentProfileScreen
 import { StudentLessonsListScreen } from "../screens/instructor/StudentLessonsListScreen";
 import { ProgressTrackerScreen } from "../screens/instructor/ProgressTrackerScreen";
 import { EarningsScreen } from "../screens/instructor/EarningsScreen";
-import { InvoicesScreen } from "../screens/instructor/InvoicesScreen";
+import { PaymentsScreen } from "../screens/instructor/PaymentsScreen";
 import { BookLessonScreen } from "../screens/instructor/BookLessonScreen";
 import { EditLessonScreen } from "../screens/instructor/EditLessonScreen";
 import { LessonDetailScreen } from "../screens/instructor/LessonDetailScreen";
@@ -57,14 +60,24 @@ import { StudentTestReadinessScreen } from "../screens/student/StudentTestReadin
 import { FeedbackSummaryScreen } from "../screens/instructor/FeedbackSummaryScreen";
 import { CalendarSyncScreen } from "../screens/instructor/CalendarSyncScreen";
 import { TestReadinessScreen } from "../screens/instructor/TestReadinessScreen";
+import { PracticalTestsScreen } from "../screens/instructor/PracticalTestsScreen";
 import { CarHealthScreen } from "../screens/instructor/CarHealthScreen";
-import { TipsScreen } from "../screens/instructor/TipsScreen";
-import { StudentTipsScreen } from "../screens/student/StudentTipsScreen";
 import { ExpensesScreen } from "../screens/instructor/ExpensesScreen";
 import { MileageScreen } from "../screens/instructor/MileageScreen";
 import { NotificationsScreen } from "../screens/shared/NotificationsScreen";
 import { PrivacyPolicyScreen } from "../screens/shared/PrivacyPolicyScreen";
 import { TermsScreen } from "../screens/shared/TermsScreen";
+import { ResourceLibraryScreen } from "../screens/instructor/ResourceLibraryScreen";
+import { StudentLearningHubScreen as InstructorStudentLearningHubScreen } from "../screens/instructor/StudentLearningHubScreen";
+import { StudentLearningHubScreen } from "../screens/student/StudentLearningHubScreen";
+import { MoreScreen } from "../screens/instructor/MoreScreen";
+import { NavigationTabsScreen } from "../screens/instructor/NavigationTabsScreen";
+import { GlobalSearchScreen } from "../screens/instructor/GlobalSearchScreen";
+import {
+  getInstructorModule,
+  useNavigationPreferences,
+  type InstructorModuleKey,
+} from "./NavigationPreferencesContext";
 
 const Stack = createNativeStackNavigator();
 const InstructorTabs = createBottomTabNavigator();
@@ -81,7 +94,7 @@ function useNavTheme() {
         card: c.surface,
         text: c.slate900,
         border: c.border,
-        primary: c.emerald,
+        primary: c.emeraldDark,
       },
     }),
     [c],
@@ -156,7 +169,8 @@ const SafeLessonDetail = safeScreen(LessonDetailScreen, "LessonDetail");
 const SafeBookLesson = safeScreen(BookLessonScreen, "BookLesson");
 const SafeEditLesson = safeScreen(EditLessonScreen, "EditLesson");
 const SafeProgressTracker = safeScreen(ProgressTrackerScreen, "ProgressTracker");
-const SafeInvoices = safeScreen(InvoicesScreen, "Invoices");
+const SafePayments = safeScreen(PaymentsScreen, "Payments");
+const SafePracticalTests = safeScreen(PracticalTestsScreen, "PracticalTests");
 const SafeExpenses = safeScreen(ExpensesScreen, "Expenses");
 const SafeMileage = safeScreen(MileageScreen, "Mileage");
 const SafePrivacy = safeScreen(PrivacyPolicyScreen, "PrivacyPolicy");
@@ -180,18 +194,34 @@ const SafeFeedbackSummary = safeScreen(FeedbackSummaryScreen, "FeedbackSummary")
 const SafeCalendarSync = safeScreen(CalendarSyncScreen, "CalendarSync");
 const SafeTestReadiness = safeScreen(TestReadinessScreen, "TestReadiness");
 const SafeCarHealth = safeScreen(CarHealthScreen, "CarHealth");
-const SafeTips = safeScreen(TipsScreen, "Tips");
-const SafeStudentTips = safeScreen(StudentTipsScreen, "StudentTips");
 const SafeInstructorOnboarding = safeScreen(InstructorOnboardingScreen, "InstructorOnboarding");
 const SafeVerifyEmail = safeScreen(VerifyEmailScreen, "VerifyEmail");
+const SafePaywall = safeScreen(PaywallScreen, "Paywall");
+const SafeInstructorPlus = safeScreen(InstructorPlusScreen, "InstructorPlus");
+const SafeResourceLibrary = safeScreen(ResourceLibraryScreen, "ResourceLibrary");
+const SafeInstructorStudentLearningHub = safeScreen(InstructorStudentLearningHubScreen, "StudentLearningHub");
+const SafeStudentLearningHub = safeScreen(StudentLearningHubScreen, "StudentLearning");
+const SafeMore = safeScreen(MoreScreen, "More");
+const SafeNavigationTabs = safeScreen(NavigationTabsScreen, "NavigationTabs");
+const SafeGlobalSearch = safeScreen(GlobalSearchScreen, "GlobalSearch");
+
+const INSTRUCTOR_TAB_SCREENS: Record<InstructorModuleKey, ComponentType<any>> = {
+  lessons: SafeTodayLessons,
+  calendar: SafeLessonsCalendar,
+  students: SafeStudents,
+  learning: SafeResourceLibrary,
+  tests: SafePracticalTests,
+  earnings: SafeEarnings,
+  car: SafeCarHealth,
+};
 
 function useTabBarStyle() {
   const insets = useSafeAreaInsets();
   const c = useColors();
   return useMemo(
     () => ({
-      height: 56 + insets.bottom,
-      paddingTop: 6,
+      height: 62 + insets.bottom,
+      paddingTop: 8,
       paddingBottom: Math.max(insets.bottom, 6),
       backgroundColor: c.navBg,
       borderTopWidth: StyleSheet.hairlineWidth,
@@ -223,40 +253,32 @@ function useSharedTabOptions() {
 
 function InstructorTabNavigator() {
   const screenOptions = useSharedTabOptions();
+  const { selectedTabs } = useNavigationPreferences();
   return (
-    <InstructorTabs.Navigator screenOptions={screenOptions}>
+    <InstructorTabs.Navigator key={selectedTabs.join(":")} screenOptions={screenOptions}>
       <InstructorTabs.Screen
         name="Dashboard"
         component={SafeInstructorDashboard}
-        options={{ tabBarIcon: tabIcon("home-outline", "home") }}
+        options={{ tabBarLabel: "Home", tabBarIcon: tabIcon("home-outline", "home") }}
       />
+      {selectedTabs.map((key) => {
+        const module = getInstructorModule(key);
+        return (
+          <InstructorTabs.Screen
+            key={key}
+            name={module.tabRoute}
+            component={INSTRUCTOR_TAB_SCREENS[key]}
+            options={{
+              tabBarLabel: module.shortLabel,
+              tabBarIcon: tabIcon(module.icon as IoniconName, module.iconFilled as IoniconName),
+            }}
+          />
+        );
+      })}
       <InstructorTabs.Screen
-        name="Lessons"
-        component={SafeTodayLessons}
-        options={{ tabBarIcon: tabIcon("car-outline", "car") }}
-      />
-      <InstructorTabs.Screen
-        name="Calendar"
-        component={SafeLessonsCalendar}
-        options={{ tabBarIcon: tabIcon("calendar-outline", "calendar") }}
-      />
-      <InstructorTabs.Screen
-        name="Students"
-        component={SafeStudents}
-        options={{ tabBarIcon: tabIcon("people-outline", "people") }}
-      />
-      <InstructorTabs.Screen
-        name="CarHealth"
-        component={SafeCarHealth}
-        options={{
-          tabBarLabel: "Car",
-          tabBarIcon: tabIcon("shield-checkmark-outline", "shield-checkmark"),
-        }}
-      />
-      <InstructorTabs.Screen
-        name="Earnings"
-        component={SafeEarnings}
-        options={{ tabBarIcon: tabIcon("wallet-outline", "wallet") }}
+        name="More"
+        component={SafeMore}
+        options={{ tabBarIcon: tabIcon("ellipsis-horizontal-circle-outline", "ellipsis-horizontal-circle") }}
       />
     </InstructorTabs.Navigator>
   );
@@ -287,9 +309,9 @@ function StudentTabNavigator() {
         options={{ tabBarIcon: tabIcon("person-outline", "person") }}
       />
       <StudentTabs.Screen
-        name="Library"
-        component={SafeStudentLibrary}
-        options={{ tabBarIcon: tabIcon("library-outline", "library") }}
+        name="Learning"
+        component={SafeStudentLearningHub}
+        options={{ tabBarIcon: tabIcon("school-outline", "school") }}
       />
     </StudentTabs.Navigator>
   );
@@ -393,6 +415,20 @@ export function AppNavigator() {
     );
   }
 
+  // Billing gate — an instructor whose subscription has lapsed sees the paywall
+  // instead of the app. Free early-access accounts are never locked.
+  if (isInstructorPaywalled(user)) {
+    return (
+      <ErrorBoundary screenName="PaywallRoot">
+        <NavigationContainer ref={navigationRef} theme={navTheme} onStateChange={handleStateChange}>
+          <Stack.Navigator screenOptions={stackOptions}>
+            <Stack.Screen name="Paywall" component={SafePaywall} options={{ headerShown: false }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary screenName="AppRoot">
       <NavigationContainer ref={navigationRef} theme={navTheme} onStateChange={handleStateChange}>
@@ -400,6 +436,11 @@ export function AppNavigator() {
           {user.role === "instructor" ? (
             <>
               <Stack.Screen name="InstructorTabs" component={InstructorTabNavigator} options={{ headerShown: false }} />
+              <Stack.Screen name="ModuleLessons" component={SafeTodayLessons} options={{ headerShown: false }} />
+              <Stack.Screen name="ModuleCalendar" component={SafeLessonsCalendar} options={{ headerShown: false }} />
+              <Stack.Screen name="ModuleStudents" component={SafeStudents} options={{ headerShown: false }} />
+              <Stack.Screen name="ModuleEarnings" component={SafeEarnings} options={{ headerShown: false }} />
+              <Stack.Screen name="ModuleCar" component={SafeCarHealth} options={{ headerShown: false }} />
               <Stack.Screen name="StudentProfile" component={SafeStudentProfile} options={{ headerShown: false }} />
               <Stack.Screen name="AddStudent" component={SafeAddStudent} options={{ headerShown: false }} />
               <Stack.Screen name="EditStudent" component={SafeEditStudent} options={{ headerShown: false }} />
@@ -408,8 +449,13 @@ export function AppNavigator() {
               <Stack.Screen name="LessonDetail" component={SafeLessonDetail} options={{ headerShown: false }} />
               <Stack.Screen name="BookLesson" component={SafeBookLesson} options={{ headerShown: false }} />
               <Stack.Screen name="EditLesson" component={SafeEditLesson} options={{ headerShown: false }} />
-              <Stack.Screen name="ProgressTracker" component={SafeProgressTracker} options={{ title: "Progress" }} />
-              <Stack.Screen name="Invoices" component={SafeInvoices} options={{ title: "Invoices" }} />
+              <Stack.Screen name="ProgressTracker" component={SafeProgressTracker} options={{ title: "Student performance" }} />
+              <Stack.Screen name="Payments" component={SafePayments} options={{ headerShown: false }} />
+              <Stack.Screen name="ResourceLibrary" component={SafeResourceLibrary} options={{ headerShown: false }} />
+              <Stack.Screen name="StudentLearningHub" component={SafeInstructorStudentLearningHub} options={{ headerShown: false }} />
+              <Stack.Screen name="GlobalSearch" component={SafeGlobalSearch} options={{ headerShown: false }} />
+              <Stack.Screen name="NavigationTabs" component={SafeNavigationTabs} options={{ headerShown: false }} />
+              <Stack.Screen name="PracticalTests" component={SafePracticalTests} options={{ title: "Practical Tests" }} />
               <Stack.Screen name="Expenses" component={SafeExpenses} options={{ headerShown: false }} />
               <Stack.Screen name="Mileage" component={SafeMileage} options={{ headerShown: false }} />
               <Stack.Screen name="PrivacyPolicy" component={SafePrivacy} options={{ headerShown: false }} />
@@ -417,23 +463,27 @@ export function AppNavigator() {
               <Stack.Screen name="Settings" component={SafeSettings} options={{ title: "Settings" }} />
               <Stack.Screen name="RemindersSettings" component={SafeRemindersSettings} options={{ headerShown: false }} />
               <Stack.Screen name="MyProfile" component={SafeMyProfile} options={{ headerShown: false }} />
+              <Stack.Screen name="InstructorPlus" component={SafeInstructorPlus} options={{ headerShown: false }} />
               <Stack.Screen name="FeedbackSummary" component={SafeFeedbackSummary} options={{ title: "Student feedback" }} />
               <Stack.Screen name="CalendarSync" component={SafeCalendarSync} options={{ title: "Calendar sync" }} />
               <Stack.Screen name="TestReadiness" component={SafeTestReadiness} options={{ title: "Test readiness" }} />
               <Stack.Screen name="InstructorMessages" component={SafeMessages} options={{ headerShown: false }} />
-              <Stack.Screen name="Tips" component={SafeTips} options={{ headerShown: false }} />
+              <Stack.Screen name="Tips" component={SafeResourceLibrary} options={{ headerShown: false }} />
               <Stack.Screen name="Notifications" component={SafeNotifications} options={{ headerShown: false }} />
+              {/* Same DVLA links screen the student side uses — content is not student-specific */}
+              <Stack.Screen name="Resources" component={SafeStudentResources} options={{ title: "DVLA resources" }} />
             </>
           ) : (
             <>
               <Stack.Screen name="StudentTabs" component={StudentTabNavigator} options={{ headerShown: false }} />
+              <Stack.Screen name="StudentMore" component={SafeStudentLibrary} options={{ headerShown: false }} />
               <Stack.Screen name="StudentNotes" component={SafeStudentNotes} options={{ title: "Lesson notes" }} />
               <Stack.Screen name="LessonFeedback" component={SafeLessonFeedback} options={{ title: "Lesson feedback" }} />
               <Stack.Screen name="StudentResources" component={SafeStudentResources} options={{ title: "DVLA resources" }} />
               <Stack.Screen name="StudentImportantNotes" component={SafeStudentImportantNotes} options={{ title: "Important notes" }} />
               <Stack.Screen name="StudentRateInstructor" component={SafeStudentRateInstructor} options={{ title: "Rate your instructor" }} />
               <Stack.Screen name="StudentTestReadiness" component={SafeStudentTestReadiness} options={{ title: "My test" }} />
-              <Stack.Screen name="StudentTips" component={SafeStudentTips} options={{ title: "Tips from instructor" }} />
+              <Stack.Screen name="StudentTips" component={SafeStudentLearningHub} options={{ headerShown: false }} />
               <Stack.Screen name="PrivacyPolicy" component={SafePrivacy} options={{ headerShown: false }} />
               <Stack.Screen name="Terms" component={SafeTerms} options={{ headerShown: false }} />
               <Stack.Screen name="Notifications" component={SafeNotifications} options={{ headerShown: false }} />
@@ -452,7 +502,7 @@ function useStackOptions() {
       headerStyle: { backgroundColor: c.background },
       headerShadowVisible: false,
       headerTitleStyle: { color: c.slate900, fontWeight: "600" as const },
-      headerTintColor: c.emerald,
+      headerTintColor: c.emeraldDark,
     }),
     [c],
   );
@@ -460,7 +510,8 @@ function useStackOptions() {
 
 const styles = StyleSheet.create({
   tabItem: {
-    paddingVertical: 2,
+    minHeight: 50,
+    paddingVertical: 3,
   },
   tabLabel: {
     fontSize: 10,

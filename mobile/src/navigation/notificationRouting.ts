@@ -30,6 +30,18 @@ export function urlToNavigationTarget(url: string): NavigationTarget | null {
     return { screen: "FeedbackSummary" };
   }
 
+  if (path === "/payments") {
+    return { screen: "Payments" };
+  }
+
+  if (path === "/my-lessons") {
+    return { screen: "StudentTabs", params: { screen: "Lessons" } };
+  }
+
+  if (path === "/notifications") {
+    return { screen: "Notifications" };
+  }
+
   // /students/{id} → instructor StudentProfile
   const studentMatch = path.match(/^\/students\/([^/]+)$/);
   if (studentMatch) {
